@@ -30,8 +30,10 @@ Repository = "https://github.com/robcox2910/pystack"
 
 [project.scripts]
 pystack = "pystack.cli:main"
+pystack-web = "pystack.web.app:main"
 
 [project.optional-dependencies]
+web = ["flask>=3.0"]
 dev = [
     "pytest>=8.3.4",
     "pytest-cov>=6.0.0",
@@ -40,6 +42,7 @@ dev = [
     "pyright>=1.1.400",
     "commitizen>=4.4.0",
     "pip-audit>=2.10.0",
+    "flask>=3.0",
 ]
 
 [build-system]
