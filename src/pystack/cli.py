@@ -11,6 +11,7 @@ from py_os.shell import Shell
 from pydb.cli import repl
 
 from pystack.environment import PyStackEnvironment
+from pystack.web.app import main as web_main
 
 
 def main() -> None:
@@ -30,6 +31,8 @@ def main() -> None:
             _run_sql()
         case "os":
             _run_os()
+        case "web":
+            web_main()
         case _:
             if command.endswith(".pbl"):
                 _run_pebble([command])
@@ -47,6 +50,7 @@ def _print_help() -> None:
         "  pystack pebble <file.pbl>  Run a Pebble program with database access\n"
         "  pystack sql                Launch interactive SQL REPL\n"
         "  pystack os                 Launch PyOS shell with Pebble + DB integration\n"
+        "  pystack web                Launch browser UI at http://localhost:8080\n"
         "  pystack <file.pbl>         Shortcut for pystack pebble <file.pbl>\n"
         "  pystack --help             Show this help\n"
     )

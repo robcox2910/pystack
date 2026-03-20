@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyStack -- The Full Stack, From Scratch</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <h1>PyStack</h1>
+        <p class="subtitle">The Full Stack, From Scratch</p>
+        <nav>
+            <button class="tab active" data-panel="terminal">OS Terminal</button>
+            <button class="tab" data-panel="pebble">Pebble Editor</button>
+            <button class="tab" data-panel="sql">SQL Console</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- OS Terminal Panel -->
+        <div id="terminal" class="panel active">
+            <div id="terminal-output" class="output">{{ boot_log }}</div>
+            <div class="input-row">
+                <span class="prompt">pystack-os&gt;</span>
+                <input type="text" id="terminal-input" autofocus
+                       placeholder="Type a command (ls, pebble, sql, help)">
+            </div>
+        </div>
+
+        <!-- Pebble Editor Panel -->
+        <div id="pebble" class="panel">
+            <textarea id="pebble-source" class="editor" placeholder='import "db"
+
+db_execute("CREATE TABLE cards (name TEXT, power INTEGER)")
+db_execute("INSERT INTO cards VALUES (&apos;Pikachu&apos;, 55)")
+
+let rows = db_query("SELECT * FROM cards")
+for row in rows {
+    print(row["name"])
+}'></textarea>
+            <button id="pebble-run" class="run-btn">Run</button>
+            <div id="pebble-output" class="output"></div>
+        </div>
+
+        <!-- SQL Console Panel -->
+        <div id="sql" class="panel">
+            <div id="sql-output" class="output"></div>
+            <div class="input-row">
+                <span class="prompt">sql&gt;</span>
+                <input type="text" id="sql-input"
+                       placeholder="SELECT * FROM cards">
+            </div>
+        </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
