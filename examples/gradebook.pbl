@@ -1,0 +1,30 @@
+// Gradebook -- a Pebble program that manages student grades.
+// Demonstrates the full stack: Pebble code querying a PyDB database.
+
+import "db"
+
+// Create the grades table.
+db_execute("CREATE TABLE grades (student TEXT, subject TEXT, score INTEGER)")
+
+// Add some grades.
+db_execute("INSERT INTO grades VALUES ('Alice', 'Math', 95)")
+db_execute("INSERT INTO grades VALUES ('Alice', 'Science', 88)")
+db_execute("INSERT INTO grades VALUES ('Bob', 'Math', 72)")
+db_execute("INSERT INTO grades VALUES ('Bob', 'Science', 91)")
+db_execute("INSERT INTO grades VALUES ('Charlie', 'Math', 85)")
+db_execute("INSERT INTO grades VALUES ('Charlie', 'Science', 79)")
+
+// Show all grades sorted by score.
+print("=== All Grades ===")
+let all_grades = db_query("SELECT student, subject, score FROM grades ORDER BY score DESC")
+for row in all_grades {
+    print(row["student"] + " - " + row["subject"] + ": " + str(row["score"]))
+}
+
+// Show average score per student.
+print("")
+print("=== Averages ===")
+let averages = db_query("SELECT student, AVG(score) FROM grades GROUP BY student ORDER BY AVG(score) DESC")
+for row in averages {
+    print(row["student"] + ": " + str(row["AVG(score)"]))
+}

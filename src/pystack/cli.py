@@ -93,7 +93,9 @@ def _run_os() -> None:
     env = PyStackEnvironment(os_mode=True)
     sys.stdout.write("PyStack OS -- type 'help' for commands, 'pebble' or 'sql' for integrations\n")
     shell = env.shell
-    assert isinstance(shell, Shell)  # noqa: S101
+    if not isinstance(shell, Shell):
+        sys.stderr.write("Error: OS mode failed to boot\n")
+        sys.exit(1)
     try:
         while True:
             try:

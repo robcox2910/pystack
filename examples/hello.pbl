@@ -1,0 +1,13 @@
+// Hello from PyStack!
+// This program creates a database table and queries it.
+
+import "db"
+
+db_execute("CREATE TABLE greetings (message TEXT)")
+db_execute("INSERT INTO greetings VALUES ('Hello from PyStack!')")
+db_execute("INSERT INTO greetings VALUES ('Pebble + PyDB = awesome!')")
+
+let rows = db_query("SELECT message FROM greetings")
+for row in rows {
+    print(row["message"])
+}
