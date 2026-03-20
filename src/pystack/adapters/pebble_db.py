@@ -30,7 +30,7 @@ def _row_to_pebble_dict(row: dict[str, PyDBValue]) -> dict[str, PebbleValue]:
     return {k: _pydb_to_pebble(v) for k, v in row.items()}
 
 
-def _make_db_query(database: Database) -> "StdlibModule":
+def _make_db_query(database: Database) -> StdlibModule:
     """Build the handler functions that wrap PyDB operations.
 
     Args:
@@ -57,9 +57,10 @@ def _make_db_query(database: Database) -> "StdlibModule":
             return str(results[0]["result"])
         return f"{len(results)} rows returned"
 
-    def _db_tables(args: list[PebbleValue]) -> PebbleValue:
+    def _db_tables(_args: list[PebbleValue]) -> PebbleValue:
         """Return a list of all table names in the database."""
-        return database.table_names()
+        names: list[PebbleValue] = list(database.table_names())
+        return names
 
     return StdlibModule(
         functions={

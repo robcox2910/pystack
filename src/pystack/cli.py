@@ -7,6 +7,8 @@ programs that query databases, or start an interactive SQL session.
 import sys
 from pathlib import Path
 
+from pydb.cli import repl
+
 from pystack.environment import PyStackEnvironment
 
 
@@ -24,9 +26,8 @@ def main() -> None:
         case "pebble":
             _run_pebble(args[1:])
         case "sql":
-            _run_sql(args[1:])
+            _run_sql()
         case _:
-            # Treat as a .pbl file path.
             if command.endswith(".pbl"):
                 _run_pebble([command])
             else:
@@ -70,12 +71,10 @@ def _run_pebble(args: list[str]) -> None:
         env.shutdown()
 
 
-def _run_sql(args: list[str]) -> None:
+def _run_sql() -> None:
     """Launch an interactive SQL REPL with the integrated database."""
     env = PyStackEnvironment()
     try:
-        from pydb.cli import repl
-
         repl(env.database)
     finally:
         env.shutdown()

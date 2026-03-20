@@ -6,8 +6,8 @@ verify that the bridge works correctly.
 
 from pathlib import Path
 
-from pydb.database import Database
 from pebble.stdlib import STDLIB_MODULES
+from pydb.database import Database
 
 from pystack.adapters.pebble_db import register_db_module, unregister_db_module
 from pystack.environment import PyStackEnvironment

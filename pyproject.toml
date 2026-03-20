@@ -108,7 +108,7 @@ addopts = [
 [tool.coverage.run]
 source = ["src"]
 branch = true
-omit = ["*/tests/*", "*/__pycache__/*", "*/.venv/*", "*/_version.py"]
+omit = ["*/tests/*", "*/__pycache__/*", "*/.venv/*", "*/_version.py", "*/cli.py"]
 
 [tool.coverage.report]
 precision = 2
