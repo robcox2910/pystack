@@ -129,6 +129,10 @@ root = "src/pystack/adapters"
 reportPrivateUsage = false
 
 [[tool.pyright.executionEnvironments]]
+root = "src/pystack/plugins"
+reportPrivateUsage = false
+
+[[tool.pyright.executionEnvironments]]
 root = "tests"
 extraPaths = ["."]
 reportPrivateUsage = false

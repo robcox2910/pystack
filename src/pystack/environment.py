@@ -27,6 +27,7 @@ from pydb.sql_parser import parse_sql
 
 from pystack.adapters.os_pebble import register_pebble_command, register_sql_command
 from pystack.adapters.pebble_db import register_db_module, unregister_db_module
+from pystack.plugins.registry import PluginRegistry
 
 
 class PyStackEnvironment:
@@ -44,7 +45,7 @@ class PyStackEnvironment:
 
     """
 
-    __slots__ = ("_database", "_db_path", "_kernel", "_os_mode", "_shell")
+    __slots__ = ("_database", "_db_path", "_kernel", "_os_mode", "_plugin_registry", "_shell")
 
     def __init__(
         self,
@@ -57,6 +58,7 @@ class PyStackEnvironment:
         self._os_mode = os_mode
         self._kernel: Kernel | None = None
         self._shell: Shell | None = None
+        self._plugin_registry = PluginRegistry()
 
         self._database = Database(path=self._db_path)
         self._database.load()
@@ -74,8 +76,17 @@ class PyStackEnvironment:
         register_pebble_command(shell, kernel, self.run_pebble_source)
         register_sql_command(shell, self.run_sql)
 
+        # Discover and activate any installed plugins.
+        self._plugin_registry.discover()
+        self._plugin_registry.activate_all(shell=shell)
+
         self._kernel = kernel
         self._shell = shell
+
+    @property
+    def plugin_registry(self) -> PluginRegistry:
+        """Return the plugin registry."""
+        return self._plugin_registry
 
     @property
     def database(self) -> Database:
