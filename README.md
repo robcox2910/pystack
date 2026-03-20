@@ -2,20 +2,19 @@
 
 The full stack, from scratch.
 
-PyStack is a unified educational platform that integrates three projects
-into one cohesive environment:
+PyStack connects three educational projects into one integrated platform:
 
-- **PyOS** -- an operating system simulator
-- **Pebble** -- a programming language with compiler and bytecode VM
-- **PyDB** -- a relational database engine
+- **PyOS** -- an operating system (the school building)
+- **Pebble** -- a programming language (the language students speak)
+- **PyDB** -- a database engine (the filing cabinet)
 
-Write Pebble programs that query PyDB databases, all running on a
-simulated operating system. Every layer is built from scratch, explained
-with analogies a 12-year-old can follow.
+Think of a "full stack" like a three-layer cake. The OS is the bottom
+layer, the programming language is the middle, and the database is the
+top. PyStack is the frosting that holds them together.
 
-## Example
+## What Can You Do?
 
-Write a Pebble program (`gradebook.pbl`):
+### Write programs that talk to a database
 
 ```
 import "db"
@@ -30,17 +29,38 @@ for row in rows {
 }
 ```
 
-Run it:
+```bash
+pystack pebble examples/gradebook.pbl
+# Alice: 95
+# Bob: 87
+```
+
+### Use an integrated OS shell
 
 ```bash
-pystack pebble gradebook.pbl
+pystack os
+pystack-os> pebble run /programs/hello.pbl   # Run Pebble programs
+pystack-os> sql SELECT * FROM scores          # Query the database
+pystack-os> ls /data                          # See database files in the OS
 ```
 
-Output:
+### Open the web UI
 
+```bash
+pystack web
+# Opens http://localhost:8080 with three panels:
+# - OS Terminal
+# - Pebble Code Editor
+# - SQL Console
 ```
-Alice: 95
-Bob: 87
+
+### Or just use SQL
+
+```bash
+pystack sql
+pydb> CREATE TABLE cards (name TEXT, power INTEGER)
+pydb> INSERT INTO cards VALUES ('Pikachu', 55)
+pydb> SELECT * FROM cards
 ```
 
 ## Quick Start
@@ -49,15 +69,41 @@ Bob: 87
 # Install dependencies (including PyOS, Pebble, and PyDB)
 uv sync --all-extras
 
-# Run a Pebble program with database access
+# Run the example program
 pystack pebble examples/hello.pbl
 
-# Launch interactive SQL REPL
-pystack sql
+# Launch the web UI
+pystack web
 
 # Run tests
 uv run pytest
 ```
+
+## All Commands
+
+| Command | What It Does |
+|---------|-------------|
+| `pystack pebble <file.pbl>` | Run a Pebble program with database access |
+| `pystack sql` | Interactive SQL REPL |
+| `pystack os` | PyOS shell with Pebble + SQL integration |
+| `pystack web` | Browser-based UI at http://localhost:8080 |
+| `pystack --help` | Show available commands |
+
+## Pebble Database Functions
+
+When a Pebble program does `import "db"`, it gets three functions:
+
+| Function | What It Does |
+|----------|-------------|
+| `db_query(sql)` | Run a SELECT and get results as a list of dicts |
+| `db_execute(sql)` | Run CREATE/INSERT/UPDATE/DELETE and get a status message |
+| `db_tables()` | Get a list of all table names |
+
+## Plugin System
+
+PyStack is extensible. Future components (like a web server or version
+control) can plug in without changing core code. See the plugin
+documentation for details.
 
 ## License
 

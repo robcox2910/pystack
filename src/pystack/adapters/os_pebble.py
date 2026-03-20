@@ -16,6 +16,7 @@ from py_os.kernel import Kernel
 from py_os.shell import Shell
 from py_os.syscalls import SyscallError, SyscallNumber
 
+MIN_QUOTED_LENGTH = 2
 PEBBLE_USAGE = "Usage: pebble run <file.pbl> | pebble eval '<code>'"
 
 
@@ -64,7 +65,10 @@ def register_pebble_command(
         if subcommand == "run" and len(args) > 1:
             return _run_file(kernel, run_source, args[1])
         if subcommand == "eval" and len(args) > 1:
-            source = " ".join(args[1:]).strip("'\"")
+            source = " ".join(args[1:])
+            # Remove matching outer quotes if present.
+            if len(source) >= MIN_QUOTED_LENGTH and source[0] == source[-1] and source[0] in "'\"":
+                source = source[1:-1]
             return _eval_code(run_source, source)
         return PEBBLE_USAGE
 

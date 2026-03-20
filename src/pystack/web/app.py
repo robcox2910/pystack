@@ -31,7 +31,9 @@ def create_app() -> Flask:
 
     shell = env.shell
     kernel = env.kernel
-    assert isinstance(shell, Shell)  # noqa: S101
+    if not isinstance(shell, Shell):
+        msg = "Shell not available -- OS mode failed to boot"
+        raise TypeError(msg)
 
     boot_log = "\n".join(kernel.dmesg()) if kernel else ""
 
@@ -99,14 +101,10 @@ def create_app() -> Flask:
             return jsonify({"output": f"Error: {exc}", "error": True})
         return jsonify({"output": output, "error": False})
 
-    @app.teardown_appcontext
-    def teardown(exc: BaseException | None) -> None:  # pyright: ignore[reportUnusedFunction]
-        """Clean up on shutdown."""
-
     return app
 
 
 def main() -> None:
     """Run the web UI development server."""
     app = create_app()
-    app.run(debug=True, port=8080)
+    app.run(port=8080)

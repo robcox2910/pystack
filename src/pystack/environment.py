@@ -126,12 +126,14 @@ class PyStackEnvironment:
         self._database.save()
 
     def shutdown(self) -> None:
-        """Clean up resources and unregister adapters."""
+        """Clean up resources and unregister adapters. Safe to call multiple times."""
         with contextlib.suppress(Exception):
             self._database.save()
         unregister_db_module()
         if self._kernel is not None:
-            self._kernel.shutdown()
+            with contextlib.suppress(Exception):
+                self._kernel.shutdown()
+            self._kernel = None
 
     def run_pebble_source(self, source: str) -> str:
         """Compile and run a Pebble source string with database access.
