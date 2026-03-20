@@ -7,6 +7,7 @@ programs that query databases, or start an interactive SQL session.
 import sys
 from pathlib import Path
 
+from py_os.shell import Shell
 from pydb.cli import repl
 
 from pystack.environment import PyStackEnvironment
@@ -27,6 +28,8 @@ def main() -> None:
             _run_pebble(args[1:])
         case "sql":
             _run_sql()
+        case "os":
+            _run_os()
         case _:
             if command.endswith(".pbl"):
                 _run_pebble([command])
@@ -43,6 +46,7 @@ def _print_help() -> None:
         "Usage:\n"
         "  pystack pebble <file.pbl>  Run a Pebble program with database access\n"
         "  pystack sql                Launch interactive SQL REPL\n"
+        "  pystack os                 Launch PyOS shell with Pebble + DB integration\n"
         "  pystack <file.pbl>         Shortcut for pystack pebble <file.pbl>\n"
         "  pystack --help             Show this help\n"
     )
@@ -76,5 +80,29 @@ def _run_sql() -> None:
     env = PyStackEnvironment()
     try:
         repl(env.database)
+    finally:
+        env.shutdown()
+
+
+def _run_os() -> None:
+    """Launch the PyOS shell with Pebble and SQL integration."""
+    env = PyStackEnvironment(os_mode=True)
+    sys.stdout.write("PyStack OS -- type 'help' for commands, 'pebble' or 'sql' for integrations\n")
+    shell = env.shell
+    assert isinstance(shell, Shell)  # noqa: S101
+    try:
+        while True:
+            try:
+                line = input("pystack-os> ").strip()
+            except EOFError, KeyboardInterrupt:
+                sys.stdout.write("\nGoodbye!\n")
+                break
+            if not line:
+                continue
+            output = shell.execute(line)
+            if output == Shell.EXIT_SENTINEL:
+                break
+            if output:
+                sys.stdout.write(output + "\n")
     finally:
         env.shutdown()
