@@ -110,9 +110,10 @@ database logic or compiler logic. They just connect the pieces.
 
 ## Plugin System
 
-PyStack is designed to grow. Future components (like a web server or
-version control system) can plug in without changing any existing code.
-A plugin can:
+PyStack is designed to grow. Components like
+[PyWeb](https://github.com/robcox2910/pyweb) (web server) and
+[PyGit](https://github.com/robcox2910/pygit) (version control) can
+plug in without changing any existing code. A plugin can:
 
 - Add new commands to the PyOS shell
 - Add new functions to the Pebble language

@@ -105,6 +105,26 @@ PyStack is extensible. Future components (like a web server or version
 control) can plug in without changing core code. See the plugin
 documentation for details.
 
+## Related Projects
+
+PyStack is part of an educational series where every layer of the
+computing stack is built from scratch:
+
+| Project | What It Teaches |
+|---------|----------------|
+| [PyOS](https://github.com/robcox2910/py-os) | Operating systems |
+| [Pebble](https://github.com/robcox2910/pebble-lang) | Compilers and programming languages |
+| [PyDB](https://github.com/robcox2910/pydb) | Relational databases |
+| [PyWeb](https://github.com/robcox2910/pyweb) | HTTP web servers |
+| [PyGit](https://github.com/robcox2910/pygit) | Version control |
+
+All projects use TDD, comprehensive documentation with real-world
+analogies, and are designed for learners aged 12+.
+
+## Documentation
+
+Full docs at [robcox2910.github.io/pystack](https://robcox2910.github.io/pystack/)
+
 ## License
 
 MIT

@@ -27,6 +27,8 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/robcox2910/pystack"
 Repository = "https://github.com/robcox2910/pystack"
+Issues = "https://github.com/robcox2910/pystack/issues"
+Documentation = "https://robcox2910.github.io/pystack/"
 
 [project.scripts]
 pystack = "pystack.cli:main"
