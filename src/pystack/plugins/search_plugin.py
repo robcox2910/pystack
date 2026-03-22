@@ -20,56 +20,47 @@ from pebble.builtins import Value as PebbleValue
 from pebble.stdlib import StdlibModule
 from pysearch.engine import SearchEngine
 
-from pystack.plugins.base import Plugin, PluginInfo, ShellCommand
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
 
 # Module-level storage for search engine instances, keyed by ID.
 _engines: dict[str, SearchEngine] = {}
 _next_id: list[int] = [0]
 
 
+@pebble_handler
 def _search_create(args: list[PebbleValue]) -> PebbleValue:  # noqa: ARG001
     """Create a new search engine and return its ID string."""
-    try:
-        engine_id = f"engine_{_next_id[0]}"
-        _next_id[0] += 1
-        _engines[engine_id] = SearchEngine()
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
-    else:
-        return engine_id
+    engine_id = f"engine_{_next_id[0]}"
+    _next_id[0] += 1
+    _engines[engine_id] = SearchEngine()
+    return engine_id
 
 
+@pebble_handler
 def _search_add(args: list[PebbleValue]) -> PebbleValue:
     """Add a document to a search engine by engine ID."""
-    try:
-        engine_id = str(args[0])
-        doc_id = str(args[1])
-        text = str(args[2])
-        if engine_id not in _engines:
-            return f"error: unknown engine {engine_id}"
-        _engines[engine_id].add(doc_id, text)
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
-    else:
-        return True
+    engine_id = str(args[0])
+    doc_id = str(args[1])
+    text = str(args[2])
+    if engine_id not in _engines:
+        return f"error: unknown engine {engine_id}"
+    _engines[engine_id].add(doc_id, text)
+    return True
 
 
+@pebble_handler
 def _search_query(args: list[PebbleValue]) -> PebbleValue:
     """Query a search engine and return a list of [doc_id, score] results."""
-    try:
-        engine_id = str(args[0])
-        query = str(args[1])
-        if engine_id not in _engines:
-            return f"error: unknown engine {engine_id}"
-        results = _engines[engine_id].search(query)
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
-    else:
-        pebble_results: list[PebbleValue] = []
-        for doc_id, score in results:
-            pair: list[PebbleValue] = [doc_id, score]
-            pebble_results.append(pair)
-        return pebble_results
+    engine_id = str(args[0])
+    query = str(args[1])
+    if engine_id not in _engines:
+        return f"error: unknown engine {engine_id}"
+    results = _engines[engine_id].search(query)
+    pebble_results: list[PebbleValue] = []
+    for doc_id, score in results:
+        pair: list[PebbleValue] = [doc_id, score]
+        pebble_results.append(pair)
+    return pebble_results
 
 
 def reset_engines() -> None:

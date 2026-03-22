@@ -24,56 +24,46 @@ from pycrypt.hashing import sha256
 from pycrypt.hmac import hmac_sign as _hmac_sign
 from pycrypt.hmac import hmac_verify as _hmac_verify
 
-from pystack.plugins.base import Plugin, PluginInfo, ShellCommand
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
 
 
+@pebble_handler
 def _hash(args: list[PebbleValue]) -> PebbleValue:
     """Return the SHA-256 hash of a text string."""
-    try:
-        return sha256(str(args[0]))
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    return sha256(str(args[0]))
 
 
+@pebble_handler
 def _caesar_encrypt(args: list[PebbleValue]) -> PebbleValue:
     """Encrypt text using the Caesar cipher with the given shift."""
-    try:
-        text = str(args[0])
-        shift = int(args[1])  # type: ignore[arg-type]
-        return caesar_enc(text, shift)
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    text = str(args[0])
+    shift = int(args[1])  # type: ignore[arg-type]
+    return caesar_enc(text, shift)
 
 
+@pebble_handler
 def _caesar_decrypt(args: list[PebbleValue]) -> PebbleValue:
     """Decrypt text using the Caesar cipher with the given shift."""
-    try:
-        text = str(args[0])
-        shift = int(args[1])  # type: ignore[arg-type]
-        return caesar_dec(text, shift)
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    text = str(args[0])
+    shift = int(args[1])  # type: ignore[arg-type]
+    return caesar_dec(text, shift)
 
 
+@pebble_handler
 def _hmac_sign_handler(args: list[PebbleValue]) -> PebbleValue:
     """Create an HMAC-SHA256 tag for a message with a secret key."""
-    try:
-        message = str(args[0])
-        key = str(args[1])
-        return _hmac_sign(message, key)
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    message = str(args[0])
+    key = str(args[1])
+    return _hmac_sign(message, key)
 
 
+@pebble_handler
 def _hmac_verify_handler(args: list[PebbleValue]) -> PebbleValue:
     """Verify that a message matches its HMAC tag."""
-    try:
-        message = str(args[0])
-        tag = str(args[1])
-        key = str(args[2])
-        return _hmac_verify(message, tag, key)
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    message = str(args[0])
+    tag = str(args[1])
+    key = str(args[2])
+    return _hmac_verify(message, tag, key)
 
 
 class CryptoPlugin(Plugin):

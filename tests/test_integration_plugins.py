@@ -10,10 +10,11 @@ from pathlib import Path
 from pebble.stdlib import STDLIB_MODULES
 
 from pystack.environment import PyStackEnvironment
+from pystack.plugins._shared import url_parse as _url_parse
 from pystack.plugins.crypto_plugin import _caesar_decrypt, _caesar_encrypt, _hash
 from pystack.plugins.git_plugin import _git_diff, _git_hash
 from pystack.plugins.mq_plugin import _mq_create, _mq_get, _mq_put, reset_mq_state
-from pystack.plugins.net_plugin import _base64_decode, _base64_encode, _url_parse
+from pystack.plugins.net_plugin import _base64_decode, _base64_encode
 from pystack.plugins.search_plugin import (
     _search_add,
     _search_create,
@@ -21,7 +22,6 @@ from pystack.plugins.search_plugin import (
     reset_engines,
 )
 from pystack.plugins.web_plugin import WebPlugin
-from pystack.plugins.web_plugin import _url_parse as _web_url_parse
 
 EXPECTED_SHA256_LENGTH = 64
 EXPECTED_SHA1_LENGTH = 40
@@ -102,7 +102,7 @@ class TestWebPlugin:
 
     def test_url_parse_handler_directly(self) -> None:
         """The _url_parse handler should return a dict with scheme, host, port, path."""
-        result = _web_url_parse(["https://example.com:443/hello"])
+        result = _url_parse(["https://example.com:443/hello"])
         assert isinstance(result, dict)
         assert result["scheme"] == "https"
         assert result["host"] == "example.com"

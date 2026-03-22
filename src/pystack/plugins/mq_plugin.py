@@ -20,7 +20,7 @@ from pebble.stdlib import StdlibModule
 from pymq.pubsub import PubSub
 from pymq.queue import MessageQueue
 
-from pystack.plugins.base import Plugin, PluginInfo, ShellCommand
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
 
 _queues: dict[str, MessageQueue] = {}
 _pubsub_instance: PubSub | None = None
@@ -35,83 +35,71 @@ def _get_pubsub() -> PubSub:
     return _pubsub_instance
 
 
+@pebble_handler
 def _mq_create(args: list[PebbleValue]) -> PebbleValue:
     """Create a named message queue and return its name."""
-    try:
-        name = str(args[0])
-        if name not in _queues:
-            _queues[name] = MessageQueue(name)
-        return name
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    name = str(args[0])
+    if name not in _queues:
+        _queues[name] = MessageQueue(name)
+    return name
 
 
+@pebble_handler
 def _mq_put(args: list[PebbleValue]) -> PebbleValue:
     """Put a message on a named queue."""
-    try:
-        name = str(args[0])
-        message = str(args[1])
-        if name not in _queues:
-            return f"error: queue '{name}' not found"
-        _queues[name].put(message)
-        return "ok"
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    name = str(args[0])
+    message = str(args[1])
+    if name not in _queues:
+        return f"error: queue '{name}' not found"
+    _queues[name].put(message)
+    return "ok"
 
 
+@pebble_handler
 def _mq_get(args: list[PebbleValue]) -> PebbleValue:
     """Get the next message body from a named queue, or 'empty'."""
-    try:
-        name = str(args[0])
-        if name not in _queues:
-            return f"error: queue '{name}' not found"
-        msg = _queues[name].get()
-        if msg is None:
-            return "empty"
-        _queues[name].acknowledge(msg)
-        return msg.body
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    name = str(args[0])
+    if name not in _queues:
+        return f"error: queue '{name}' not found"
+    msg = _queues[name].get()
+    if msg is None:
+        return "empty"
+    _queues[name].acknowledge(msg)
+    return msg.body
 
 
+@pebble_handler
 def _mq_publish(args: list[PebbleValue]) -> PebbleValue:
     """Publish a message to a topic."""
-    try:
-        topic = str(args[0])
-        message = str(args[1])
-        _get_pubsub().publish(topic, message)
-        return "ok"
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    topic = str(args[0])
+    message = str(args[1])
+    _get_pubsub().publish(topic, message)
+    return "ok"
 
 
+@pebble_handler
 def _mq_subscribe(args: list[PebbleValue]) -> PebbleValue:
     """Subscribe to a topic and store messages for later retrieval."""
-    try:
-        topic = str(args[0])
-        if topic not in _topic_messages:
-            _topic_messages[topic] = []
+    topic = str(args[0])
+    if topic not in _topic_messages:
+        _topic_messages[topic] = []
 
-            def _handler(_t: str, msg: str) -> None:
-                _topic_messages[topic].append(msg)
+        def _handler(_t: str, msg: str) -> None:
+            _topic_messages[topic].append(msg)
 
-            _get_pubsub().subscribe(topic, _handler)
-        return topic
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+        _get_pubsub().subscribe(topic, _handler)
+    return topic
 
 
+@pebble_handler
 def _mq_receive(args: list[PebbleValue]) -> PebbleValue:
     """Get all stored messages for a subscribed topic."""
-    try:
-        topic = str(args[0])
-        if topic not in _topic_messages:
-            return f"error: not subscribed to '{topic}'"
-        result: list[PebbleValue] = list(_topic_messages[topic])
-        _topic_messages[topic].clear()
-        return result
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    topic = str(args[0])
+    if topic not in _topic_messages:
+        return f"error: not subscribed to '{topic}'"
+    result: list[PebbleValue] = list(_topic_messages[topic])
+    _topic_messages[topic].clear()
+    return result
 
 
 def reset_mq_state() -> None:
