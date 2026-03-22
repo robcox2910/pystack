@@ -16,37 +16,17 @@ Example Pebble usage::
 from pebble.builtins import Value as PebbleValue
 from pebble.stdlib import StdlibModule
 from pynet.http import get as http_get_impl
-from pynet.url import parse_url
 
-from pystack.plugins.base import Plugin, PluginInfo, ShellCommand
+from pystack.plugins._shared import url_parse as _url_parse
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
 
 
+@pebble_handler
 def _http_get(args: list[PebbleValue]) -> PebbleValue:
     """Fetch the body of a URL via HTTP GET."""
-    try:
-        url = str(args[0])
-        response = http_get_impl(url)
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
-    else:
-        return response.body
-
-
-def _url_parse(args: list[PebbleValue]) -> PebbleValue:
-    """Parse a URL string into a dict with scheme, host, port, and path."""
-    try:
-        url_string = str(args[0])
-        parsed = parse_url(url_string)
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
-    else:
-        result: dict[str, PebbleValue] = {
-            "scheme": parsed.scheme,
-            "host": parsed.host,
-            "port": parsed.port,
-            "path": parsed.path,
-        }
-        return result
+    url = str(args[0])
+    response = http_get_impl(url)
+    return response.body
 
 
 class WebPlugin(Plugin):

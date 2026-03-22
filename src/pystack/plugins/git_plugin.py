@@ -21,26 +21,22 @@ from pebble.stdlib import StdlibModule
 from pygit.diff import diff_lines, format_diff
 from pygit.hashing import hash_content
 
-from pystack.plugins.base import Plugin, PluginInfo, ShellCommand
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
 
 
+@pebble_handler
 def _git_hash(args: list[PebbleValue]) -> PebbleValue:
     """Return the SHA-1 hash of a text string (Git-style)."""
-    try:
-        return hash_content(str(args[0]))
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    return hash_content(str(args[0]))
 
 
+@pebble_handler
 def _git_diff(args: list[PebbleValue]) -> PebbleValue:
     """Return a unified diff between two text strings."""
-    try:
-        old = str(args[0])
-        new = str(args[1])
-        lines = diff_lines(old, new)
-        return format_diff(lines)
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    old = str(args[0])
+    new = str(args[1])
+    lines = diff_lines(old, new)
+    return format_diff(lines)
 
 
 class GitPlugin(Plugin):

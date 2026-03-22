@@ -20,51 +20,28 @@ from pebble.builtins import Value as PebbleValue
 from pebble.stdlib import StdlibModule
 from pynet.base64 import b64_decode, b64_encode
 from pynet.dns import resolve
-from pynet.url import parse_url
 
-from pystack.plugins.base import Plugin, PluginInfo, ShellCommand
+from pystack.plugins._shared import url_parse as _url_parse
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
 
 
+@pebble_handler
 def _dns_lookup(args: list[PebbleValue]) -> PebbleValue:
     """Resolve a hostname to an IPv4 address."""
-    try:
-        hostname = str(args[0])
-        return resolve(hostname)
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    hostname = str(args[0])
+    return resolve(hostname)
 
 
-def _url_parse(args: list[PebbleValue]) -> PebbleValue:
-    """Parse a URL string into a dict with scheme, host, port, and path."""
-    try:
-        url_string = str(args[0])
-        parsed = parse_url(url_string)
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
-    else:
-        result: dict[str, PebbleValue] = {
-            "scheme": parsed.scheme,
-            "host": parsed.host,
-            "port": parsed.port,
-            "path": parsed.path,
-        }
-        return result
-
-
+@pebble_handler
 def _base64_encode(args: list[PebbleValue]) -> PebbleValue:
     """Encode a text string to Base64."""
-    try:
-        return b64_encode(str(args[0]))
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    return b64_encode(str(args[0]))
 
 
+@pebble_handler
 def _base64_decode(args: list[PebbleValue]) -> PebbleValue:
     """Decode a Base64 string back to plain text."""
-    try:
-        return b64_decode(str(args[0]))
-    except Exception as exc:  # noqa: BLE001
-        return f"error: {exc}"
+    return b64_decode(str(args[0]))
 
 
 class NetPlugin(Plugin):

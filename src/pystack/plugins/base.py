@@ -9,10 +9,42 @@ Think of plugins like expansion packs for a board game. The base
 game (PyStack) works on its own, but each expansion adds new pieces.
 """
 
+import functools
 from collections.abc import Callable
 from dataclasses import dataclass
 
+from pebble.builtins import Value as PebbleValue
 from pebble.stdlib import StdlibModule
+
+# Type alias for a Pebble handler function (takes args, returns a value).
+type PebbleHandler = Callable[[list[PebbleValue]], PebbleValue]
+
+
+def pebble_handler(fn: PebbleHandler) -> PebbleHandler:
+    """Wrap a Pebble handler so exceptions become ``"error: ..."`` strings.
+
+    Every Pebble stdlib function needs to catch errors and return a
+    friendly message instead of crashing the VM.  This decorator does
+    that automatically -- like a safety net under a trapeze artist.
+
+    Usage::
+
+        @pebble_handler
+        def _my_func(args: list[PebbleValue]) -> PebbleValue:
+            return do_something(args[0])
+
+    If ``do_something`` raises, the caller gets ``"error: <message>"``
+    instead of an unhandled exception.
+    """
+
+    @functools.wraps(fn)
+    def _wrapper(args: list[PebbleValue]) -> PebbleValue:
+        try:
+            return fn(args)
+        except Exception as exc:  # noqa: BLE001
+            return f"error: {exc}"
+
+    return _wrapper
 
 
 @dataclass
