@@ -1,6 +1,6 @@
 """Tests for the integration plugins.
 
-Verify that each plugin (crypto, web, git, net, search) registers
+Verify that each plugin (crypto, web, git, net, search, mq) registers
 Pebble stdlib functions correctly and that Pebble programs can call
 them through the PyStackEnvironment.
 """
@@ -12,6 +12,7 @@ from pebble.stdlib import STDLIB_MODULES
 from pystack.environment import PyStackEnvironment
 from pystack.plugins.crypto_plugin import _caesar_decrypt, _caesar_encrypt, _hash
 from pystack.plugins.git_plugin import _git_diff, _git_hash
+from pystack.plugins.mq_plugin import _mq_create, _mq_get, _mq_put, reset_mq_state
 from pystack.plugins.net_plugin import _base64_decode, _base64_encode, _url_parse
 from pystack.plugins.search_plugin import (
     _search_add,
@@ -253,20 +254,20 @@ class TestEnvironmentRegistersPlugins:
     """Verify that PyStackEnvironment auto-registers all plugins on boot."""
 
     def test_all_modules_registered(self, tmp_path: Path) -> None:
-        """All five plugin modules should be registered after environment boot."""
+        """All six plugin modules should be registered after environment boot."""
         env = PyStackEnvironment(db_path=tmp_path)
         try:
-            expected_modules = ["crypto", "web", "git", "net", "search"]
+            expected_modules = ["crypto", "web", "git", "net", "search", "mq"]
             for module_name in expected_modules:
                 assert module_name in STDLIB_MODULES, f"{module_name} not registered"
         finally:
             env.shutdown()
 
     def test_plugins_in_registry(self, tmp_path: Path) -> None:
-        """All five plugins should appear in the plugin registry."""
+        """All six plugins should appear in the plugin registry."""
         env = PyStackEnvironment(db_path=tmp_path)
         try:
-            expected_count = 5
+            expected_count = 6
             infos = env.plugin_registry.list_plugins()
             assert len(infos) >= expected_count
             names = {info.name for info in infos}
@@ -275,5 +276,79 @@ class TestEnvironmentRegistersPlugins:
             assert "PyGit" in names
             assert "PyNet" in names
             assert "PySearch" in names
+            assert "PyMQ" in names
         finally:
+            env.shutdown()
+
+
+class TestMQPlugin:
+    """Verify PyMQ integration via the mq plugin."""
+
+    def test_mq_create_returns_name(self) -> None:
+        """The mq_create handler should return the queue name."""
+        reset_mq_state()
+        try:
+            result = _mq_create(["orders"])
+            assert result == "orders"
+        finally:
+            reset_mq_state()
+
+    def test_mq_put_and_get(self) -> None:
+        """Put a message and get it back via handlers."""
+        reset_mq_state()
+        try:
+            _mq_create(["tasks"])
+            result = _mq_put(["tasks", "do laundry"])
+            assert result == "ok"
+            msg = _mq_get(["tasks"])
+            assert msg == "do laundry"
+        finally:
+            reset_mq_state()
+
+    def test_mq_get_empty_returns_empty(self) -> None:
+        """Getting from an empty queue should return 'empty'."""
+        reset_mq_state()
+        try:
+            _mq_create(["empty-q"])
+            result = _mq_get(["empty-q"])
+            assert result == "empty"
+        finally:
+            reset_mq_state()
+
+    def test_mq_get_unknown_queue_returns_error(self) -> None:
+        """Getting from an unknown queue should return an error string."""
+        reset_mq_state()
+        try:
+            result = _mq_get(["nonexistent"])
+            assert isinstance(result, str)
+            assert "error" in result
+        finally:
+            reset_mq_state()
+
+    def test_mq_put_unknown_queue_returns_error(self) -> None:
+        """Putting to an unknown queue should return an error string."""
+        reset_mq_state()
+        try:
+            result = _mq_put(["nonexistent", "msg"])
+            assert isinstance(result, str)
+            assert "error" in result
+        finally:
+            reset_mq_state()
+
+    def test_mq_pebble_source(self, tmp_path: Path) -> None:
+        """Run a Pebble program that creates a queue, puts, and gets a message."""
+        reset_mq_state()
+        env = PyStackEnvironment(db_path=tmp_path)
+        try:
+            source = (
+                'import "mq"\n'
+                'let q = mq_create("test")\n'
+                'mq_put("test", "hello from pebble")\n'
+                'let msg = mq_get("test")\n'
+                "print(msg)"
+            )
+            output = env.run_pebble_source(source)
+            assert output.strip() == "hello from pebble"
+        finally:
+            reset_mq_state()
             env.shutdown()

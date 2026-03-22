@@ -622,6 +622,22 @@ wheels = [
 ]
 
 [[package]]
+name = "pymq"
+source = { editable = "../pymq" }
+
+[package.metadata]
+requires-dist = [
+    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
+    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
+    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
+    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
+]
+provides-extras = ["dev"]
+
+[[package]]
 name = "pynet"
 source = { editable = "../pynet" }
 
@@ -703,6 +719,7 @@ dependencies = [
     { name = "pycrypt" },
     { name = "pydb" },
     { name = "pygit" },
+    { name = "pymq" },
     { name = "pynet" },
     { name = "pyos-learn" },
     { name = "pysearch" },
@@ -735,6 +752,7 @@ requires-dist = [
     { name = "pycrypt", editable = "../pycrypt" },
     { name = "pydb", editable = "../pydb" },
     { name = "pygit", editable = "../pygit" },
+    { name = "pymq", editable = "../pymq" },
     { name = "pynet", editable = "../pynet" },
     { name = "pyos-learn", editable = "../os_learning" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },

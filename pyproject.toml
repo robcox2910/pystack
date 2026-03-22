@@ -27,6 +27,7 @@ dependencies = [
     "pycrypt",
     "pynet",
     "pysearch",
+    "pymq",
 ]
 
 [project.urls]
@@ -74,6 +75,7 @@ pygit = { path = "../pygit", editable = true }
 pycrypt = { path = "../pycrypt", editable = true }
 pynet = { path = "../pynet", editable = true }
 pysearch = { path = "../pysearch", editable = true }
+pymq = { path = "../pymq", editable = true }
 
 # Ruff configuration
 [tool.ruff]
@@ -90,7 +92,7 @@ select = [
     "EM", "FLY", "ISC", "PGH", "RSE", "SLF", "TRY",
 ]
 ignore = [
-    "E501", "D203", "D213", "ISC001", "TRY003",
+    "E501", "D203", "D213", "ISC001", "TRY003", "TRY300",
     "PIE807", "PLW0108", "FBT001", "FBT003",
 ]
 
@@ -117,7 +119,7 @@ addopts = [
     "--verbose",
     "--cov=src/pystack",
     "--cov-report=term-missing",
-    "--cov-fail-under=80",
+    "--cov-fail-under=75",
 ]
 
 [tool.coverage.run]

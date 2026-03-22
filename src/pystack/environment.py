@@ -31,6 +31,7 @@ from pystack.adapters.pebble_db import register_db_module, unregister_db_module
 from pystack.plugins.base import Plugin
 from pystack.plugins.crypto_plugin import CryptoPlugin
 from pystack.plugins.git_plugin import GitPlugin
+from pystack.plugins.mq_plugin import MQPlugin
 from pystack.plugins.net_plugin import NetPlugin
 from pystack.plugins.registry import PluginRegistry
 from pystack.plugins.search_plugin import SearchPlugin
@@ -78,7 +79,7 @@ class PyStackEnvironment:
     def _register_all_plugins(self) -> None:
         """Register all integration plugin Pebble stdlib modules.
 
-        Activate crypto, web, git, net, and search plugins so their
+        Activate crypto, web, git, net, search, and mq plugins so their
         functions are available from Pebble programs via ``import``.
         """
         plugins: list[Plugin] = [
@@ -87,6 +88,7 @@ class PyStackEnvironment:
             GitPlugin(),
             NetPlugin(),
             SearchPlugin(),
+            MQPlugin(),
         ]
         for plugin in plugins:
             self._plugin_registry.register(plugin)
