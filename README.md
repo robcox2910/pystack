@@ -2,124 +2,237 @@
 
 The full stack, from scratch.
 
-PyStack connects three educational projects into one integrated platform:
+PyStack connects **TEN** educational projects into one integrated
+platform. Think of it like a school:
 
-- **PyOS** -- an operating system (the school building)
-- **Pebble** -- a programming language (the language students speak)
-- **PyDB** -- a database engine (the filing cabinet)
+| Project | Role | School Analogy |
+|---------|------|----------------|
+| **PyOS** | Operating system | The school building |
+| **Pebble** | Programming language | The language students speak |
+| **PyDB** | Database engine | The filing cabinet |
+| **PyCrypt** | Cryptography toolkit | The combination lock |
+| **PyWeb** | HTTP web server | The front office |
+| **PyNet** | Networking library | The phone system |
+| **PyGit** | Version control | The yearbook archive |
+| **PySearch** | Full-text search engine | The library index |
+| **PyMQ** | Message queue | The intercom |
+| **PyStack** | Integration layer | The hallways connecting everything |
 
-Think of a "full stack" like a three-layer cake. The OS is the bottom
-layer, the programming language is the middle, and the database is the
-top. PyStack is the frosting that holds them together.
+PyStack is the hallways. Without hallways, you can't get from the
+filing cabinet to the front office. PyStack lets a Pebble program
+query a database, hash a password, fetch a web page, search documents,
+and send messages -- all in one program.
 
 ## What Can You Do?
 
-### Write programs that talk to a database
+PyStack adds **7 Pebble modules** so your programs can use every
+project. Just `import` the one you need.
+
+### Database -- `import "db"`
 
 ```
 import "db"
 
-db_execute("CREATE TABLE grades (student TEXT, score INTEGER)")
-db_execute("INSERT INTO grades VALUES ('Alice', 95)")
-db_execute("INSERT INTO grades VALUES ('Bob', 87)")
+db_execute("CREATE TABLE pets (name TEXT, kind TEXT)")
+db_execute("INSERT INTO pets VALUES ('Buddy', 'dog')")
 
-let rows = db_query("SELECT student, score FROM grades ORDER BY score DESC")
-for row in rows {
-    print(row["student"] + ": " + str(row["score"]))
+let pets = db_query("SELECT * FROM pets")
+for pet in pets {
+    print(pet["name"] + " is a " + pet["kind"])
 }
+
+let tables = db_tables()
+print(tables)
 ```
 
-```bash
-pystack pebble examples/gradebook.pbl
-# Alice: 95
-# Bob: 87
+### Cryptography -- `import "crypto"`
+
+```
+import "crypto"
+
+let h = hash("secret password")
+print(h)
+
+let encrypted = caesar_encrypt("HELLO", 3)
+print(encrypted)
+
+let decrypted = caesar_decrypt(encrypted, 3)
+print(decrypted)
+
+let tag = hmac_sign("important message", "my-key")
+let ok = hmac_verify("important message", tag, "my-key")
+print(ok)
 ```
 
-### Use an integrated OS shell
+### Web -- `import "web"`
 
-```bash
-pystack os
-pystack-os> pebble run /programs/hello.pbl   # Run Pebble programs
-pystack-os> sql SELECT * FROM scores          # Query the database
-pystack-os> ls /data                          # See database files in the OS
+```
+import "web"
+
+let page = http_get("http://example.com")
+print(page)
+
+let parts = url_parse("https://example.com:8080/hello?q=1")
+print(parts["host"])
+print(parts["port"])
 ```
 
-### Open the web UI
+### Git -- `import "git"`
 
-```bash
-pystack web
-# Opens http://localhost:8080 with three panels:
-# - OS Terminal
-# - Pebble Code Editor
-# - SQL Console
+```
+import "git"
+
+let h = git_hash("hello world")
+print(h)
+
+let d = git_diff("old version", "new version")
+print(d)
 ```
 
-### Or just use SQL
+### Networking -- `import "net"`
 
-```bash
-pystack sql
-pydb> CREATE TABLE cards (name TEXT, power INTEGER)
-pydb> INSERT INTO cards VALUES ('Pikachu', 55)
-pydb> SELECT * FROM cards
+```
+import "net"
+
+let ip = dns_lookup("example.com")
+print(ip)
+
+let parts = url_parse("https://example.com/page")
+print(parts["scheme"])
+
+let encoded = base64_encode("Hello!")
+print(encoded)
+
+let decoded = base64_decode(encoded)
+print(decoded)
 ```
 
-## Quick Start
+### Search -- `import "search"`
 
-```bash
-# Install dependencies (including PyOS, Pebble, and PyDB)
-uv sync --all-extras
+```
+import "search"
 
-# Run the example program
-pystack pebble examples/hello.pbl
+let engine = search_create()
+search_add(engine, "doc1", "the cat sat on the mat")
+search_add(engine, "doc2", "the dog chased the cat")
 
-# Launch the web UI
-pystack web
+let results = search_query(engine, "cat")
+print(results)
+```
 
-# Run tests
-uv run pytest
+### Message Queue -- `import "mq"`
+
+```
+import "mq"
+
+let q = mq_create("orders")
+mq_put("orders", "one coffee please")
+mq_put("orders", "two teas")
+
+let msg = mq_get("orders")
+print(msg)
+
+mq_subscribe("news")
+mq_publish("news", "school is cancelled!")
+let messages = mq_receive("news")
+print(messages)
 ```
 
 ## All Commands
 
 | Command | What It Does |
 |---------|-------------|
-| `pystack pebble <file.pbl>` | Run a Pebble program with database access |
+| `pystack pebble <file.pbl>` | Run a Pebble program with all 7 modules available |
 | `pystack sql` | Interactive SQL REPL |
-| `pystack os` | PyOS shell with Pebble + SQL integration |
+| `pystack os` | PyOS shell with Pebble, SQL, and plugin commands |
 | `pystack web` | Browser-based UI at http://localhost:8080 |
 | `pystack --help` | Show available commands |
+| `pystack <file.pbl>` | Shortcut for `pystack pebble <file.pbl>` |
 
-## Pebble Database Functions
+## Shell Commands
 
-When a Pebble program does `import "db"`, it gets three functions:
+When you run `pystack os`, these commands are available at the
+`pystack-os>` prompt:
 
-| Function | What It Does |
-|----------|-------------|
-| `db_query(sql)` | Run a SELECT and get results as a list of dicts |
-| `db_execute(sql)` | Run CREATE/INSERT/UPDATE/DELETE and get a status message |
-| `db_tables()` | Get a list of all table names |
+| Command | What It Does | From |
+|---------|-------------|------|
+| `pebble run <file.pbl>` | Run a Pebble program | PyOS + Pebble |
+| `pebble eval '<code>'` | Evaluate Pebble code inline | PyOS + Pebble |
+| `sql <statement>` | Run a SQL statement | PyOS + PyDB |
+| `hash <text>` | Print the SHA-256 hash | PyCrypt |
+| `curl <url>` | Fetch a URL | PyWeb + PyNet |
+| `dns <hostname>` | Resolve hostname to IP | PyNet |
+| `git-hash <text>` | Print the SHA-1 hash (Git-style) | PyGit |
+| `git-diff <old> <new>` | Show a diff between two strings | PyGit |
+| `mq-put <queue> <msg>` | Put a message on a queue | PyMQ |
+| `mq-get <queue>` | Get the next message from a queue | PyMQ |
+
+## Quick Start
+
+```bash
+# Install dependencies (all 10 projects wired together)
+uv sync --all-extras
+
+# Run an example program
+pystack pebble examples/hello.pbl
+
+# Try the interactive SQL REPL
+pystack sql
+
+# Launch the OS shell
+pystack os
+
+# Open the browser UI
+pystack web
+
+# Run tests
+uv run pytest
+```
 
 ## Plugin System
 
-PyStack is extensible. Future components (like a web server or version
-control) can plug in without changing core code. See the plugin
-documentation for details.
+PyStack uses a plugin system to integrate projects. There are
+currently **6 active plugins**:
+
+| Plugin | Pebble Module | Shell Commands |
+|--------|--------------|----------------|
+| CryptoPlugin | `crypto` | `hash` |
+| WebPlugin | `web` | `curl` |
+| GitPlugin | `git` | `git-hash`, `git-diff` |
+| NetPlugin | `net` | `dns` |
+| SearchPlugin | `search` | (none -- used from Pebble) |
+| MQPlugin | `mq` | `mq-put`, `mq-get` |
+
+The `db` module is registered separately via the Pebble-DB adapter
+(it needs a database instance, so it's set up before the plugins).
+
+Each plugin can:
+
+- Add a new stdlib module to the Pebble language (`import "crypto"`)
+- Add new commands to the PyOS shell (`hash`, `curl`, `dns`, etc.)
+- Run custom setup logic at boot time
+
+Plugins are discovered automatically via Python entry points, or
+registered manually in the `PyStackEnvironment`.
 
 ## Related Projects
 
 PyStack is part of an educational series where every layer of the
-computing stack is built from scratch:
+computing stack is built from scratch. All projects use TDD,
+kid-friendly documentation, and are designed for learners aged 12+.
 
-| Project | What It Teaches |
-|---------|----------------|
-| [PyOS](https://github.com/robcox2910/py-os) | Operating systems |
-| [Pebble](https://github.com/robcox2910/pebble-lang) | Compilers and programming languages |
-| [PyDB](https://github.com/robcox2910/pydb) | Relational databases |
-| [PyWeb](https://github.com/robcox2910/pyweb) | HTTP web servers |
-| [PyGit](https://github.com/robcox2910/pygit) | Version control |
-
-All projects use TDD, comprehensive documentation with real-world
-analogies, and are designed for learners aged 12+.
+| Project | What It Teaches | Repository |
+|---------|----------------|------------|
+| PyOS | Operating systems | [robcox2910/py-os](https://github.com/robcox2910/py-os) |
+| Pebble | Compilers and programming languages | [robcox2910/pebble-lang](https://github.com/robcox2910/pebble-lang) |
+| PyDB | Relational databases | [robcox2910/pydb](https://github.com/robcox2910/pydb) |
+| PyCrypt | Cryptography | [robcox2910/pycrypt](https://github.com/robcox2910/pycrypt) |
+| PyWeb | HTTP web servers | [robcox2910/pyweb](https://github.com/robcox2910/pyweb) |
+| PyNet | Computer networking | [robcox2910/pynet](https://github.com/robcox2910/pynet) |
+| PyGit | Version control | [robcox2910/pygit](https://github.com/robcox2910/pygit) |
+| PySearch | Search engines | [robcox2910/pysearch](https://github.com/robcox2910/pysearch) |
+| PyMQ | Message queues | [robcox2910/pymq](https://github.com/robcox2910/pymq) |
+| PyStack | Full-stack integration | [robcox2910/pystack](https://github.com/robcox2910/pystack) |
 
 ## Documentation
 

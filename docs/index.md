@@ -4,28 +4,54 @@
 
 ### What's a "Full Stack"?
 
-A **full stack** is all the layers of software between you and the
-computer. Think of it like a three-layer cake:
+A **full stack** is all the layers of software that make a computer
+useful. Think of it like a school. A school isn't just one thing -- it's
+a building, a language, filing cabinets, locks, a phone system, a
+library, an intercom, and hallways that connect them all.
 
-- **Bottom layer** -- the operating system (manages everything)
-- **Middle layer** -- the programming language (writes the programs)
-- **Top layer** -- the database (stores the data)
+PyStack connects **ten** educational projects, and each one teaches you
+how a real piece of technology works:
 
-Most people never see these layers. But you've built all three from
-scratch! **PyStack** is the frosting that holds the cake together.
-
-| Project | What It Is | Analogy |
-|---------|-----------|---------|
-| **PyOS** | Operating system | The school building |
+| Project | What It Is | School Analogy |
+|---------|-----------|----------------|
+| **PyOS** | Operating system | The school building -- manages everything |
 | **Pebble** | Programming language | The language students speak |
-| **PyDB** | Database engine | The filing cabinet |
-| **PyStack** | The glue | The hallways connecting everything |
+| **PyDB** | Database engine | The filing cabinet -- stores and retrieves data |
+| **PyCrypt** | Cryptography toolkit | The combination lock -- keeps secrets safe |
+| **PyWeb** | HTTP web server | The front office -- talks to visitors |
+| **PyNet** | Networking library | The phone system -- connects to the outside world |
+| **PyGit** | Version control | The yearbook archive -- tracks every change |
+| **PySearch** | Full-text search engine | The library index -- finds things fast |
+| **PyMQ** | Message queue | The intercom -- sends messages between rooms |
+| **PyStack** | Integration layer | The hallways connecting everything |
+
+You built all ten from scratch. PyStack is the hallways -- it lets
+a single Pebble program use any of these systems together.
+
+## Seven Pebble Modules
+
+When PyStack boots, it registers **7 stdlib modules** in the Pebble
+language. Each module comes from a different project. Just write
+`import "modulename"` at the top of your Pebble program.
+
+| Module | Project | Functions |
+|--------|---------|-----------|
+| `db` | PyDB | `db_query(sql)`, `db_execute(sql)`, `db_tables()` |
+| `crypto` | PyCrypt | `hash(text)`, `caesar_encrypt(text, shift)`, `caesar_decrypt(text, shift)`, `hmac_sign(msg, key)`, `hmac_verify(msg, tag, key)` |
+| `web` | PyWeb + PyNet | `http_get(url)`, `url_parse(url)` |
+| `git` | PyGit | `git_hash(text)`, `git_diff(old, new)` |
+| `net` | PyNet | `dns_lookup(hostname)`, `url_parse(url)`, `base64_encode(text)`, `base64_decode(text)` |
+| `search` | PySearch | `search_create()`, `search_add(engine, id, text)`, `search_query(engine, query)` |
+| `mq` | PyMQ | `mq_create(name)`, `mq_put(name, msg)`, `mq_get(name)`, `mq_publish(topic, msg)`, `mq_subscribe(topic)`, `mq_receive(topic)` |
+
+That's **25 functions** across 7 modules. Every one of them calls
+real code from a real project you built yourself.
 
 ## Four Ways to Use PyStack
 
-### 1. Run a Pebble program with database access
+### 1. Run a Pebble program with all modules available
 
-Write a program that creates a table and queries it:
+Write a program that creates a table, adds data, and queries it:
 
 ```
 import "db"
@@ -46,7 +72,7 @@ pystack pebble hello_db.pbl
 
 ### 2. Use the integrated OS shell
 
-The OS shell has `pebble` and `sql` commands built in:
+The OS shell has `pebble`, `sql`, and all plugin commands built in:
 
 ```bash
 pystack os
@@ -54,6 +80,14 @@ pystack-os> pebble eval 'print(1 + 2)'
 3
 pystack-os> sql CREATE TABLE scores (player TEXT, score INTEGER)
 Table 'scores' created
+pystack-os> hash hello
+2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+pystack-os> dns example.com
+93.184.216.34
+pystack-os> mq-put orders "one coffee"
+Queued on 'orders': one coffee
+pystack-os> mq-get orders
+one coffee
 pystack-os> ls /data
 scores.json
 ```
@@ -75,53 +109,98 @@ pystack web
 
 ```bash
 pystack sql
-pydb> SELECT * FROM friends ORDER BY age
+pydb> CREATE TABLE cards (name TEXT, power INTEGER)
+pydb> INSERT INTO cards VALUES ('Pikachu', 55)
+pydb> SELECT * FROM cards
 ```
 
-## The Database Functions
+## Shell Commands in PyStack OS
 
-When a Pebble program does `import "db"`, it gets three functions:
+When you run `pystack os`, these commands are available at the prompt.
+The first two come from the core adapters. The rest come from plugins.
 
-| Function | What It Does | Example |
-|----------|-------------|---------|
-| `db_query(sql)` | Run a SELECT, get results | `db_query("SELECT * FROM t")` |
-| `db_execute(sql)` | Run a write command, get status | `db_execute("INSERT INTO t VALUES (1)")` |
-| `db_tables()` | List all table names | `db_tables()` |
+| Command | What It Does | Provided By |
+|---------|-------------|-------------|
+| `pebble run <file>` | Run a Pebble program | Core (OS-Pebble adapter) |
+| `pebble eval '<code>'` | Evaluate Pebble code inline | Core (OS-Pebble adapter) |
+| `sql <statement>` | Run a SQL statement | Core (OS-DB adapter) |
+| `hash <text>` | Print the SHA-256 hash of text | CryptoPlugin |
+| `curl <url>` | Fetch a URL and print the body | WebPlugin |
+| `dns <hostname>` | Resolve a hostname to an IP address | NetPlugin |
+| `git-hash <text>` | Print the SHA-1 hash (Git-style) | GitPlugin |
+| `git-diff <old> <new>` | Show a unified diff | GitPlugin |
+| `mq-put <queue> <msg>` | Put a message on a named queue | MQPlugin |
+| `mq-get <queue>` | Get the next message from a queue | MQPlugin |
 
-## How It Works Under the Hood
+Plus all the standard PyOS commands like `ls`, `cat`, `mkdir`, `help`,
+and more.
 
-PyStack uses **adapters** -- like translators between people who speak
-different languages:
+## How It Works
+
+PyStack uses **adapters** and **plugins** to connect projects together.
+Think of them like translators between people who speak different
+languages.
 
 ```
-Pebble program calls db_query("SELECT * FROM cards")
-    │
-    ├── PyStack adapter translates this call
-    │       │
-    │       └── PyDB parses the SQL and runs it
-    │               │
-    │               └── Results come back as a Pebble list
-    │
-    └── print(results)  -- your program gets the data!
+Your Pebble program calls db_query("SELECT * FROM pets")
+    |
+    +-- The adapter translates this for PyDB
+    |       |
+    |       +-- PyDB parses the SQL and runs it
+    |               |
+    |               +-- Results come back as a Pebble list
+    |
+    +-- print(results)  -- your program gets the data!
 ```
 
-The adapters are small -- about 90 lines each. They don't contain any
-database logic or compiler logic. They just connect the pieces.
+**Adapters** connect core systems (Pebble to PyDB, PyOS to Pebble).
+They are small -- about 90 lines each.
+
+**Plugins** connect additional projects (PyCrypt, PyWeb, PyGit, PyNet,
+PySearch, PyMQ). Each plugin registers a Pebble module and optionally
+adds shell commands.
 
 ## Plugin System
 
-PyStack is designed to grow. Components like
-[PyWeb](https://github.com/robcox2910/pyweb) (web server) and
-[PyGit](https://github.com/robcox2910/pygit) (version control) can
-plug in without changing any existing code. A plugin can:
+PyStack has **6 active plugins** that integrate projects beyond the
+core three (PyOS, Pebble, PyDB):
 
-- Add new commands to the PyOS shell
-- Add new functions to the Pebble language
-- Run custom setup when PyStack boots
+| Plugin | Pebble Module | Shell Commands | Project |
+|--------|--------------|----------------|---------|
+| CryptoPlugin | `import "crypto"` | `hash` | PyCrypt |
+| WebPlugin | `import "web"` | `curl` | PyWeb |
+| GitPlugin | `import "git"` | `git-hash`, `git-diff` | PyGit |
+| NetPlugin | `import "net"` | `dns` | PyNet |
+| SearchPlugin | `import "search"` | (none) | PySearch |
+| MQPlugin | `import "mq"` | `mq-put`, `mq-get` | PyMQ |
+
+The `db` module is handled separately by the Pebble-DB adapter because
+it needs a live database instance.
+
+Each plugin is a Python class that extends the `Plugin` base class.
+A plugin can do three things:
+
+1. **Register a Pebble module** -- so programs can `import` it
+2. **Add shell commands** -- available in `pystack os`
+3. **Run boot logic** -- custom setup when PyStack starts
+
+Plugins can also be discovered automatically via Python entry points
+(the `pystack.plugins` group), so other packages can extend PyStack
+without modifying its code.
 
 ## Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/robcox2910/pystack.git
+cd pystack
+
+# Install all dependencies (all 10 projects wired together)
 uv sync --all-extras
+
+# Run an example
 pystack pebble examples/hello.pbl
+
+# Run the tests
+uv run pytest
 ```
