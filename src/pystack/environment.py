@@ -15,6 +15,7 @@ from pebble.lexer import Lexer
 from pebble.optimizer import optimize
 from pebble.parser import Parser
 from pebble.resolver import ModuleResolver
+from pebble.stdlib import STDLIB_MODULES
 from pebble.type_checker import type_check
 from pebble.vm import VirtualMachine
 from py_os.kernel import Kernel
@@ -27,7 +28,13 @@ from pydb.sql_parser import parse_sql
 
 from pystack.adapters.os_pebble import register_pebble_command, register_sql_command
 from pystack.adapters.pebble_db import register_db_module, unregister_db_module
+from pystack.plugins.base import Plugin
+from pystack.plugins.crypto_plugin import CryptoPlugin
+from pystack.plugins.git_plugin import GitPlugin
+from pystack.plugins.net_plugin import NetPlugin
 from pystack.plugins.registry import PluginRegistry
+from pystack.plugins.search_plugin import SearchPlugin
+from pystack.plugins.web_plugin import WebPlugin
 
 
 class PyStackEnvironment:
@@ -63,9 +70,29 @@ class PyStackEnvironment:
         self._database = Database(path=self._db_path)
         self._database.load()
         register_db_module(self._database)
+        self._register_all_plugins()
 
         if os_mode:
             self._boot_os()
+
+    def _register_all_plugins(self) -> None:
+        """Register all integration plugin Pebble stdlib modules.
+
+        Activate crypto, web, git, net, and search plugins so their
+        functions are available from Pebble programs via ``import``.
+        """
+        plugins: list[Plugin] = [
+            CryptoPlugin(),
+            WebPlugin(),
+            GitPlugin(),
+            NetPlugin(),
+            SearchPlugin(),
+        ]
+        for plugin in plugins:
+            self._plugin_registry.register(plugin)
+            stdlib = plugin.pebble_stdlib()
+            if stdlib is not None:
+                STDLIB_MODULES[plugin.pebble_module_name()] = stdlib
 
     def _boot_os(self) -> None:
         """Boot the PyOS kernel and register integrated shell commands."""

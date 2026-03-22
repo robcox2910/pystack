@@ -22,6 +22,11 @@ dependencies = [
     "pyos-learn",
     "pebble-lang",
     "pydb",
+    "pyweb",
+    "pygit",
+    "pycrypt",
+    "pynet",
+    "pysearch",
 ]
 
 [project.urls]
@@ -64,6 +69,11 @@ packages = ["src/pystack"]
 pyos-learn = { path = "../os_learning", editable = true }
 pebble-lang = { path = "../pebble-lang", editable = true }
 pydb = { path = "../pydb", editable = true }
+pyweb = { path = "../pyweb", editable = true }
+pygit = { path = "../pygit", editable = true }
+pycrypt = { path = "../pycrypt", editable = true }
+pynet = { path = "../pynet", editable = true }
+pysearch = { path = "../pysearch", editable = true }
 
 # Ruff configuration
 [tool.ruff]
