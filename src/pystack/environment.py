@@ -29,12 +29,18 @@ from pydb.sql_parser import parse_sql
 from pystack.adapters.os_pebble import register_pebble_command, register_sql_command
 from pystack.adapters.pebble_db import register_db_module, unregister_db_module
 from pystack.plugins.base import Plugin
+from pystack.plugins.coldb_plugin import ColDBPlugin
 from pystack.plugins.crypto_plugin import CryptoPlugin
+from pystack.plugins.docdb_plugin import DocDBPlugin
 from pystack.plugins.git_plugin import GitPlugin
+from pystack.plugins.graphdb_plugin import GraphDBPlugin
+from pystack.plugins.kv_plugin import KVPlugin
 from pystack.plugins.mq_plugin import MQPlugin
 from pystack.plugins.net_plugin import NetPlugin
 from pystack.plugins.registry import PluginRegistry
 from pystack.plugins.search_plugin import SearchPlugin
+from pystack.plugins.tsdb_plugin import TSDBPlugin
+from pystack.plugins.vecdb_plugin import VecDBPlugin
 from pystack.plugins.web_plugin import WebPlugin
 
 
@@ -79,8 +85,9 @@ class PyStackEnvironment:
     def _register_all_plugins(self) -> None:
         """Register all integration plugin Pebble stdlib modules.
 
-        Activate crypto, web, git, net, search, and mq plugins so their
-        functions are available from Pebble programs via ``import``.
+        Activate crypto, web, git, net, search, mq, kv, docdb, graphdb,
+        tsdb, vecdb, and coldb plugins so their functions are available
+        from Pebble programs via ``import``.
         """
         plugins: list[Plugin] = [
             CryptoPlugin(),
@@ -89,6 +96,12 @@ class PyStackEnvironment:
             NetPlugin(),
             SearchPlugin(),
             MQPlugin(),
+            KVPlugin(),
+            DocDBPlugin(),
+            GraphDBPlugin(),
+            TSDBPlugin(),
+            VecDBPlugin(),
+            ColDBPlugin(),
         ]
         for plugin in plugins:
             self._plugin_registry.register(plugin)
