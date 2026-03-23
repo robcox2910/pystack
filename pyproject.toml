@@ -28,6 +28,12 @@ dependencies = [
     "pynet",
     "pysearch",
     "pymq",
+    "pykv",
+    "pydocdb",
+    "pygraphdb",
+    "pytsdb",
+    "pyvecdb",
+    "pycoldb",
 ]
 
 [project.urls]
@@ -76,6 +82,12 @@ pycrypt = { path = "../pycrypt", editable = true }
 pynet = { path = "../pynet", editable = true }
 pysearch = { path = "../pysearch", editable = true }
 pymq = { path = "../pymq", editable = true }
+pykv = { path = "../pykv", editable = true }
+pydocdb = { path = "../pydocdb", editable = true }
+pygraphdb = { path = "../pygraphdb", editable = true }
+pytsdb = { path = "../pytsdb", editable = true }
+pyvecdb = { path = "../pyvecdb", editable = true }
+pycoldb = { path = "../pycoldb", editable = true }
 
 # Ruff configuration
 [tool.ruff]

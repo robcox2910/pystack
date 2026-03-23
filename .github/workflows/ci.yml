@@ -31,6 +31,12 @@ jobs:
           git clone --depth 1 https://github.com/robcox2910/pynet.git pynet
           git clone --depth 1 https://github.com/robcox2910/pysearch.git pysearch
           git clone --depth 1 https://github.com/robcox2910/pymq.git pymq
+          git clone --depth 1 https://github.com/robcox2910/pykv.git pykv
+          git clone --depth 1 https://github.com/robcox2910/pydocdb.git pydocdb
+          git clone --depth 1 https://github.com/robcox2910/pygraphdb.git pygraphdb
+          git clone --depth 1 https://github.com/robcox2910/pytsdb.git pytsdb
+          git clone --depth 1 https://github.com/robcox2910/pyvecdb.git pyvecdb
+          git clone --depth 1 https://github.com/robcox2910/pycoldb.git pycoldb
 
       - name: Install dependencies
         run: uv sync --all-extras
