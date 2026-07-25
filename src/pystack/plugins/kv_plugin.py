@@ -148,8 +148,6 @@ class KVPlugin(Plugin):
         return [
             ShellCommand(name="kv-set", handler=_kv_set_cmd, help_text="Set a key-value pair"),
             ShellCommand(name="kv-get", handler=_kv_get_cmd, help_text="Get value by key"),
-            ShellCommand(
-                name="kv-delete", handler=_kv_delete_cmd, help_text="Delete a key"
-            ),
+            ShellCommand(name="kv-delete", handler=_kv_delete_cmd, help_text="Delete a key"),
             ShellCommand(name="kv-keys", handler=_kv_keys_cmd, help_text="List all keys"),
         ]

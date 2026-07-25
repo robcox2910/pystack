@@ -136,13 +136,7 @@ class DocDBPlugin(Plugin):
             return str(_get_collection(args[0]).count())
 
         return [
-            ShellCommand(
-                name="doc-insert", handler=_doc_insert_cmd, help_text="Insert a document"
-            ),
-            ShellCommand(
-                name="doc-find", handler=_doc_find_cmd, help_text="Find documents"
-            ),
-            ShellCommand(
-                name="doc-count", handler=_doc_count_cmd, help_text="Count documents"
-            ),
+            ShellCommand(name="doc-insert", handler=_doc_insert_cmd, help_text="Insert a document"),
+            ShellCommand(name="doc-find", handler=_doc_find_cmd, help_text="Find documents"),
+            ShellCommand(name="doc-count", handler=_doc_count_cmd, help_text="Count documents"),
         ]
