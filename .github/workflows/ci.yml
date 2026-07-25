@@ -25,7 +25,7 @@ jobs:
           cd ..
           for r in py-os:os_learning pebble-lang:pebble-lang pydb:pydb \
                    pyweb:pyweb pygit:pygit pycrypt:pycrypt pynet:pynet \
-                   pysearch:pysearch pymq:pymq pykv:pykv pydocdb:pydocdb \
+                   pysearch:pysearch pymq:pymq pykv:pykv pydoc-db:pydocdb \
                    pygraphdb:pygraphdb pytsdb:pytsdb pyvecdb:pyvecdb \
                    pycoldb:pycoldb pyllm:pyllm; do
             git clone --depth 1 "https://github.com/robcox2910/${r%%:*}.git" "${r##*:}"
@@ -64,7 +64,7 @@ jobs:
           cd ..
           for r in py-os:os_learning pebble-lang:pebble-lang pydb:pydb \
                    pyweb:pyweb pygit:pygit pycrypt:pycrypt pynet:pynet \
-                   pysearch:pysearch pymq:pymq pykv:pykv pydocdb:pydocdb \
+                   pysearch:pysearch pymq:pymq pykv:pykv pydoc-db:pydocdb \
                    pygraphdb:pygraphdb pytsdb:pytsdb pyvecdb:pyvecdb \
                    pycoldb:pycoldb pyllm:pyllm; do
             git clone --depth 1 "https://github.com/robcox2910/${r%%:*}.git" "${r##*:}"
@@ -97,7 +97,7 @@ jobs:
           cd ..
           for r in py-os:os_learning pebble-lang:pebble-lang pydb:pydb \
                    pyweb:pyweb pygit:pygit pycrypt:pycrypt pynet:pynet \
-                   pysearch:pysearch pymq:pymq pykv:pykv pydocdb:pydocdb \
+                   pysearch:pysearch pymq:pymq pykv:pykv pydoc-db:pydocdb \
                    pygraphdb:pygraphdb pytsdb:pytsdb pyvecdb:pyvecdb \
                    pycoldb:pycoldb pyllm:pyllm; do
             git clone --depth 1 "https://github.com/robcox2910/${r%%:*}.git" "${r##*:}"
