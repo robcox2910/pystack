@@ -115,10 +115,7 @@ class TestKVPlugin:
         env = PyStackEnvironment(db_path=tmp_path)
         try:
             source = (
-                'import "kv"\n'
-                'kv_set("greeting", "hello")\n'
-                'let val = kv_get("greeting")\n'
-                "print(val)"
+                'import "kv"\nkv_set("greeting", "hello")\nlet val = kv_get("greeting")\nprint(val)'
             )
             output = env.run_pebble_source(source)
             assert output.strip() == "hello"

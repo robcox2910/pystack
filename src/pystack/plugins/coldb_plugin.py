@@ -153,7 +153,5 @@ class ColDBPlugin(Plugin):
             return "Usage: col <set|get> <family> <row> <col> [value]"
 
         return [
-            ShellCommand(
-                name="col", handler=_col_cmd, help_text="Column-family store operations"
-            ),
+            ShellCommand(name="col", handler=_col_cmd, help_text="Column-family store operations"),
         ]

@@ -258,8 +258,19 @@ class TestEnvironmentRegistersPlugins:
         env = PyStackEnvironment(db_path=tmp_path)
         try:
             expected_modules = [
-                "crypto", "web", "git", "net", "search", "mq",
-                "kv", "docdb", "graphdb", "tsdb", "vecdb", "coldb", "llm",
+                "crypto",
+                "web",
+                "git",
+                "net",
+                "search",
+                "mq",
+                "kv",
+                "docdb",
+                "graphdb",
+                "tsdb",
+                "vecdb",
+                "coldb",
+                "llm",
             ]
             for module_name in expected_modules:
                 assert module_name in STDLIB_MODULES, f"{module_name} not registered"
