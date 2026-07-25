@@ -34,6 +34,7 @@ dependencies = [
     "pytsdb",
     "pyvecdb",
     "pycoldb",
+    "pyllm",
 ]
 
 [project.urls]
@@ -88,6 +89,7 @@ pygraphdb = { path = "../pygraphdb", editable = true }
 pytsdb = { path = "../pytsdb", editable = true }
 pyvecdb = { path = "../pyvecdb", editable = true }
 pycoldb = { path = "../pycoldb", editable = true }
+pyllm = { path = "../pyllm", editable = true }
 
 # Ruff configuration
 [tool.ruff]
