@@ -35,6 +35,7 @@ from pystack.plugins.docdb_plugin import DocDBPlugin
 from pystack.plugins.git_plugin import GitPlugin
 from pystack.plugins.graphdb_plugin import GraphDBPlugin
 from pystack.plugins.kv_plugin import KVPlugin
+from pystack.plugins.llm_plugin import LLMPlugin
 from pystack.plugins.mq_plugin import MQPlugin
 from pystack.plugins.net_plugin import NetPlugin
 from pystack.plugins.registry import PluginRegistry
@@ -102,6 +103,7 @@ class PyStackEnvironment:
             TSDBPlugin(),
             VecDBPlugin(),
             ColDBPlugin(),
+            LLMPlugin(),
         ]
         for plugin in plugins:
             self._plugin_registry.register(plugin)

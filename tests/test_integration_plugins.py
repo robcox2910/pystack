@@ -254,12 +254,12 @@ class TestEnvironmentRegistersPlugins:
     """Verify that PyStackEnvironment auto-registers all plugins on boot."""
 
     def test_all_modules_registered(self, tmp_path: Path) -> None:
-        """All twelve plugin modules should be registered after environment boot."""
+        """All thirteen plugin modules should be registered after environment boot."""
         env = PyStackEnvironment(db_path=tmp_path)
         try:
             expected_modules = [
                 "crypto", "web", "git", "net", "search", "mq",
-                "kv", "docdb", "graphdb", "tsdb", "vecdb", "coldb",
+                "kv", "docdb", "graphdb", "tsdb", "vecdb", "coldb", "llm",
             ]
             for module_name in expected_modules:
                 assert module_name in STDLIB_MODULES, f"{module_name} not registered"
@@ -267,10 +267,10 @@ class TestEnvironmentRegistersPlugins:
             env.shutdown()
 
     def test_plugins_in_registry(self, tmp_path: Path) -> None:
-        """All twelve plugins should appear in the plugin registry."""
+        """All thirteen plugins should appear in the plugin registry."""
         env = PyStackEnvironment(db_path=tmp_path)
         try:
-            expected_count = 12
+            expected_count = 13
             infos = env.plugin_registry.list_plugins()
             assert len(infos) >= expected_count
             names = {info.name for info in infos}
@@ -286,6 +286,7 @@ class TestEnvironmentRegistersPlugins:
             assert "PyTSDB" in names
             assert "PyVecDB" in names
             assert "PyColDB" in names
+            assert "PyLLM" in names
         finally:
             env.shutdown()
 
