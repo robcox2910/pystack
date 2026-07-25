@@ -2,7 +2,7 @@
 
 The full stack, from scratch.
 
-PyStack connects **TEN** educational projects into one integrated
+PyStack connects **ELEVEN** educational projects into one integrated
 platform. Think of it like a school:
 
 | Project | Role | School Analogy |
@@ -16,6 +16,7 @@ platform. Think of it like a school:
 | **PyGit** | Version control | The yearbook archive |
 | **PySearch** | Full-text search engine | The library index |
 | **PyMQ** | Message queue | The intercom |
+| **PyLLM** | Language model | The imagination — the brain that dreams up new text |
 | **PyStack** | Integration layer | The hallways connecting everything |
 
 PyStack is the hallways. Without hallways, you can't get from the
@@ -191,8 +192,8 @@ uv run pytest
 
 ## Plugin System
 
-PyStack uses a plugin system to integrate projects. There are
-currently **6 active plugins**:
+PyStack uses a plugin system to integrate projects. Active plugins
+include:
 
 | Plugin | Pebble Module | Shell Commands |
 |--------|--------------|----------------|
@@ -202,6 +203,7 @@ currently **6 active plugins**:
 | NetPlugin | `net` | `dns` |
 | SearchPlugin | `search` | (none -- used from Pebble) |
 | MQPlugin | `mq` | `mq-put`, `mq-get` |
+| LLMPlugin | `llm` | `dream` |
 
 The `db` module is registered separately via the Pebble-DB adapter
 (it needs a database instance, so it's set up before the plugins).
@@ -232,6 +234,7 @@ kid-friendly documentation, and are designed for learners aged 12+.
 | PyGit | Version control | [robcox2910/pygit](https://github.com/robcox2910/pygit) |
 | PySearch | Search engines | [robcox2910/pysearch](https://github.com/robcox2910/pysearch) |
 | PyMQ | Message queues | [robcox2910/pymq](https://github.com/robcox2910/pymq) |
+| PyLLM | Language models (the brain) | [robcox2910/pyllm](https://github.com/robcox2910/pyllm) |
 | PyStack | Full-stack integration | [robcox2910/pystack](https://github.com/robcox2910/pystack) |
 
 ## Documentation

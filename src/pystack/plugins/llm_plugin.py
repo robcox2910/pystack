@@ -10,10 +10,7 @@ import pyllm
 from pebble.builtins import Value as PebbleValue
 from pebble.stdlib import StdlibModule
 
-from pystack.plugins.base import Plugin
-from pystack.plugins.base import PluginInfo
-from pystack.plugins.base import ShellCommand
-from pystack.plugins.base import pebble_handler
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
 
 
 @pebble_handler
@@ -34,15 +31,18 @@ class LLMPlugin(Plugin):
     """Wires PyLLM into PyStack as the Pebble ``llm`` module (and a shell command)."""
 
     def info(self) -> PluginInfo:
+        """Return metadata naming PyLLM the brain of the series."""
         return PluginInfo(
             name="PyLLM",
             description="A from-scratch language model -- the brain of the series.",
         )
 
     def pebble_module_name(self) -> str:
+        """Pebble programs reach PyLLM via ``import "llm"``."""
         return "llm"
 
     def pebble_stdlib(self) -> StdlibModule:
+        """Expose ``llm_generate`` (writes Pebble) and ``llm_dream`` (Pokemon)."""
         return StdlibModule(
             functions={
                 "llm_generate": (1, _llm_generate),
@@ -52,6 +52,7 @@ class LLMPlugin(Plugin):
         )
 
     def shell_commands(self) -> list[ShellCommand]:
+        """Add a ``dream`` shell command that generates Pokemon names."""
         return [
             ShellCommand(
                 name="dream",
