@@ -15,7 +15,6 @@ from pebble.lexer import Lexer
 from pebble.optimizer import optimize
 from pebble.parser import Parser
 from pebble.resolver import ModuleResolver
-from pebble.stdlib import STDLIB_MODULES
 from pebble.type_checker import type_check
 from pebble.vm import VirtualMachine
 from py_os.kernel import Kernel
@@ -83,12 +82,18 @@ class PyStackEnvironment:
         if os_mode:
             self._boot_os()
 
-    def _register_all_plugins(self) -> None:
-        """Register all integration plugin Pebble stdlib modules.
+        # Activate every plugin exactly once, in every mode. Passing the
+        # shell (which is None outside OS mode) means plugin Pebble modules
+        # and on_boot() hooks always run, while shell commands are only
+        # registered when there is a shell to register them in.
+        self._plugin_registry.activate_all(shell=self._shell)
 
-        Activate crypto, web, git, net, search, mq, kv, docdb, graphdb,
-        tsdb, vecdb, and coldb plugins so their functions are available
-        from Pebble programs via ``import``.
+    def _register_all_plugins(self) -> None:
+        """Register all built-in integration plugins with the registry.
+
+        Add the crypto, web, git, net, search, mq, kv, docdb, graphdb,
+        tsdb, vecdb, coldb, and llm plugins so the registry can wire their
+        Pebble modules, shell commands, and boot hooks during activation.
         """
         plugins: list[Plugin] = [
             CryptoPlugin(),
@@ -107,12 +112,9 @@ class PyStackEnvironment:
         ]
         for plugin in plugins:
             self._plugin_registry.register(plugin)
-            stdlib = plugin.pebble_stdlib()
-            if stdlib is not None:
-                STDLIB_MODULES[plugin.pebble_module_name()] = stdlib
 
     def _boot_os(self) -> None:
-        """Boot the PyOS kernel and register integrated shell commands."""
+        """Boot the PyOS kernel and register the pebble and sql shell commands."""
         kernel = Kernel()
         kernel.boot()
         shell = Shell(kernel=kernel)
@@ -120,9 +122,9 @@ class PyStackEnvironment:
         register_pebble_command(shell, kernel, self.run_pebble_source)
         register_sql_command(shell, self.run_sql)
 
-        # Discover and activate any installed plugins.
+        # Discover any third-party plugins installed via entry points so
+        # they are activated alongside the built-ins.
         self._plugin_registry.discover()
-        self._plugin_registry.activate_all(shell=shell)
 
         self._kernel = kernel
         self._shell = shell

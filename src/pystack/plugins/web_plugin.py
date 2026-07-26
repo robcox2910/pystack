@@ -4,6 +4,9 @@ Bridge HTTP client functionality into Pebble so kids can fetch web
 pages and parse URLs from their Pebble programs. Since PyWeb is a
 server framework, the HTTP client operations use PyNet's HTTP module.
 
+The web is like a giant library you visit by mail -- you send off the
+address of a page and a copy of it comes back to you.
+
 Pebble module name: ``web``
 
 Example Pebble usage::

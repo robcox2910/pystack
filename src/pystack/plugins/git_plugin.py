@@ -4,6 +4,9 @@ Bridge PyGit's hashing and diff functionality into Pebble so kids can
 compute Git-style SHA-1 hashes and diff two strings from their Pebble
 programs.
 
+Version control is like a photographer who fingerprints every snapshot
+and circles exactly what changed between two photos.
+
 Pebble module name: ``git``
 
 Example Pebble usage::

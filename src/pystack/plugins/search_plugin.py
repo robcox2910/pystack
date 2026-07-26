@@ -4,6 +4,10 @@ Bridge PySearch's full-text search engine into Pebble so kids can
 create search indices, add documents, and query them with TF-IDF
 ranking from their Pebble programs.
 
+A search engine is like the index at the back of a book -- you type a
+word and it instantly tells you which pages mention it, best matches
+first.
+
 Pebble module name: ``search``
 
 Example Pebble usage::

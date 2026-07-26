@@ -1,5 +1,9 @@
 """PyStack plugin exposing PyLLM (the brain) to Pebble as the ``llm`` module.
 
+A language model is like an imaginative friend who has read tons of text and
+can keep writing in the same style -- give it a few words and it dreams up
+what might come next.
+
 This is the loop-closing plugin: it lets a Pebble program ``import "llm"`` and ask
 PyLLM to write text -- including *more Pebble code*. The brain of the series
 writing the language of the series. It calls PyLLM's cached public API, so the
@@ -53,12 +57,18 @@ class LLMPlugin(Plugin):
 
     def shell_commands(self) -> list[ShellCommand]:
         """Add a ``dream`` shell command that generates Pokemon names."""
+
+        def _dream_cmd(args: list[str]) -> str:
+            """Dream up new Pokemon names, returning a friendly error on failure."""
+            try:
+                return pyllm.generate_pokemon(prompt=" ".join(args), max_new_tokens=40)
+            except Exception as exc:  # noqa: BLE001
+                return f"error: {exc}"
+
         return [
             ShellCommand(
                 name="dream",
-                handler=lambda args: pyllm.generate_pokemon(
-                    prompt=" ".join(args), max_new_tokens=40
-                ),
+                handler=_dream_cmd,
                 help_text="Dream up new Pokemon names with PyLLM.",
             )
         ]

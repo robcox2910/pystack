@@ -7,6 +7,7 @@ lifecycle.
 
 from pathlib import Path
 
+import pytest
 from pebble.builtins import Value as PebbleValue
 from pebble.stdlib import STDLIB_MODULES, StdlibModule
 from py_os.kernel import Kernel
@@ -167,4 +168,26 @@ class TestPluginIntegration:
             assert "Hello from plugin!" in output
         finally:
             STDLIB_MODULES.pop("test", None)
+            env.shutdown()
+
+    def test_on_boot_runs_in_non_os_mode(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Every built-in plugin's on_boot should run, even outside OS mode.
+
+        Regression test: the environment used to skip on_boot() unless it
+        was booting the PyOS shell, so pebble/sql modes never ran it.
+        """
+        booted: list[str] = []
+        original = Plugin.on_boot
+
+        def _tracking(self: Plugin) -> None:
+            booted.append(type(self).__name__)
+            original(self)
+
+        monkeypatch.setattr(Plugin, "on_boot", _tracking)
+        env = PyStackEnvironment(db_path=tmp_path)  # non-OS mode
+        try:
+            assert booted, "on_boot was never called in non-OS mode"
+        finally:
             env.shutdown()
