@@ -4,6 +4,9 @@ Bridge PyMQ's message queue and pub/sub primitives into Pebble so kids
 can create queues, put and get messages, and publish/subscribe to topics
 from their Pebble programs.
 
+A message queue is like the order rail at a busy kitchen -- cooks pin up
+tickets and chefs grab them one at a time, in order.
+
 Pebble module name: ``mq``
 
 Example Pebble usage::

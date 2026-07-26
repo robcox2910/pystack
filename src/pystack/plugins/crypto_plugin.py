@@ -4,6 +4,10 @@ Bridge PyCrypt's cryptographic primitives into Pebble so kids can hash
 text, encrypt with Caesar ciphers, and sign messages with HMAC -- all
 from their Pebble programs.
 
+Cryptography is like a set of secret codes and tamper-proof wax seals --
+it scrambles a message so only the right person can read it, and proves
+nobody changed it along the way.
+
 Pebble module name: ``crypto``
 
 Example Pebble usage::

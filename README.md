@@ -2,7 +2,7 @@
 
 The full stack, from scratch.
 
-PyStack connects **ELEVEN** educational projects into one integrated
+PyStack connects **SEVENTEEN** educational projects into one integrated
 platform. Think of it like a school:
 
 | Project | Role | School Analogy |
@@ -16,6 +16,12 @@ platform. Think of it like a school:
 | **PyGit** | Version control | The yearbook archive |
 | **PySearch** | Full-text search engine | The library index |
 | **PyMQ** | Message queue | The intercom |
+| **PyKV** | Key-value store | The cubby holes — one labeled box per thing |
+| **PyDocDB** | Document database | The index-card box — every card has its own fields |
+| **PyGraphDB** | Graph database | The friendship map — who knows whom |
+| **PyTSDB** | Time-series database | The attendance logbook — readings over time |
+| **PyVecDB** | Vector database | The "find similar" recommendation board |
+| **PyColDB** | Column-family store | The flexible report cards |
 | **PyLLM** | Language model | The imagination — the brain that dreams up new text |
 | **PyStack** | Integration layer | The hallways connecting everything |
 
@@ -26,7 +32,7 @@ and send messages -- all in one program.
 
 ## What Can You Do?
 
-PyStack adds **7 Pebble modules** so your programs can use every
+PyStack adds **14 Pebble modules** so your programs can use every
 project. Just `import` the one you need.
 
 ### Database -- `import "db"`
@@ -139,11 +145,100 @@ let messages = mq_receive("news")
 print(messages)
 ```
 
+### Key-Value Store -- `import "kv"`
+
+```
+import "kv"
+
+kv_set("name", "Alice")
+let who = kv_get("name")
+print(who)
+
+kv_delete("name")
+let keys = kv_keys()
+print(keys)
+```
+
+### Document Database -- `import "docdb"`
+
+```
+import "docdb"
+
+doc_insert("students", {"name": "Alice", "age": 14})
+let results = doc_find("students", {"name": "Alice"})
+print(results)
+
+let total = doc_count("students")
+print(total)
+```
+
+### Graph Database -- `import "graphdb"`
+
+```
+import "graphdb"
+
+graph_add_node("alice", "Person")
+graph_add_node("bob", "Person")
+graph_add_edge("alice", "bob", "KNOWS")
+
+let path = graph_shortest_path("alice", "bob")
+print(path)
+```
+
+### Time-Series Database -- `import "tsdb"`
+
+```
+import "tsdb"
+
+ts_add("temperature", 72.5)
+ts_add("temperature", 74.0)
+
+let readings = ts_query("temperature")
+print(readings)
+
+let avg = ts_avg("temperature", 3600)
+print(avg)
+```
+
+### Vector Database -- `import "vecdb"`
+
+```
+import "vecdb"
+
+vec_insert("song1", [0.9, 0.1, 0.3])
+vec_insert("song2", [0.2, 0.8, 0.4])
+
+let similar = vec_search([0.85, 0.15, 0.35], 1)
+print(similar)
+```
+
+### Column-Family Store -- `import "coldb"`
+
+```
+import "coldb"
+
+col_set("grades", "alice", "math", "A+")
+let grade = col_get("grades", "alice", "math")
+print(grade)
+```
+
+### Language Model -- `import "llm"`
+
+```
+import "llm"
+
+let code = llm_generate("add two numbers")
+print(code)
+
+let name = llm_dream("pik")
+print(name)
+```
+
 ## All Commands
 
 | Command | What It Does |
 |---------|-------------|
-| `pystack pebble <file.pbl>` | Run a Pebble program with all 7 modules available |
+| `pystack pebble <file.pbl>` | Run a Pebble program with all 14 modules available |
 | `pystack sql` | Interactive SQL REPL |
 | `pystack os` | PyOS shell with Pebble, SQL, and plugin commands |
 | `pystack web` | Browser-based UI at http://localhost:8080 |
@@ -167,11 +262,25 @@ When you run `pystack os`, these commands are available at the
 | `git-diff <old> <new>` | Show a diff between two strings | PyGit |
 | `mq-put <queue> <msg>` | Put a message on a queue | PyMQ |
 | `mq-get <queue>` | Get the next message from a queue | PyMQ |
+| `kv-set <key> <value>` | Store a value under a key | PyKV |
+| `kv-get <key>` | Get a value by key | PyKV |
+| `kv-delete <key>` | Delete a key | PyKV |
+| `kv-keys` | List all keys | PyKV |
+| `doc-insert <collection> <json>` | Insert a document | PyDocDB |
+| `doc-find <collection> [query]` | Find documents | PyDocDB |
+| `doc-count <collection>` | Count documents | PyDocDB |
+| `graph <add-node\|add-edge\|path> ...` | Graph database operations | PyGraphDB |
+| `ts-add <series> <value>` | Add a data point | PyTSDB |
+| `ts-query <series>` | Query a series | PyTSDB |
+| `ts-avg <series> <window_seconds>` | Average over a time window | PyTSDB |
+| `vec <insert\|search\|cosine> ...` | Vector database operations | PyVecDB |
+| `col <set\|get> <family> <row> <col> [value]` | Column-family operations | PyColDB |
+| `dream <prompt>` | Dream up new Pokemon names | PyLLM |
 
 ## Quick Start
 
 ```bash
-# Install dependencies (all 10 projects wired together)
+# Install dependencies (all 17 projects wired together)
 uv sync --all-extras
 
 # Run an example program

@@ -4,6 +4,10 @@ Bridge PyNet's networking utilities into Pebble so kids can resolve
 DNS names, parse URLs, and encode/decode Base64 from their Pebble
 programs.
 
+Networking is like the postal system of the internet -- it looks up
+addresses, reads the envelope, and packs messages into a format that
+travels safely.
+
 Pebble module name: ``net``
 
 Example Pebble usage::

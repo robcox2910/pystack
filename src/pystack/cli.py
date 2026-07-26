@@ -100,7 +100,7 @@ def _run_os() -> None:
         while True:
             try:
                 line = input("pystack-os> ").strip()
-            except EOFError, KeyboardInterrupt:
+            except (EOFError, KeyboardInterrupt):  # fmt: skip
                 sys.stdout.write("\nGoodbye!\n")
                 break
             if not line:
