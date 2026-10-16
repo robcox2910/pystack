@@ -162,3 +162,32 @@ class TestEnvironment:
 
         # Verify file was saved.
         assert (tmp_path / "t.json").exists()
+
+
+class TestEnvironmentsDontShareDb:
+    """Each environment's Pebble programs see *its own* database, always."""
+
+    def test_shutting_down_one_environment_leaves_others_working(self, tmp_path: Path) -> None:
+        """Regression: a second environment's shutdown used to delete ``db`` for everyone."""
+        first = PyStackEnvironment(db_path=tmp_path / "first")
+        second = PyStackEnvironment(db_path=tmp_path / "second")
+        try:
+            second.shutdown()
+            out = first.run_pebble_source('import "db"\nprint(db_tables())')
+            assert out.strip() == "[]"
+        finally:
+            first.shutdown()
+
+    def test_each_environment_queries_its_own_database(self, tmp_path: Path) -> None:
+        """Two live environments never read each other's tables."""
+        first = PyStackEnvironment(db_path=tmp_path / "first")
+        second = PyStackEnvironment(db_path=tmp_path / "second")
+        try:
+            first.run_sql("CREATE TABLE only_first (x INTEGER)")
+            second.run_sql("CREATE TABLE only_second (x INTEGER)")
+            program = 'import "db"\nprint(db_tables())'
+            assert first.run_pebble_source(program).strip() == "[only_first]"
+            assert second.run_pebble_source(program).strip() == "[only_second]"
+        finally:
+            first.shutdown()
+            second.shutdown()

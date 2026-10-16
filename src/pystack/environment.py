@@ -26,7 +26,7 @@ from pydb.query import Query
 from pydb.sql_parser import parse_sql
 
 from pystack.adapters.os_pebble import register_pebble_command, register_sql_command
-from pystack.adapters.pebble_db import register_db_module, unregister_db_module
+from pystack.adapters.pebble_db import bound_db_module, make_db_module
 from pystack.plugins.base import Plugin
 from pystack.plugins.coldb_plugin import ColDBPlugin
 from pystack.plugins.crypto_plugin import CryptoPlugin
@@ -59,7 +59,15 @@ class PyStackEnvironment:
 
     """
 
-    __slots__ = ("_database", "_db_path", "_kernel", "_os_mode", "_plugin_registry", "_shell")
+    __slots__ = (
+        "_database",
+        "_db_module",
+        "_db_path",
+        "_kernel",
+        "_os_mode",
+        "_plugin_registry",
+        "_shell",
+    )
 
     def __init__(
         self,
@@ -76,7 +84,9 @@ class PyStackEnvironment:
 
         self._database = Database(path=self._db_path)
         self._database.load()
-        register_db_module(self._database)
+        # This environment's own ``db`` module; it is only placed on Pebble's
+        # shared module shelf while one of *our* programs runs.
+        self._db_module = make_db_module(self._database)
         self._register_all_plugins()
 
         if os_mode:
@@ -172,10 +182,9 @@ class PyStackEnvironment:
         self._database.save()
 
     def shutdown(self) -> None:
-        """Clean up resources and unregister adapters. Safe to call multiple times."""
+        """Save the database and stop the OS kernel. Safe to call multiple times."""
         with contextlib.suppress(Exception):
             self._database.save()
-        unregister_db_module()
         if self._kernel is not None:
             with contextlib.suppress(Exception):
                 self._kernel.shutdown()
@@ -191,6 +200,11 @@ class PyStackEnvironment:
             The captured stdout output from the program.
 
         """
+        with bound_db_module(self._db_module):
+            return self._compile_and_run(source)
+
+    def _compile_and_run(self, source: str) -> str:
+        """Run Pebble's full pipeline on ``source`` and capture what it prints."""
         output = io.StringIO()
         tokens = Lexer(source).tokenize()
         program = Parser(tokens).parse()
