@@ -10,7 +10,7 @@ import importlib.metadata
 from pebble.stdlib import STDLIB_MODULES
 from py_os.shell import Shell
 
-from pystack.plugins.base import Plugin, PluginInfo
+from pystack.plugins.base import Plugin, PluginInfo, shell_handler
 
 ENTRY_POINT_GROUP = "pystack.plugins"
 
@@ -73,10 +73,11 @@ class PluginRegistry:
 
         """
         for plugin in self._plugins:
-            # Register shell commands.
+            # Register shell commands, each wrapped in a safety net so a bad
+            # argument prints an error instead of crashing the shell.
             if shell is not None:
                 for cmd in plugin.shell_commands():
-                    shell._commands[cmd.name] = cmd.handler  # noqa: SLF001
+                    shell._commands[cmd.name] = shell_handler(cmd.handler)  # noqa: SLF001
 
             # Register Pebble stdlib module.
             stdlib = plugin.pebble_stdlib()

@@ -14,7 +14,7 @@ from py_os.kernel import Kernel
 from py_os.shell import Shell
 
 from pystack.environment import PyStackEnvironment
-from pystack.plugins.base import Plugin, PluginInfo, ShellCommand
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, shell_handler
 from pystack.plugins.registry import PluginRegistry
 
 
@@ -191,3 +191,20 @@ class TestPluginIntegration:
             assert booted, "on_boot was never called in non-OS mode"
         finally:
             env.shutdown()
+
+
+class TestShellHandler:
+    """``shell_handler`` turns a crash into an ``error: ...`` message."""
+
+    def test_exception_becomes_error_message(self) -> None:
+        """A handler that raises returns the error text instead."""
+
+        def explode(_args: list[str]) -> str:
+            msg = "boom"
+            raise ValueError(msg)
+
+        assert shell_handler(explode)([]) == "error: boom"
+
+    def test_normal_result_passes_through(self) -> None:
+        """A handler that works returns its result unchanged."""
+        assert shell_handler(lambda args: " ".join(args))(["a", "b"]) == "a b"
