@@ -11,7 +11,20 @@ from py_os.shell import Shell
 from pydb.cli import repl
 
 from pystack.environment import PyStackEnvironment
-from pystack.web.app import main as web_main
+
+
+def _run_web() -> None:
+    """Launch the browser UI -- the only command that needs Flask.
+
+    Flask is an optional extra, so we only import it when you actually ask
+    for the web UI. Everything else works on a plain install.
+    """
+    try:
+        from pystack.web.app import main as web_main  # noqa: PLC0415 -- optional extra
+    except ImportError:
+        sys.stderr.write("pystack web needs Flask. Install it with: pip install 'pystack[web]'\n")
+        sys.exit(1)
+    web_main()
 
 
 def main() -> None:
@@ -32,7 +45,7 @@ def main() -> None:
         case "os":
             _run_os()
         case "web":
-            web_main()
+            _run_web()
         case _:
             if command.endswith(".pbl"):
                 _run_pebble([command])
