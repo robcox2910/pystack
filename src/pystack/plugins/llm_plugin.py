@@ -24,6 +24,33 @@ def _llm_generate(args: list[PebbleValue]) -> PebbleValue:
     return pyllm.generate_pebble(prompt=prompt, max_new_tokens=120)
 
 
+def _as_comment(request: str) -> str:
+    """Turn a plain-English request into a one-line Pebble comment.
+
+    Like writing the task at the top of your page: ``# add two numbers``. Any
+    line breaks are squashed into spaces so the request can't leak into the code.
+    """
+    return "# " + " ".join(request.split()) + "\n"
+
+
+@pebble_handler
+def _llm_write_pebble(args: list[PebbleValue]) -> PebbleValue:
+    """Write Pebble code that is guaranteed to parse (the referee is watching).
+
+    PyLLM's grammar referee only lets the model write legal Pebble. If the prompt
+    is already the start of some code (``"let "``) we carry on from it; if it's a
+    plain-English request the referee rejects it, so we pin it to the top as a
+    comment and let the model write real code underneath.
+    """
+    prompt = str(args[0]) if args else "let "
+    try:
+        return pyllm.generate_pebble(prompt=prompt, max_new_tokens=120, constrained=True)
+    except ValueError:  # the referee blew the whistle on the prompt itself
+        return pyllm.generate_pebble(
+            prompt=_as_comment(prompt), max_new_tokens=120, constrained=True
+        )
+
+
 @pebble_handler
 def _llm_dream(args: list[PebbleValue]) -> PebbleValue:
     """Dream up Pokemon-ish names from a prompt string."""
@@ -46,10 +73,11 @@ class LLMPlugin(Plugin):
         return "llm"
 
     def pebble_stdlib(self) -> StdlibModule:
-        """Expose ``llm_generate`` (writes Pebble) and ``llm_dream`` (Pokemon)."""
+        """Expose ``llm_generate`` / ``llm_write_pebble`` (Pebble) and ``llm_dream``."""
         return StdlibModule(
             functions={
                 "llm_generate": (1, _llm_generate),
+                "llm_write_pebble": (1, _llm_write_pebble),
                 "llm_dream": (1, _llm_dream),
             },
             constants={},

@@ -230,8 +230,28 @@ import "llm"
 let code = llm_generate("add two numbers")
 print(code)
 
+let valid = llm_write_pebble("add two numbers")
+print(valid)
+
 let name = llm_dream("pik")
 print(name)
+```
+
+`llm_generate` lets the model write freely, so its Pebble-flavoured code doesn't
+always parse. `llm_write_pebble` calls in PyLLM's grammar **referee**, which
+vetoes every illegal character, so what comes back is always real, parseable
+Pebble. A plain-English request is pinned to the top as a comment and the model
+writes code underneath:
+
+```
+# add two numbers
+
+let x = step()
+
+let z = j
+
+count = 95 - (81 + 54)
+let z = 88 - b % y
 ```
 
 ## All Commands
