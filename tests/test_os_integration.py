@@ -201,3 +201,31 @@ class TestEnvironmentOSMode:
             assert output
         finally:
             env.shutdown()
+
+
+class TestShellCommandsNeverCrashTheShell:
+    """A bad argument to any plugin command prints an error instead of crashing."""
+
+    def test_bad_arguments_return_friendly_errors(self, tmp_path: Path) -> None:
+        """Regression: these used to raise straight out of the shell and kill it."""
+        env = PyStackEnvironment(db_path=tmp_path, os_mode=True)
+        try:
+            for command in (
+                "vec insert a xyz",
+                "ts-add s abc",
+                "ts-avg s x",
+                "graph path a b",
+            ):
+                output = env.execute_shell(command)
+                assert output.startswith("error: "), (command, output)
+        finally:
+            env.shutdown()
+
+    def test_shell_keeps_working_after_a_failed_command(self, tmp_path: Path) -> None:
+        """After a command fails, the next one still runs normally."""
+        env = PyStackEnvironment(db_path=tmp_path, os_mode=True)
+        try:
+            env.execute_shell("vec insert a xyz")
+            assert "3" in env.execute_shell("pebble eval 'print(1 + 2)'")
+        finally:
+            env.shutdown()

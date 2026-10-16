@@ -47,6 +47,28 @@ def pebble_handler(fn: PebbleHandler) -> PebbleHandler:
     return _wrapper
 
 
+type ShellHandler = Callable[[list[str]], str]
+
+
+def shell_handler(fn: ShellHandler) -> ShellHandler:
+    """Wrap a shell command so exceptions become ``"error: ..."`` messages.
+
+    The shell's twin of :func:`pebble_handler`. A typo like
+    ``vec insert a xyz`` should print a friendly error and give you your
+    prompt back -- not knock the whole shell over. The registry wraps every
+    plugin command with this automatically, so plugin authors can't forget.
+    """
+
+    @functools.wraps(fn)
+    def _wrapper(args: list[str]) -> str:
+        try:
+            return fn(args)
+        except Exception as exc:  # noqa: BLE001
+            return f"error: {exc}"
+
+    return _wrapper
+
+
 @dataclass
 class ShellCommand:
     """A command to register in the PyOS shell.
@@ -59,7 +81,7 @@ class ShellCommand:
     """
 
     name: str
-    handler: Callable[[list[str]], str]
+    handler: ShellHandler
     help_text: str = ""
 
 
