@@ -9,6 +9,7 @@ hand-written HTTP client so every step can be seen.
 """
 
 from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from pynet.loop import run
 from pynet.streams import StreamReader, open_connection
@@ -87,24 +88,33 @@ async def _read_head(reader: StreamReader) -> tuple[int, dict[str, str]]:
     return status, headers
 
 
+@asynccontextmanager
 async def _send(
     port: int, request_line: str, extra_headers: str = "", body: str = ""
-) -> tuple[StreamReader, int, dict[str, str]]:
-    """Send one raw HTTP request and return the reader positioned at the body."""
+) -> AsyncIterator[tuple[StreamReader, int, dict[str, str]]]:
+    """Send one raw HTTP request and give the reader positioned at the body.
+
+    The connection is hung up when the ``async with`` block ends, even if
+    reading the reply fails.
+    """
     reader, writer = await open_connection(LOOPBACK, port)
-    head = f"{request_line}\r\nHost: demo\r\nConnection: close\r\n{extra_headers}\r\n"
-    writer.write((head + body).encode())
-    await writer.drain()
-    status, headers = await _read_head(reader)
-    return reader, status, headers
+    try:
+        head = f"{request_line}\r\nHost: demo\r\nConnection: close\r\n{extra_headers}\r\n"
+        writer.write((head + body).encode())
+        await writer.drain()
+        status, headers = await _read_head(reader)
+        yield reader, status, headers
+    finally:
+        writer.close()
+        await writer.wait_closed()
 
 
 async def _get(port: int, path: str, cookie: str | None = None) -> tuple[int, str]:
     """GET a path (with an optional cookie) and return the status and body text."""
     extra = f"Cookie: {cookie}\r\n" if cookie else ""
-    reader, status, headers = await _send(port, f"GET {path} HTTP/1.1", extra)
-    length = int(headers.get("content-length", "0"))
-    body = await reader.read_exactly(length) if length else b""
+    async with _send(port, f"GET {path} HTTP/1.1", extra) as (reader, status, headers):
+        length = int(headers.get("content-length", "0"))
+        body = await reader.read_exactly(length) if length else b""
     return status, body.decode()
 
 
@@ -112,8 +122,8 @@ async def _login(port: int) -> tuple[int, str]:
     """POST the demo login form and return the status and the Set-Cookie header."""
     form = f"name={DEMO_NAME}&password={DEMO_PHRASE}"
     extra = f"Content-Type: application/x-www-form-urlencoded\r\nContent-Length: {len(form)}\r\n"
-    reader, status, headers = await _send(port, "POST /login HTTP/1.1", extra, form)
-    await reader.read_exactly(int(headers.get("content-length", "0")))
+    async with _send(port, "POST /login HTTP/1.1", extra, form) as (reader, status, headers):
+        await reader.read_exactly(int(headers.get("content-length", "0")))
     return status, headers.get("set-cookie", "")
 
 
@@ -125,8 +135,8 @@ async def _chunk(reader: StreamReader) -> str:
 
 async def _ticks(port: int) -> tuple[int, list[str]]:
     """Listen to the event stream and return the status and the three events."""
-    reader, status, _headers = await _send(port, "GET /ticks HTTP/1.1")
-    events = [(await _chunk(reader)).strip().removeprefix("data: ") for _ in range(TICKS)]
+    async with _send(port, "GET /ticks HTTP/1.1") as (reader, status, _headers):
+        events = [(await _chunk(reader)).strip().removeprefix("data: ") for _ in range(TICKS)]
     return status, events
 
 
