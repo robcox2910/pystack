@@ -285,6 +285,7 @@ When you run `pystack os`, these commands are available at the
 | `git-diff <old> <new>` | Show a diff between two strings | PyGit |
 | `mq-put <queue> <msg>` | Put a message on a queue | PyMQ |
 | `mq-get <queue>` | Get the next message from a queue | PyMQ |
+| `mqnet` | Run a real PyMQ broker on localhost: one worker crashes, another finishes, a poison job lands in the dead-letter box | PyMQ |
 | `kv-set <key> <value>` | Store a value under a key | PyKV |
 | `kv-get <key>` | Get a value by key | PyKV |
 | `kv-delete <key>` | Delete a key | PyKV |
@@ -362,7 +363,7 @@ include:
 | GitPlugin | `git` | `git-hash`, `git-diff` |
 | NetPlugin | `net` | `dns`, `overlap`, `netecho`, `wsecho` |
 | SearchPlugin | `search` | (none -- used from Pebble) |
-| MQPlugin | `mq` | `mq-put`, `mq-get` |
+| MQPlugin | `mq` | `mq-put`, `mq-get`, `mqnet` |
 | LLMPlugin | `llm` | `dream` |
 
 The `db` module is registered separately via the Pebble-DB adapter

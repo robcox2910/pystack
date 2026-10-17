@@ -7,6 +7,11 @@ from their Pebble programs.
 A message queue is like the order rail at a busy kitchen -- cooks pin up
 tickets and chefs grab them one at a time, in order.
 
+Shell command ``mqnet`` runs PyMQ's networked broker -- a real post office
+with a front door -- on a free local port. Two workers collect parcels
+(jobs): one crashes on its first job, the other finishes the rest, and a
+poison job nobody can do ends up in the dead-letter box.
+
 Pebble module name: ``mq``
 
 Example Pebble usage::
@@ -20,10 +25,19 @@ Example Pebble usage::
 
 from pebble.builtins import Value as PebbleValue
 from pebble.stdlib import StdlibModule
+from pymq.broker import BrokerClient, BrokerServer, Delivery, QueueConfig, TopicEvent
 from pymq.pubsub import PubSub
 from pymq.queue import MessageQueue
+from pynet.loop import Event, run, timeout
 
 from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
+
+LOOPBACK = "127.0.0.1"
+MQNET_TIMEOUT = 5.0
+MQNET_MAX_ATTEMPTS = 2
+MQNET_ACK_TIMEOUT = 0.5
+MQNET_RETRY_DELAY = 0.1
+POISON_JOB = "job-boom"
 
 _queues: dict[str, MessageQueue] = {}
 _pubsub_instance: PubSub | None = None
@@ -105,6 +119,81 @@ def _mq_receive(args: list[PebbleValue]) -> PebbleValue:
     return result
 
 
+async def _mqnet_story(out: list[str]) -> None:
+    """Tell the mqnet story, appending one line per step to ``out``."""
+    crashed = Event()
+    job_done = Event()
+    dead_seen = Event()
+    dead_topics: list[str] = []
+
+    async def worker_a(delivery: Delivery) -> None:
+        """Crash on the first job: hand it back with a note instead of finishing."""
+        out.append(f"worker A crashed on {delivery.body} (attempt {delivery.attempt})")
+        await delivery.nack(error="worker A crashed")
+        crashed.set()
+
+    async def worker_b(delivery: Delivery) -> None:
+        """Finish every job except the poison one, which is handed back each time."""
+        if delivery.body == POISON_JOB:
+            out.append(f"worker B: {delivery.body} failed (attempt {delivery.attempt})")
+            await delivery.nack(error="poison job")
+            return
+        out.append(f"worker B: {delivery.body} done (attempt {delivery.attempt})")
+        job_done.set()
+
+    async def on_dead(event: TopicEvent) -> None:
+        """Remember the dead-letter announcement."""
+        dead_topics.append(event.topic)
+        dead_seen.set()
+
+    server = BrokerServer()
+    await server.start(LOOPBACK, 0)
+    try:
+        async with (
+            timeout(MQNET_TIMEOUT),
+            BrokerClient(LOOPBACK, server.port) as boss,
+            BrokerClient(LOOPBACK, server.port) as ann,
+            BrokerClient(LOOPBACK, server.port) as bob,
+        ):
+            out.append("broker: listening on a free local port")
+            config = QueueConfig(
+                max_attempts=MQNET_MAX_ATTEMPTS,
+                ack_timeout=MQNET_ACK_TIMEOUT,
+                retry_delay=MQNET_RETRY_DELAY,
+            )
+            await boss.declare_queue("jobs", config)
+            await boss.subscribe("$sys.dead.*", on_dead)
+            out.append("boss: declared queue 'jobs' (2 attempts per job)")
+            a_consumer = await ann.consume("jobs", worker_a, prefetch=1, auto_ack=False)
+            await boss.put("jobs", "job-1")
+            await crashed.wait()
+            await a_consumer.cancel()
+            out.append("worker A: went home")
+            await bob.consume("jobs", worker_b, prefetch=1)
+            await job_done.wait()
+            job_done.clear()
+            await boss.put("jobs", "job-2")
+            await job_done.wait()
+            await boss.put("jobs", POISON_JOB)
+            await dead_seen.wait()
+            letters = await boss.dead_letters("jobs")
+            out.extend(f"dead: {d.envelope.body} ({d.reason}) - {d.error}" for d in letters)
+            out.append(f"announced: {dead_topics[0]}")
+    finally:
+        await server.close()
+    out.append("broker: closed")
+
+
+def _mqnet_cmd(_args: list[str]) -> str:
+    """Run a small job-queue story against a real PyMQ broker on localhost."""
+    lines: list[str] = []
+    try:
+        run(_mqnet_story(lines))
+    except Exception as exc:  # noqa: BLE001
+        lines.append(f"error: {exc}")
+    return "\n".join(lines)
+
+
 def reset_mq_state() -> None:
     """Reset all module-level state for testing."""
     global _pubsub_instance  # noqa: PLW0603
@@ -117,7 +206,7 @@ class MQPlugin(Plugin):
     """Integrate PyMQ message queue functions into PyStack.
 
     Register queue and pub/sub functions in Pebble's ``mq`` stdlib
-    module, and ``mq-put`` / ``mq-get`` shell commands.
+    module, and ``mq-put`` / ``mq-get`` / ``mqnet`` shell commands.
     """
 
     def info(self) -> PluginInfo:
@@ -147,7 +236,7 @@ class MQPlugin(Plugin):
         )
 
     def shell_commands(self) -> list[ShellCommand]:
-        """Return the mq-put and mq-get shell commands."""
+        """Return the mq-put, mq-get and mqnet shell commands."""
 
         def _mq_put_cmd(args: list[str]) -> str:
             """Put a message on a named queue."""
@@ -175,6 +264,11 @@ class MQPlugin(Plugin):
             return msg.body
 
         return [
+            ShellCommand(
+                name="mqnet",
+                handler=_mqnet_cmd,
+                help_text="Run a networked PyMQ broker with crashing workers",
+            ),
             ShellCommand(name="mq-put", handler=_mq_put_cmd, help_text="Put message on a queue"),
             ShellCommand(name="mq-get", handler=_mq_get_cmd, help_text="Get message from a queue"),
         ]

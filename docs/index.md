@@ -88,6 +88,12 @@ pystack-os> mq-put orders "one coffee"
 Queued on 'orders': one coffee
 pystack-os> mq-get orders
 one coffee
+pystack-os> mqnet
+broker: listening on a free local port
+...
+dead: job-boom (max_attempts) - poison job
+announced: $sys.dead.jobs
+broker: closed
 pystack-os> ls /data
 scores.json
 ```
@@ -131,6 +137,7 @@ The first two come from the core adapters. The rest come from plugins.
 | `git-diff <old> <new>` | Show a unified diff | GitPlugin |
 | `mq-put <queue> <msg>` | Put a message on a named queue | MQPlugin |
 | `mq-get <queue>` | Get the next message from a queue | MQPlugin |
+| `mqnet` | Visit PyMQ's networked post office: one worker crashes, another finishes, a poison job lands in the dead-letter box | MQPlugin |
 
 Plus all the standard PyOS commands like `ls`, `cat`, `mkdir`, `help`,
 and more.
@@ -172,7 +179,7 @@ core three (PyOS, Pebble, PyDB):
 | GitPlugin | `import "git"` | `git-hash`, `git-diff` | PyGit |
 | NetPlugin | `import "net"` | `dns`, `overlap`, `netecho`, `wsecho` | PyNet |
 | SearchPlugin | `import "search"` | (none) | PySearch |
-| MQPlugin | `import "mq"` | `mq-put`, `mq-get` | PyMQ |
+| MQPlugin | `import "mq"` | `mq-put`, `mq-get`, `mqnet` | PyMQ |
 
 The `db` module is handled separately by the Pebble-DB adapter because
 it needs a live database instance.
