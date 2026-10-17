@@ -287,6 +287,7 @@ When you run `pystack os`, these commands are available at the
 | `mq-put <queue> <msg>` | Put a message on a queue | PyMQ |
 | `mq-get <queue>` | Get the next message from a queue | PyMQ |
 | `mqnet` | Run a real PyMQ broker on localhost: one worker crashes, its lease comes back to another, a poison job lands in the dead-letter box | PyMQ |
+| `dbcrash` | Pull the plug on a journalled PyDB: a helper commits three job runs (with dates and timestamps) and dies mid-way through a fourth; reopening brings back the three and not the fourth | PyDB |
 | `kv-set <key> <value>` | Store a value under a key | PyKV |
 | `kv-get <key>` | Get a value by key | PyKV |
 | `kv-delete <key>` | Delete a key | PyKV |
@@ -388,6 +389,7 @@ include:
 | NetPlugin | `net` | `dns`, `overlap`, `netecho`, `wsecho` |
 | SearchPlugin | `search` | (none -- used from Pebble) |
 | MQPlugin | `mq` | `mq-put`, `mq-get`, `mqnet` |
+| PyDBPlugin | (none) | `dbcrash` |
 | LLMPlugin | `llm` | `dream` |
 
 The `db` module comes from the Pebble-DB adapter instead of a plugin,

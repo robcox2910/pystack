@@ -33,6 +33,7 @@ from pystack.plugins.kv_plugin import KVPlugin
 from pystack.plugins.llm_plugin import LLMPlugin
 from pystack.plugins.mq_plugin import MQPlugin
 from pystack.plugins.net_plugin import NetPlugin
+from pystack.plugins.pydb_plugin import PyDBPlugin
 from pystack.plugins.registry import PluginRegistry
 from pystack.plugins.search_plugin import SearchPlugin
 from pystack.plugins.tsdb_plugin import TSDBPlugin
@@ -111,6 +112,7 @@ class PyStackEnvironment:
             NetPlugin(),
             SearchPlugin(),
             MQPlugin(),
+            PyDBPlugin(),
             KVPlugin(),
             DocDBPlugin(),
             GraphDBPlugin(),
