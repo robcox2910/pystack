@@ -224,6 +224,18 @@ class TestNetPlugin:
         for bad in (["0"], ["x"], ["3", "-1"], ["3", "abc"], ["1", "2", "3"], ["999"], ["1", "99"]):
             assert cmds["overlap"](bad).startswith("Usage: overlap")
 
+    def test_netecho_round_trip(self) -> None:
+        """The netecho command should echo text back with a round-trip time."""
+        cmds = {c.name: c.handler for c in NetPlugin().shell_commands()}
+        output = cmds["netecho"](["hello", "world"])
+        assert output.startswith("echo: hello world")
+        assert re.search(r"\(round trip \d+\.\d ms\)$", output)
+
+    def test_netecho_usage(self) -> None:
+        """The netecho command should return usage when given no text."""
+        cmds = {c.name: c.handler for c in NetPlugin().shell_commands()}
+        assert cmds["netecho"]([]).startswith("Usage: netecho")
+
 
 class TestSearchPlugin:
     """Verify PySearch integration via the search plugin."""

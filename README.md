@@ -279,6 +279,7 @@ When you run `pystack os`, these commands are available at the
 | `curl <url>` | Fetch a URL | PyWeb + PyNet |
 | `dns <hostname>` | Resolve hostname to IP | PyNet |
 | `overlap [n] [seconds]` | Run n sleeps at once on PyNet's event loop and time them | PyNet |
+| `netecho <text>` | Send a message through a local PyNet server and time the round trip | PyNet |
 | `git-hash <text>` | Print the Git blob hash (same as `git hash-object`) | PyGit |
 | `git-diff <old> <new>` | Show a diff between two strings | PyGit |
 | `mq-put <queue> <msg>` | Put a message on a queue | PyMQ |
@@ -330,7 +331,7 @@ include:
 | CryptoPlugin | `crypto` | `hash` |
 | WebPlugin | `web` | `curl` |
 | GitPlugin | `git` | `git-hash`, `git-diff` |
-| NetPlugin | `net` | `dns`, `overlap` |
+| NetPlugin | `net` | `dns`, `overlap`, `netecho` |
 | SearchPlugin | `search` | (none -- used from Pebble) |
 | MQPlugin | `mq` | `mq-put`, `mq-get` |
 | LLMPlugin | `llm` | `dream` |

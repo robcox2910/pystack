@@ -13,6 +13,10 @@ Shell command ``overlap`` shows off PyNet's event loop: it starts several
 three kettles on the stove at once instead of waiting for each to boil
 before starting the next -- the whole job takes as long as one kettle.
 
+Shell command ``netecho`` sends a message to a tiny PyNet server and waits
+for it to come back. Think of shouting into a canyon and timing how long
+the echo takes to return.
+
 Pebble module name: ``net``
 
 Example Pebble usage::
@@ -32,6 +36,7 @@ from pebble.stdlib import StdlibModule
 from pynet.base64 import b64_decode, b64_encode
 from pynet.dns import resolve
 from pynet.loop import gather, run
+from pynet.messaging import JsonValue, Message, Peer, connect, serve
 from pynet.process import create_process
 
 from pystack.plugins._shared import url_parse as _url_parse
@@ -42,6 +47,9 @@ DEFAULT_SECONDS = 1.0
 MAX_OVERLAP = 20
 MAX_SECONDS = 10.0
 MAX_ARGS = 2
+ECHO_USAGE = "Usage: netecho <text...>"
+MS_PER_SECOND = 1000
+LOOPBACK = "127.0.0.1"
 OVERLAP_USAGE = f"Usage: overlap [n 1-{MAX_OVERLAP}] [seconds 0-{MAX_SECONDS:g}]"
 
 
@@ -77,6 +85,44 @@ def _overlap_cmd(args: list[str]) -> str:
     )
 
 
+async def _echo_handler(msg: Message) -> JsonValue:
+    """Return the request body unchanged."""
+    return msg.body
+
+
+def _echo_setup(peer: Peer) -> None:
+    """Register the ``echo`` handler on each accepted connection."""
+    peer.on("echo", _echo_handler)
+
+
+async def _echo_round_trip(text: str) -> tuple[str, float]:
+    """Send ``text`` to a local echo server and return the reply and seconds taken."""
+    server = await serve(LOOPBACK, 0, _echo_setup, heartbeat_interval=None)
+    client: Peer | None = None
+    try:
+        client = await connect(LOOPBACK, server.port, heartbeat_interval=None)
+        started = time.perf_counter()
+        reply = await client.request("echo", text)
+        elapsed = time.perf_counter() - started
+        return str(reply.body), elapsed
+    finally:
+        if client is not None:
+            await client.close()
+        server.close()
+        await server.wait_closed()
+
+
+def _netecho_cmd(args: list[str]) -> str:
+    """Round-trip a message through a local PyNet server and report the timing."""
+    if not args:
+        return ECHO_USAGE
+    try:
+        text, elapsed = run(_echo_round_trip(" ".join(args)))
+    except Exception as exc:  # noqa: BLE001
+        return f"error: {exc}"
+    return f"echo: {text} (round trip {elapsed * MS_PER_SECOND:.1f} ms)"
+
+
 @pebble_handler
 def _dns_lookup(args: list[PebbleValue]) -> PebbleValue:
     """Resolve a hostname to an IPv4 address."""
@@ -100,7 +146,7 @@ class NetPlugin(Plugin):
     """Integrate PyNet networking utilities into PyStack.
 
     Register DNS, URL parsing, and Base64 functions in Pebble's ``net``
-    stdlib module, and ``dns`` and ``overlap`` shell commands.
+    stdlib module, and ``dns``, ``overlap``, and ``netecho`` shell commands.
     """
 
     def info(self) -> PluginInfo:
@@ -128,7 +174,7 @@ class NetPlugin(Plugin):
         )
 
     def shell_commands(self) -> list[ShellCommand]:
-        """Return the dns and overlap shell commands."""
+        """Return the dns, overlap, and netecho shell commands."""
 
         def _dns_cmd(args: list[str]) -> str:
             """Resolve a hostname to an IP address."""
@@ -145,5 +191,10 @@ class NetPlugin(Plugin):
                 name="overlap",
                 handler=_overlap_cmd,
                 help_text="Run n sleeps at once on PyNet's event loop",
+            ),
+            ShellCommand(
+                name="netecho",
+                handler=_netecho_cmd,
+                help_text="Echo text through a local PyNet message server",
             ),
         ]
