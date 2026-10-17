@@ -74,4 +74,9 @@ jobs:
         run: uv sync --locked --all-extras
 
       - name: Run security checks (advisory)
-        run: uv run pip-audit --skip-editable
+        # Audit third-party packages only. Siblings are git installs whose names
+        # (pygit, pykv, ...) belong to unrelated projects on PyPI; exported as URL
+        # requirements, pip-audit skips them instead of auditing the namesakes.
+        run: |
+          uv export --frozen --no-emit-project --all-extras --no-hashes -q > requirements-audit.txt
+          uv run pip-audit -r requirements-audit.txt --disable-pip --no-deps
