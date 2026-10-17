@@ -17,6 +17,10 @@ Shell command ``netecho`` sends a message to a tiny PyNet server and waits
 for it to come back. Think of shouting into a canyon and timing how long
 the echo takes to return.
 
+Shell command ``wsecho`` sends a text message over a WebSocket to a tiny
+PyNet server and prints the reply. Think of a walkie-talkie left switched
+on: once the call is connected, either side can talk whenever it likes.
+
 Pebble module name: ``net``
 
 Example Pebble usage::
@@ -38,6 +42,7 @@ from pynet.dns import resolve
 from pynet.loop import gather, run
 from pynet.messaging import JsonValue, Message, Peer, connect, serve
 from pynet.process import create_process
+from pynet.ws import WebSocket, connect_websocket, serve_websocket
 
 from pystack.plugins._shared import url_parse as _url_parse
 from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
@@ -48,6 +53,7 @@ MAX_OVERLAP = 20
 MAX_SECONDS = 10.0
 MAX_ARGS = 2
 ECHO_USAGE = "Usage: netecho <text...>"
+WS_ECHO_USAGE = "Usage: wsecho <text...>"
 MS_PER_SECOND = 1000
 LOOPBACK = "127.0.0.1"
 OVERLAP_USAGE = f"Usage: overlap [n 1-{MAX_OVERLAP}] [seconds 0-{MAX_SECONDS:g}]"
@@ -123,6 +129,37 @@ def _netecho_cmd(args: list[str]) -> str:
     return f"echo: {text} (round trip {elapsed * MS_PER_SECOND:.1f} ms)"
 
 
+async def _ws_echo_handler(ws: WebSocket) -> None:
+    """Send the first message received straight back."""
+    await ws.send_text(await ws.recv())
+
+
+async def _ws_echo_round_trip(text: str) -> str:
+    """Send ``text`` to a local WebSocket echo server and return the reply."""
+    server = await serve_websocket(_ws_echo_handler, LOOPBACK, 0)
+    try:
+        client = await connect_websocket(LOOPBACK, server.port)
+        try:
+            await client.send_text(text)
+            return str(await client.recv())
+        finally:
+            await client.close()
+    finally:
+        server.close()
+        await server.wait_closed()
+
+
+def _wsecho_cmd(args: list[str]) -> str:
+    """Round-trip a text message through a local PyNet WebSocket server."""
+    if not args:
+        return WS_ECHO_USAGE
+    try:
+        reply = run(_ws_echo_round_trip(" ".join(args)))
+    except Exception as exc:  # noqa: BLE001
+        return f"error: {exc}"
+    return f"ws echo: {reply}"
+
+
 @pebble_handler
 def _dns_lookup(args: list[PebbleValue]) -> PebbleValue:
     """Resolve a hostname to an IPv4 address."""
@@ -146,7 +183,7 @@ class NetPlugin(Plugin):
     """Integrate PyNet networking utilities into PyStack.
 
     Register DNS, URL parsing, and Base64 functions in Pebble's ``net``
-    stdlib module, and ``dns``, ``overlap``, and ``netecho`` shell commands.
+    stdlib module, and ``dns``, ``overlap``, ``netecho``, and ``wsecho`` shell commands.
     """
 
     def info(self) -> PluginInfo:
@@ -174,7 +211,7 @@ class NetPlugin(Plugin):
         )
 
     def shell_commands(self) -> list[ShellCommand]:
-        """Return the dns, overlap, and netecho shell commands."""
+        """Return the dns, overlap, netecho, and wsecho shell commands."""
 
         def _dns_cmd(args: list[str]) -> str:
             """Resolve a hostname to an IP address."""
@@ -196,5 +233,10 @@ class NetPlugin(Plugin):
                 name="netecho",
                 handler=_netecho_cmd,
                 help_text="Echo text through a local PyNet message server",
+            ),
+            ShellCommand(
+                name="wsecho",
+                handler=_wsecho_cmd,
+                help_text="Echo text through a local PyNet WebSocket server",
             ),
         ]

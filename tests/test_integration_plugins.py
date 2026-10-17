@@ -236,6 +236,16 @@ class TestNetPlugin:
         cmds = {c.name: c.handler for c in NetPlugin().shell_commands()}
         assert cmds["netecho"]([]).startswith("Usage: netecho")
 
+    def test_wsecho_round_trip(self) -> None:
+        """The wsecho command should echo text back through a local WebSocket."""
+        cmds = {c.name: c.handler for c in NetPlugin().shell_commands()}
+        assert cmds["wsecho"](["hello", "socket"]) == "ws echo: hello socket"
+
+    def test_wsecho_usage(self) -> None:
+        """The wsecho command should return usage when given no text."""
+        cmds = {c.name: c.handler for c in NetPlugin().shell_commands()}
+        assert cmds["wsecho"]([]).startswith("Usage: wsecho")
+
 
 class TestSearchPlugin:
     """Verify PySearch integration via the search plugin."""
