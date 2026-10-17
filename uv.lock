@@ -662,8 +662,11 @@ dependencies = [
 
 [[package]]
 name = "pymq"
-version = "0.1.0"
-source = { git = "https://github.com/robcox2910/pymq?tag=v0.1.0#5c04ec2873a8a5c1224bec13de6a22ce118825ed" }
+version = "0.2.0"
+source = { git = "https://github.com/robcox2910/pymq?tag=v0.2.0#53cd123ec67ce1884b950905eb42a16fefa3316d" }
+dependencies = [
+    { name = "pynet" },
+]
 
 [[package]]
 name = "pynet"
@@ -755,7 +758,7 @@ requires-dist = [
     { name = "pygraphdb", git = "https://github.com/robcox2910/pygraphdb?tag=v0.1.0" },
     { name = "pykv", git = "https://github.com/robcox2910/pykv?tag=v0.1.0" },
     { name = "pyllm", git = "https://github.com/robcox2910/pyllm?tag=v0.1.0" },
-    { name = "pymq", git = "https://github.com/robcox2910/pymq?tag=v0.1.0" },
+    { name = "pymq", git = "https://github.com/robcox2910/pymq?tag=v0.2.0" },
     { name = "pynet", git = "https://github.com/robcox2910/pynet?tag=v0.1.0" },
     { name = "pyos-learn", git = "https://github.com/robcox2910/py-os?tag=v0.2.0" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
