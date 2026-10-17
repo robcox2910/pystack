@@ -11,8 +11,8 @@ model is loaded once and reused.
 """
 
 import pyllm
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 
 from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
 

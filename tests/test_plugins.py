@@ -104,14 +104,13 @@ class TestPluginRegistry:
         finally:
             kernel.shutdown()
 
-    def test_activate_registers_pebble_stdlib(self) -> None:
-        """Activation should register Pebble stdlib modules."""
+    def test_activate_collects_pebble_modules(self) -> None:
+        """Activation collects each plugin's Pebble module, without touching Pebble's table."""
         registry = PluginRegistry()
         registry.register(_ExamplePlugin())
         registry.activate_all()
-        assert "test" in STDLIB_MODULES
-        # Clean up.
-        STDLIB_MODULES.pop("test", None)
+        assert "test" in registry.pebble_modules()
+        assert "test" not in STDLIB_MODULES
 
     def test_activate_calls_on_boot(self) -> None:
         """Activation should call on_boot for each plugin."""
@@ -167,7 +166,6 @@ class TestPluginIntegration:
             output = env.run_pebble_source('import "test"\nprint(greet())')
             assert "Hello from plugin!" in output
         finally:
-            STDLIB_MODULES.pop("test", None)
             env.shutdown()
 
     def test_on_boot_runs_in_non_os_mode(

@@ -5,8 +5,12 @@ These tests verify the API endpoints work correctly.
 """
 
 import json
+from pathlib import Path
 
-from pystack.web.app import create_app
+import pytest
+from flask import Flask
+
+from pystack.web.app import create_app, main
 
 CONTENT_TYPE = "application/json"
 
@@ -127,3 +131,63 @@ class TestWebApp:
             )
             data = json.loads(response.data)
             assert "99" in data["output"]
+
+
+class TestWebServerSaves:
+    """Data typed into the web UI is saved when the server stops."""
+
+    def test_server_saves_when_it_stops(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Stopping the server (Ctrl-C) saves everything first."""
+
+        def fake_run(app: Flask, **_kwargs: object) -> None:
+            with app.test_client() as client:
+                client.post(
+                    "/api/pebble",
+                    data=json.dumps({"source": 'import "kv"\nkv_set("colour", "blue")'}),
+                    content_type=CONTENT_TYPE,
+                )
+            raise KeyboardInterrupt
+
+        monkeypatch.setattr(Flask, "run", fake_run)
+        with pytest.raises(KeyboardInterrupt):
+            main(data_dir=tmp_path)
+        assert "colour" in (tmp_path / "kv" / "store.json").read_text(encoding="utf-8")
+
+    def test_shell_exit_saves(self, tmp_path: Path) -> None:
+        """Typing ``exit`` in the web terminal saves before halting."""
+        app = create_app(data_dir=tmp_path)
+        with app.test_client() as client:
+            client.post(
+                "/api/pebble",
+                data=json.dumps({"source": 'import "kv"\nkv_set("pet", "cat")'}),
+                content_type=CONTENT_TYPE,
+            )
+            response = client.post(
+                "/api/shell", data=json.dumps({"command": "exit"}), content_type=CONTENT_TYPE
+            )
+            assert json.loads(response.data)["halted"]
+        assert "pet" in (tmp_path / "kv" / "store.json").read_text(encoding="utf-8")
+
+    def test_changes_after_shell_exit_are_still_saved(self, tmp_path: Path) -> None:
+        """The Pebble panel keeps working after ``exit``; stopping the server saves it."""
+        app = create_app(data_dir=tmp_path)
+        with app.test_client() as client:
+            for source, command in (
+                ('kv_set("before", "1")', "exit"),
+                ('kv_set("after", "2")', None),
+            ):
+                client.post(
+                    "/api/pebble",
+                    data=json.dumps({"source": f'import "kv"\n{source}'}),
+                    content_type=CONTENT_TYPE,
+                )
+                if command:
+                    client.post(
+                        "/api/shell",
+                        data=json.dumps({"command": command}),
+                        content_type=CONTENT_TYPE,
+                    )
+        app.extensions["pystack_env"].shutdown()
+        assert "after" in (tmp_path / "kv" / "store.json").read_text(encoding="utf-8")

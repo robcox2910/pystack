@@ -351,6 +351,29 @@ pair together.
    A change to the public API bumps the minor version (`v0.1.0` → `v0.2.0`);
    anything else bumps the patch (`v0.1.0` → `v0.1.1`).
 
+## Your Data Is Saved
+
+PyStack is like a real database: what you store is still there next time.
+Your SQL tables and the data in `kv`, `docdb`, `graphdb`, `coldb`, `tsdb`,
+`vecdb` and `search` are all kept in the `pystack_data/` folder. Each
+plugin has its own sub-folder (for example `pystack_data/kv/store.json`).
+
+PyStack saves when it stops: `.quit` or `exit`, the end of a script, or
+stopping the web server with Ctrl-C. Type `save` in the shell to save
+straight away. If PyStack crashes, changes since the last save are lost.
+
+Saving is crash-safe: a fresh copy is written beside the old file and
+swapped in at once, so a file is never half-written. If a save file is ever
+damaged, PyStack refuses to start and names the file, rather than starting
+empty and overwriting your data.
+
+Message queues (`mq`) aren't saved yet; they start empty each time.
+
+Because data is kept, running the same example twice adds the same data
+twice. To start fresh, delete the `pystack_data/` folder (or just one
+plugin's folder, like `pystack_data/kv/`). Saved search engines keep their
+ids; `search_list()` lists them, so a later program can find them.
+
 ## Plugin System
 
 PyStack uses a plugin system to integrate projects. Active plugins
@@ -366,14 +389,23 @@ include:
 | MQPlugin | `mq` | `mq-put`, `mq-get`, `mqnet` |
 | LLMPlugin | `llm` | `dream` |
 
-The `db` module is registered separately via the Pebble-DB adapter
-(it needs a database instance, so it's set up before the plugins).
+The `db` module comes from the Pebble-DB adapter instead of a plugin,
+because it needs this environment's database.
+
+PyStack hands Pebble each environment's own modules on every run (through
+Pebble's public `run_source`), so two environments never see each other's
+data.
 
 Each plugin can:
 
 - Add a new stdlib module to the Pebble language (`import "crypto"`)
 - Add new commands to the PyOS shell (`hash`, `curl`, `dns`, etc.)
-- Run custom setup logic at boot time
+- Load its saved data at start-up (`load_state(folder)`), save it
+  (`save_state(folder)`) and clean up (`on_shutdown()`)
+- Run custom setup logic at boot time (`on_boot()`)
+
+A plugin keeps its data on itself (`self`), never in module-level
+variables, and saves into its own folder, `pystack_data/<module>/`.
 
 Plugins are discovered automatically via Python entry points, or
 registered manually in the `PyStackEnvironment`.

@@ -20,8 +20,8 @@ Example Pebble usage::
     print(encrypted)
 """
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 from pycrypt.caesar import decrypt as caesar_dec
 from pycrypt.caesar import encrypt as caesar_enc
 from pycrypt.hashing import sha256

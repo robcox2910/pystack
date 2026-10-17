@@ -16,67 +16,16 @@ Example Pebble usage::
     print(who)
 """
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pathlib import Path
+
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
+from pykv.persistence import load_store, save_store
 from pykv.store import BasicStore
 
-from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_method
 
-_store: BasicStore | None = None
-
-
-def _get_store() -> BasicStore:
-    """Return the shared BasicStore instance, creating it if needed."""
-    global _store  # noqa: PLW0603
-    if _store is None:
-        _store = BasicStore()
-    return _store
-
-
-@pebble_handler
-def _kv_set(args: list[PebbleValue]) -> PebbleValue:
-    """Store a value under a key."""
-    key = str(args[0])
-    value = str(args[1])
-    _get_store().set(key, value)
-    return "ok"
-
-
-@pebble_handler
-def _kv_get(args: list[PebbleValue]) -> PebbleValue:
-    """Retrieve a value by key, or 'not found' if missing."""
-    key = str(args[0])
-    store = _get_store()
-    try:
-        return str(store.get(key))
-    except Exception:  # noqa: BLE001
-        return "not found"
-
-
-@pebble_handler
-def _kv_delete(args: list[PebbleValue]) -> PebbleValue:
-    """Delete a key from the store."""
-    key = str(args[0])
-    store = _get_store()
-    try:
-        store.delete(key)
-    except Exception:  # noqa: BLE001
-        return f"error: key '{key}' not found"
-    return "ok"
-
-
-@pebble_handler
-def _kv_keys(args: list[PebbleValue]) -> PebbleValue:  # noqa: ARG001
-    """Return all keys in the store as a list."""
-    store = _get_store()
-    result: list[PebbleValue] = list(store.keys())
-    return result
-
-
-def reset_kv_state() -> None:
-    """Reset all module-level state for testing."""
-    global _store  # noqa: PLW0603
-    _store = None
+_STORE_FILE = "store.json"
 
 
 class KVPlugin(Plugin):
@@ -85,6 +34,65 @@ class KVPlugin(Plugin):
     Register get/set/delete/keys functions in Pebble's ``kv`` stdlib
     module and shell commands for interactive use.
     """
+
+    def __init__(self) -> None:
+        """Start with no data; it is created on first use or loaded at start-up."""
+        self._store: BasicStore | None = None
+
+    def _get_store(self) -> BasicStore:
+        """Return this plugin's store, creating it on first use."""
+        if self._store is None:
+            self._store = BasicStore()
+        return self._store
+
+    @pebble_method
+    def kv_set(self, args: list[PebbleValue]) -> PebbleValue:
+        """Store a value under a key."""
+        key = str(args[0])
+        value = str(args[1])
+        self._get_store().set(key, value)
+        return "ok"
+
+    @pebble_method
+    def kv_get(self, args: list[PebbleValue]) -> PebbleValue:
+        """Retrieve a value by key, or 'not found' if missing."""
+        key = str(args[0])
+        store = self._get_store()
+        try:
+            return str(store.get(key))
+        except Exception:  # noqa: BLE001
+            return "not found"
+
+    @pebble_method
+    def kv_delete(self, args: list[PebbleValue]) -> PebbleValue:
+        """Delete a key from the store."""
+        key = str(args[0])
+        store = self._get_store()
+        try:
+            store.delete(key)
+        except Exception:  # noqa: BLE001
+            return f"error: key '{key}' not found"
+        return "ok"
+
+    @pebble_method
+    def kv_keys(self, args: list[PebbleValue]) -> PebbleValue:  # noqa: ARG002 -- Pebble passes args
+        """Return all keys in the store as a list."""
+        store = self._get_store()
+        result: list[PebbleValue] = list(store.keys())
+        return result
+
+    def load_state(self, folder: Path) -> None:
+        """Load the saved store, if there is one."""
+        path = folder / _STORE_FILE
+        if path.exists():
+            self._store = load_store(path)
+
+    def save_state(self, folder: Path) -> None:
+        """Save the store, if this run used or loaded one."""
+        if self._store is None:
+            return
+        folder.mkdir(parents=True, exist_ok=True)
+        save_store(self._store, folder / _STORE_FILE)
 
     def info(self) -> PluginInfo:
         """Return plugin metadata."""
@@ -102,10 +110,10 @@ class KVPlugin(Plugin):
         """Return the kv stdlib module with get/set/delete/keys functions."""
         return StdlibModule(
             functions={
-                "kv_set": (2, _kv_set),
-                "kv_get": (1, _kv_get),
-                "kv_delete": (1, _kv_delete),
-                "kv_keys": (0, _kv_keys),
+                "kv_set": (2, self.kv_set),
+                "kv_get": (1, self.kv_get),
+                "kv_delete": (1, self.kv_delete),
+                "kv_keys": (0, self.kv_keys),
             },
             constants={},
         )
@@ -118,7 +126,7 @@ class KVPlugin(Plugin):
             if len(args) < 2:  # noqa: PLR2004
                 return "Usage: kv-set <key> <value>"
             key, value = args[0], " ".join(args[1:])
-            _get_store().set(key, value)
+            self._get_store().set(key, value)
             return f"Set '{key}' = '{value}'"
 
         def _kv_get_cmd(args: list[str]) -> str:
@@ -126,7 +134,7 @@ class KVPlugin(Plugin):
             if not args:
                 return "Usage: kv-get <key>"
             try:
-                return str(_get_store().get(args[0]))
+                return str(self._get_store().get(args[0]))
             except Exception:  # noqa: BLE001
                 return f"Key '{args[0]}' not found"
 
@@ -135,14 +143,14 @@ class KVPlugin(Plugin):
             if not args:
                 return "Usage: kv-delete <key>"
             try:
-                _get_store().delete(args[0])
+                self._get_store().delete(args[0])
             except Exception:  # noqa: BLE001
                 return f"Key '{args[0]}' not found"
             return f"Deleted '{args[0]}'"
 
         def _kv_keys_cmd(args: list[str]) -> str:  # noqa: ARG001
             """List all keys."""
-            keys = list(_get_store().keys())
+            keys = list(self._get_store().keys())
             return ", ".join(keys) if keys else "(no keys)"
 
         return [

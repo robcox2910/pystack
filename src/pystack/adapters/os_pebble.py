@@ -97,3 +97,22 @@ def register_sql_command(
             return f"Error: {exc}"
 
     shell._commands["sql"] = handler  # noqa: SLF001
+
+
+def register_save_command(shell: Shell, save: Callable[[], None]) -> None:
+    """Register a ``save`` command that saves the database and every plugin.
+
+    Args:
+        shell: The PyOS shell to extend.
+        save: The environment's save method.
+
+    """
+
+    def handler(_args: list[str]) -> str:
+        try:
+            save()
+        except Exception as exc:  # noqa: BLE001 -- shown to the user
+            return f"Error: {exc}"
+        return "Saved."
+
+    shell._commands["save"] = handler  # noqa: SLF001

@@ -16,77 +16,17 @@ Example Pebble usage::
     print(grade)
 """
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pathlib import Path
+
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 from pycoldb.column import Column
 from pycoldb.keyspace import Keyspace
+from pycoldb.persistence import load_keyspace, save_keyspace
 
-from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_method
 
-_keyspace: Keyspace | None = None
-
-
-def _get_keyspace() -> Keyspace:
-    """Return the shared Keyspace instance, creating it if needed."""
-    global _keyspace  # noqa: PLW0603
-    if _keyspace is None:
-        _keyspace = Keyspace(name="default")
-    return _keyspace
-
-
-def _ensure_cf(name: str) -> None:
-    """Ensure a column family exists, creating it if needed."""
-    ks = _get_keyspace()
-    if name not in ks.column_families:
-        ks.create_column_family(name)
-
-
-@pebble_handler
-def _col_set(args: list[PebbleValue]) -> PebbleValue:
-    """Set a column value in a column family."""
-    family = str(args[0])
-    row_key = str(args[1])
-    col_name = str(args[2])
-    value = str(args[3])
-    _ensure_cf(family)
-    ks = _get_keyspace()
-    ks.put(family, row_key, Column(name=col_name, value=value))
-    return "ok"
-
-
-@pebble_handler
-def _col_get(args: list[PebbleValue]) -> PebbleValue:
-    """Get a column value from a column family."""
-    family = str(args[0])
-    row_key = str(args[1])
-    col_name = str(args[2])
-    ks = _get_keyspace()
-    try:
-        column = ks.get_column(family, row_key, col_name)
-        return str(column.value)
-    except Exception:  # noqa: BLE001
-        return "not found"
-
-
-@pebble_handler
-def _col_delete(args: list[PebbleValue]) -> PebbleValue:
-    """Delete a column from a column family."""
-    family = str(args[0])
-    row_key = str(args[1])
-    col_name = str(args[2])
-    ks = _get_keyspace()
-    try:
-        cf = ks.get_column_family(family)
-        cf.delete_column(row_key, col_name)
-        return "ok"
-    except Exception:  # noqa: BLE001
-        return "not found"
-
-
-def reset_coldb_state() -> None:
-    """Reset all module-level state for testing."""
-    global _keyspace  # noqa: PLW0603
-    _keyspace = None
+_KEYSPACE_FILE = "keyspace.json"
 
 
 class ColDBPlugin(Plugin):
@@ -95,6 +35,74 @@ class ColDBPlugin(Plugin):
     Register set/get/delete functions in Pebble's ``coldb`` stdlib
     module and shell commands for interactive use.
     """
+
+    def __init__(self) -> None:
+        """Start with no data; it is created on first use or loaded at start-up."""
+        self._keyspace: Keyspace | None = None
+
+    def _get_keyspace(self) -> Keyspace:
+        """Return this plugin's Keyspace, creating it on first use."""
+        if self._keyspace is None:
+            self._keyspace = Keyspace(name="default")
+        return self._keyspace
+
+    def _ensure_cf(self, name: str) -> None:
+        """Ensure a column family exists, creating it if needed."""
+        ks = self._get_keyspace()
+        if name not in ks.column_families:
+            ks.create_column_family(name)
+
+    @pebble_method
+    def col_set(self, args: list[PebbleValue]) -> PebbleValue:
+        """Set a column value in a column family."""
+        family = str(args[0])
+        row_key = str(args[1])
+        col_name = str(args[2])
+        value = str(args[3])
+        self._ensure_cf(family)
+        ks = self._get_keyspace()
+        ks.put(family, row_key, Column(name=col_name, value=value))
+        return "ok"
+
+    @pebble_method
+    def col_get(self, args: list[PebbleValue]) -> PebbleValue:
+        """Get a column value from a column family."""
+        family = str(args[0])
+        row_key = str(args[1])
+        col_name = str(args[2])
+        ks = self._get_keyspace()
+        try:
+            column = ks.get_column(family, row_key, col_name)
+            return str(column.value)
+        except Exception:  # noqa: BLE001
+            return "not found"
+
+    @pebble_method
+    def col_delete(self, args: list[PebbleValue]) -> PebbleValue:
+        """Delete a column from a column family."""
+        family = str(args[0])
+        row_key = str(args[1])
+        col_name = str(args[2])
+        ks = self._get_keyspace()
+        try:
+            cf = ks.get_column_family(family)
+            cf.delete_column(row_key, col_name)
+            return "ok"
+        except Exception:  # noqa: BLE001
+            return "not found"
+
+    def load_state(self, folder: Path) -> None:
+        """Load the saved keyspace, if there is one."""
+        path = folder / _KEYSPACE_FILE
+        if path.exists():
+            self._keyspace = load_keyspace(path)
+
+    def save_state(self, folder: Path) -> None:
+        """Save the keyspace, if this run used or loaded one."""
+        if self._keyspace is None:
+            return
+        folder.mkdir(parents=True, exist_ok=True)
+        save_keyspace(self._keyspace, folder / _KEYSPACE_FILE)
 
     def info(self) -> PluginInfo:
         """Return plugin metadata."""
@@ -112,9 +120,9 @@ class ColDBPlugin(Plugin):
         """Return the coldb stdlib module with set/get/delete functions."""
         return StdlibModule(
             functions={
-                "col_set": (4, _col_set),
-                "col_get": (3, _col_get),
-                "col_delete": (3, _col_delete),
+                "col_set": (4, self.col_set),
+                "col_get": (3, self.col_get),
+                "col_delete": (3, self.col_delete),
             },
             constants={},
         )
@@ -136,8 +144,8 @@ class ColDBPlugin(Plugin):
                 row_key = args[2]
                 col_name = args[3]
                 value = " ".join(args[4:])
-                _ensure_cf(family)
-                _get_keyspace().put(family, row_key, Column(name=col_name, value=value))
+                self._ensure_cf(family)
+                self._get_keyspace().put(family, row_key, Column(name=col_name, value=value))
                 return f"Set {family}/{row_key}/{col_name} = '{value}'"
 
             if sub == "get" and len(args) >= min_get_args:
@@ -145,7 +153,7 @@ class ColDBPlugin(Plugin):
                 row_key = args[2]
                 col_name = args[3]
                 try:
-                    column = _get_keyspace().get_column(family, row_key, col_name)
+                    column = self._get_keyspace().get_column(family, row_key, col_name)
                     return str(column.value)
                 except Exception:  # noqa: BLE001
                     return "Not found"

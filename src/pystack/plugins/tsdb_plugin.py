@@ -18,69 +18,17 @@ Example Pebble usage::
 """
 
 from datetime import timedelta
+from pathlib import Path
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 from pytsdb.aggregation import AggFunc, aggregate
 from pytsdb.database import TimeSeriesDB
+from pytsdb.persistence import load, save
 
-from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_method
 
-_db: TimeSeriesDB | None = None
-
-
-def _get_db() -> TimeSeriesDB:
-    """Return the shared TimeSeriesDB instance, creating it if needed."""
-    global _db  # noqa: PLW0603
-    if _db is None:
-        _db = TimeSeriesDB()
-    return _db
-
-
-@pebble_handler
-def _ts_add(args: list[PebbleValue]) -> PebbleValue:
-    """Add a data point to a named time series."""
-    series_name = str(args[0])
-    value = float(str(args[1]))
-    db = _get_db()
-    # Auto-create the series if it doesn't exist.
-    if series_name not in db.list_series():
-        db.create_series(series_name)
-    db.add_point(series_name, value=value)
-    return "ok"
-
-
-@pebble_handler
-def _ts_query(args: list[PebbleValue]) -> PebbleValue:
-    """Query all data points in a named time series."""
-    series_name = str(args[0])
-    db = _get_db()
-    points = db.query(series_name)
-    result: list[PebbleValue] = [p.value for p in points]
-    return result
-
-
-@pebble_handler
-def _ts_avg(args: list[PebbleValue]) -> PebbleValue:
-    """Compute the average of a series over a time window (in seconds)."""
-    series_name = str(args[0])
-    window_seconds = int(str(args[1]))
-    db = _get_db()
-    points = db.query(series_name)
-    if not points:
-        return "error: no data points"
-    window = timedelta(seconds=window_seconds)
-    agg_points = aggregate(points, window=window, func=AggFunc.AVG)
-    if not agg_points:
-        return "error: no data in window"
-    result: list[PebbleValue] = [p.value for p in agg_points]
-    return result
-
-
-def reset_tsdb_state() -> None:
-    """Reset all module-level state for testing."""
-    global _db  # noqa: PLW0603
-    _db = None
+_DB_FILE = "db.json"
 
 
 class TSDBPlugin(Plugin):
@@ -89,6 +37,66 @@ class TSDBPlugin(Plugin):
     Register add/query/avg functions in Pebble's ``tsdb`` stdlib
     module and shell commands for interactive use.
     """
+
+    def __init__(self) -> None:
+        """Start with no data; it is created on first use or loaded at start-up."""
+        self._db: TimeSeriesDB | None = None
+
+    def _get_db(self) -> TimeSeriesDB:
+        """Return this plugin's TimeSeriesDB, creating it on first use."""
+        if self._db is None:
+            self._db = TimeSeriesDB()
+        return self._db
+
+    @pebble_method
+    def ts_add(self, args: list[PebbleValue]) -> PebbleValue:
+        """Add a data point to a named time series."""
+        series_name = str(args[0])
+        value = float(str(args[1]))
+        db = self._get_db()
+        # Auto-create the series if it doesn't exist.
+        if series_name not in db.list_series():
+            db.create_series(series_name)
+        db.add_point(series_name, value=value)
+        return "ok"
+
+    @pebble_method
+    def ts_query(self, args: list[PebbleValue]) -> PebbleValue:
+        """Query all data points in a named time series."""
+        series_name = str(args[0])
+        db = self._get_db()
+        points = db.query(series_name)
+        result: list[PebbleValue] = [p.value for p in points]
+        return result
+
+    @pebble_method
+    def ts_avg(self, args: list[PebbleValue]) -> PebbleValue:
+        """Compute the average of a series over a time window (in seconds)."""
+        series_name = str(args[0])
+        window_seconds = int(str(args[1]))
+        db = self._get_db()
+        points = db.query(series_name)
+        if not points:
+            return "error: no data points"
+        window = timedelta(seconds=window_seconds)
+        agg_points = aggregate(points, window=window, func=AggFunc.AVG)
+        if not agg_points:
+            return "error: no data in window"
+        result: list[PebbleValue] = [p.value for p in agg_points]
+        return result
+
+    def load_state(self, folder: Path) -> None:
+        """Load the saved database, if there is one."""
+        path = folder / _DB_FILE
+        if path.exists():
+            self._db = load(path)
+
+    def save_state(self, folder: Path) -> None:
+        """Save the database, if this run used or loaded one."""
+        if self._db is None:
+            return
+        folder.mkdir(parents=True, exist_ok=True)
+        save(self._db, folder / _DB_FILE)
 
     def info(self) -> PluginInfo:
         """Return plugin metadata."""
@@ -106,9 +114,9 @@ class TSDBPlugin(Plugin):
         """Return the tsdb stdlib module with add/query/avg functions."""
         return StdlibModule(
             functions={
-                "ts_add": (2, _ts_add),
-                "ts_query": (1, _ts_query),
-                "ts_avg": (2, _ts_avg),
+                "ts_add": (2, self.ts_add),
+                "ts_query": (1, self.ts_query),
+                "ts_avg": (2, self.ts_avg),
             },
             constants={},
         )
@@ -121,7 +129,7 @@ class TSDBPlugin(Plugin):
             if len(args) < 2:  # noqa: PLR2004
                 return "Usage: ts-add <series> <value>"
             series_name, value = args[0], float(args[1])
-            db = _get_db()
+            db = self._get_db()
             if series_name not in db.list_series():
                 db.create_series(series_name)
             db.add_point(series_name, value=value)
@@ -131,7 +139,7 @@ class TSDBPlugin(Plugin):
             """Query data points in a series."""
             if not args:
                 return "Usage: ts-query <series>"
-            points = _get_db().query(args[0])
+            points = self._get_db().query(args[0])
             if not points:
                 return "(no data points)"
             return "\n".join(f"{p.timestamp}: {p.value}" for p in points)
@@ -140,7 +148,7 @@ class TSDBPlugin(Plugin):
             """Compute average over a time window."""
             if len(args) < 2:  # noqa: PLR2004
                 return "Usage: ts-avg <series> <window_seconds>"
-            points = _get_db().query(args[0])
+            points = self._get_db().query(args[0])
             if not points:
                 return "(no data points)"
             window = timedelta(seconds=int(args[1]))

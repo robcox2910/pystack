@@ -12,9 +12,10 @@ game (PyStack) works on its own, but each expansion adds new pieces.
 import functools
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 
 # Type alias for a Pebble handler function (takes args, returns a value).
 type PebbleHandler = Callable[[list[PebbleValue]], PebbleValue]
@@ -41,6 +42,25 @@ def pebble_handler(fn: PebbleHandler) -> PebbleHandler:
     def _wrapper(args: list[PebbleValue]) -> PebbleValue:
         try:
             return fn(args)
+        except Exception as exc:  # noqa: BLE001
+            return f"error: {exc}"
+
+    return _wrapper
+
+
+def pebble_method[P](
+    fn: Callable[[P, list[PebbleValue]], PebbleValue],
+) -> Callable[[P, list[PebbleValue]], PebbleValue]:
+    """Like :func:`pebble_handler`, for a Pebble function that is a plugin method.
+
+    Plugins keep their data on ``self``, so their Pebble functions are
+    methods. Errors still become ``"error: ..."`` strings.
+    """
+
+    @functools.wraps(fn)
+    def _wrapper(self: P, args: list[PebbleValue]) -> PebbleValue:
+        try:
+            return fn(self, args)
         except Exception as exc:  # noqa: BLE001
             return f"error: {exc}"
 
@@ -152,3 +172,30 @@ class Plugin:
 
         Override this for setup that needs the full environment running.
         """
+
+    def load_state(self, folder: Path) -> None:
+        """Load this plugin's saved data, before :meth:`on_boot` runs.
+
+        Like opening your saved game: if there's a save in *folder*, pick up
+        where you left off. The folder may not exist yet (first run), in which
+        case there is nothing to load.
+
+        Args:
+            folder: This plugin's own data folder,
+                ``<data dir>/<pebble module name>/``.
+
+        """
+
+    def save_state(self, folder: Path) -> None:
+        """Save this plugin's data so it's there next time.
+
+        Create *folder* only if there is something to write.
+
+        Args:
+            folder: This plugin's own data folder (same as for
+                :meth:`load_state`).
+
+        """
+
+    def on_shutdown(self) -> None:
+        """Run custom clean-up when PyStack stops (after saving)."""

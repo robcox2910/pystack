@@ -6,39 +6,21 @@ verify that the bridge works correctly.
 
 from pathlib import Path
 
-from pebble.stdlib import STDLIB_MODULES
 from pydb.database import Database
 
-from pystack.adapters.pebble_db import register_db_module, unregister_db_module
+from pystack.adapters.pebble_db import make_db_module
 from pystack.environment import PyStackEnvironment
 
 
-class TestRegisterModule:
-    """Verify that the db module is registered in Pebble's stdlib."""
-
-    def test_register_adds_module(self, tmp_path: Path) -> None:
-        """Registering should add 'db' to STDLIB_MODULES."""
-        db = Database(path=tmp_path)
-        register_db_module(db)
-        assert "db" in STDLIB_MODULES
-        unregister_db_module()
-
-    def test_unregister_removes_module(self, tmp_path: Path) -> None:
-        """Unregistering should remove 'db' from STDLIB_MODULES."""
-        db = Database(path=tmp_path)
-        register_db_module(db)
-        unregister_db_module()
-        assert "db" not in STDLIB_MODULES
+class TestMakeDbModule:
+    """Verify the db module built for one database."""
 
     def test_module_has_functions(self, tmp_path: Path) -> None:
         """The db module should expose db_query, db_execute, db_tables."""
-        db = Database(path=tmp_path)
-        register_db_module(db)
-        module = STDLIB_MODULES["db"]
+        module = make_db_module(Database(path=tmp_path))
         assert "db_query" in module.functions
         assert "db_execute" in module.functions
         assert "db_tables" in module.functions
-        unregister_db_module()
 
 
 class TestPebbleDbIntegration:

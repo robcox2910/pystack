@@ -5,18 +5,10 @@ the Pebble adapter, and provides a ready-to-use integrated runtime.
 """
 
 import contextlib
-import io
+import sys
 from pathlib import Path
 
-from pebble.analyzer import SemanticAnalyzer
-from pebble.bytecode import CompiledProgram
-from pebble.compiler import Compiler
-from pebble.lexer import Lexer
-from pebble.optimizer import optimize
-from pebble.parser import Parser
-from pebble.resolver import ModuleResolver
-from pebble.type_checker import type_check
-from pebble.vm import VirtualMachine
+from pebble import run_source
 from py_os.kernel import Kernel
 from py_os.shell import Shell
 from pydb.database import Database
@@ -25,8 +17,12 @@ from pydb.formatter import format_results
 from pydb.query import Query
 from pydb.sql_parser import parse_sql
 
-from pystack.adapters.os_pebble import register_pebble_command, register_sql_command
-from pystack.adapters.pebble_db import bound_db_module, make_db_module
+from pystack.adapters.os_pebble import (
+    register_pebble_command,
+    register_save_command,
+    register_sql_command,
+)
+from pystack.adapters.pebble_db import make_db_module
 from pystack.plugins.base import Plugin
 from pystack.plugins.coldb_plugin import ColDBPlugin
 from pystack.plugins.crypto_plugin import CryptoPlugin
@@ -47,8 +43,9 @@ from pystack.plugins.web_plugin import WebPlugin
 class PyStackEnvironment:
     """Manage the lifecycle of an integrated PyStack session.
 
-    Creates a PyDB database and registers the Pebble ``db`` stdlib
-    module so Pebble programs can query the database.
+    Creates a PyDB database and runs Pebble programs through Pebble's
+    public API, handing each run this environment's own ``db`` module and
+    plugin modules (nothing is shared between environments).
 
     In OS mode, also boots a PyOS kernel and shell with integrated
     ``pebble`` and ``sql`` commands.
@@ -60,6 +57,7 @@ class PyStackEnvironment:
     """
 
     __slots__ = (
+        "_closed",
         "_database",
         "_db_module",
         "_db_path",
@@ -77,6 +75,7 @@ class PyStackEnvironment:
     ) -> None:
         """Create and boot the integrated environment."""
         self._db_path = Path(db_path)
+        self._closed = False
         self._os_mode = os_mode
         self._kernel: Kernel | None = None
         self._shell: Shell | None = None
@@ -96,7 +95,7 @@ class PyStackEnvironment:
         # shell (which is None outside OS mode) means plugin Pebble modules
         # and on_boot() hooks always run, while shell commands are only
         # registered when there is a shell to register them in.
-        self._plugin_registry.activate_all(shell=self._shell)
+        self._plugin_registry.activate_all(shell=self._shell, data_dir=self._db_path)
 
     def _register_all_plugins(self) -> None:
         """Register all built-in integration plugins with the registry.
@@ -131,6 +130,7 @@ class PyStackEnvironment:
 
         register_pebble_command(shell, kernel, self.run_pebble_source)
         register_sql_command(shell, self.run_sql)
+        register_save_command(shell, self.save)
 
         # Discover any third-party plugins installed via entry points so
         # they are activated alongside the built-ins.
@@ -178,17 +178,49 @@ class PyStackEnvironment:
         return self._shell.execute(command)
 
     def save(self) -> None:
-        """Save the database to disk."""
-        self._database.save()
+        """Save the database and every plugin's data.
+
+        Every part is tried even if an earlier one fails.
+
+        Raises:
+            ExceptionGroup: If anything couldn't be saved, after trying
+                everything.
+
+        """
+        failures = self._save_everything()
+        if failures:
+            names = ", ".join(name for name, _ in failures)
+            msg = f"pystack could not save {names}"
+            raise ExceptionGroup(msg, [exc for _, exc in failures])
 
     def shutdown(self) -> None:
-        """Save the database and stop the OS kernel. Safe to call multiple times."""
-        with contextlib.suppress(Exception):
-            self._database.save()
+        """Save everything, shut plugins down and stop the OS kernel.
+
+        Never raises -- it runs in ``finally:`` blocks, where an error would
+        hide the real one -- but prints one line per failure to stderr.
+        Safe to call more than once; later calls do nothing.
+        """
+        if self._closed:
+            return
+        self._closed = True
+        for name, exc in self._save_everything():
+            sys.stderr.write(f"pystack: could not save {name}: {exc}\n")
+        for name, exc in self._plugin_registry.shutdown_all():
+            sys.stderr.write(f"pystack: could not shut down {name}: {exc}\n")
         if self._kernel is not None:
             with contextlib.suppress(Exception):
                 self._kernel.shutdown()
             self._kernel = None
+
+    def _save_everything(self) -> list[tuple[str, Exception]]:
+        """Save the database and every plugin, returning what failed."""
+        failures: list[tuple[str, Exception]] = []
+        try:
+            self._database.save()
+        except Exception as exc:  # noqa: BLE001 -- reported by save()/shutdown()
+            failures.append(("database", exc))
+        failures.extend(self._plugin_registry.save_all(self._db_path))
+        return failures
 
     def run_pebble_source(self, source: str) -> str:
         """Compile and run a Pebble source string with database access.
@@ -200,48 +232,8 @@ class PyStackEnvironment:
             The captured stdout output from the program.
 
         """
-        with bound_db_module(self._db_module):
-            return self._compile_and_run(source)
-
-    def _compile_and_run(self, source: str) -> str:
-        """Run Pebble's full pipeline on ``source`` and capture what it prints."""
-        output = io.StringIO()
-        tokens = Lexer(source).tokenize()
-        program = Parser(tokens).parse()
-        analyzer = SemanticAnalyzer()
-        resolver = ModuleResolver(base_dir=Path.cwd())
-        resolver.resolve_imports(program, analyzer)
-        analyzed = analyzer.analyze(program)
-        type_check(analyzed, analyzer=analyzer)
-        compiled = Compiler(
-            cell_vars=analyzer.cell_vars,
-            free_vars=analyzer.free_vars,
-            enums=resolver.merged_enums,
-            class_parents=resolver.merged_class_parents,
-            structs=resolver.merged_structs,
-            class_methods=resolver.merged_class_methods,
-            functions=resolver.merged_functions,
-            variable_arity_functions=resolver.variable_arity_functions,
-        ).compile(analyzed)
-        compiled = optimize(compiled)
-        full_program = CompiledProgram(
-            main=compiled.main,
-            functions={**resolver.merged_functions, **compiled.functions},
-            structs={**resolver.merged_structs, **compiled.structs},
-            struct_field_types={
-                **resolver.merged_struct_field_types,
-                **compiled.struct_field_types,
-            },
-            class_methods={**resolver.merged_class_methods, **compiled.class_methods},
-            enums={**resolver.merged_enums, **compiled.enums},
-            class_parents={**resolver.merged_class_parents, **compiled.class_parents},
-        )
-        VirtualMachine(output=output).run(
-            full_program,
-            stdlib_handlers=resolver.merged_stdlib_handlers,
-            stdlib_constants=resolver.merged_stdlib_constants,
-        )
-        return output.getvalue()
+        modules = {"db": self._db_module, **self._plugin_registry.pebble_modules()}
+        return run_source(source, modules=modules, base_dir=Path.cwd())
 
     def run_pebble_file(self, file_path: str | Path) -> str:
         """Compile and run a Pebble file with database access.
