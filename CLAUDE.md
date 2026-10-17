@@ -29,5 +29,8 @@
 ## Dependencies
 
 - Package manager: uv
-- PyStack depends on pyos-learn, pebble-lang, and pydb as path dependencies
+- Sibling projects are pinned release tags in `[tool.uv.sources]` (git + tag); `uv.lock` records the commit
+- Upgrade a sibling: edit its tag, run `uv lock --upgrade-package <name>`, open a PR
+- Try an unreleased sibling change: `uv pip install -e ../<folder>` (the next `uv sync` restores the pin)
+- Never use `path` sources -- `tests/test_dependency_pins.py` enforces this
 - Run `uv sync --all-extras` after modifying dependencies

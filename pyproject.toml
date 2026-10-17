@@ -74,22 +74,22 @@ version-file = "src/pystack/_version.py"
 packages = ["src/pystack"]
 
 [tool.uv.sources]
-pyos-learn = { path = "../os_learning", editable = true }
-pebble-lang = { path = "../pebble-lang", editable = true }
-pydb = { path = "../pydb", editable = true }
-pyweb = { path = "../pyweb", editable = true }
-pygit = { path = "../pygit", editable = true }
-pycrypt = { path = "../pycrypt", editable = true }
-pynet = { path = "../pynet", editable = true }
-pysearch = { path = "../pysearch", editable = true }
-pymq = { path = "../pymq", editable = true }
-pykv = { path = "../pykv", editable = true }
-pydocdb = { path = "../pydocdb", editable = true }
-pygraphdb = { path = "../pygraphdb", editable = true }
-pytsdb = { path = "../pytsdb", editable = true }
-pyvecdb = { path = "../pyvecdb", editable = true }
-pycoldb = { path = "../pycoldb", editable = true }
-pyllm = { path = "../pyllm", editable = true }
+pyos-learn = { git = "https://github.com/robcox2910/py-os", tag = "v0.2.0" }
+pebble-lang = { git = "https://github.com/robcox2910/pebble-lang", tag = "v0.1.0" }
+pydb = { git = "https://github.com/robcox2910/pydb", tag = "v0.1.0" }
+pyweb = { git = "https://github.com/robcox2910/pyweb", tag = "v0.1.0" }
+pygit = { git = "https://github.com/robcox2910/pygit", tag = "v0.1.0" }
+pycrypt = { git = "https://github.com/robcox2910/pycrypt", tag = "v0.1.0" }
+pynet = { git = "https://github.com/robcox2910/pynet", tag = "v0.1.0" }
+pysearch = { git = "https://github.com/robcox2910/pysearch", tag = "v0.1.0" }
+pymq = { git = "https://github.com/robcox2910/pymq", tag = "v0.1.0" }
+pykv = { git = "https://github.com/robcox2910/pykv", tag = "v0.1.0" }
+pydocdb = { git = "https://github.com/robcox2910/pydoc-db", tag = "v0.1.0" }
+pygraphdb = { git = "https://github.com/robcox2910/pygraphdb", tag = "v0.1.0" }
+pytsdb = { git = "https://github.com/robcox2910/pytsdb", tag = "v0.1.0" }
+pyvecdb = { git = "https://github.com/robcox2910/pyvecdb", tag = "v0.1.0" }
+pycoldb = { git = "https://github.com/robcox2910/pycoldb", tag = "v0.1.0" }
+pyllm = { git = "https://github.com/robcox2910/pyllm", tag = "v0.1.0" }
 
 # Ruff configuration
 [tool.ruff]

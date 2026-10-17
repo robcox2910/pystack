@@ -20,19 +20,8 @@ jobs:
       - name: Set up Python
         run: uv python install 3.14
 
-      - name: Clone sibling projects
-        run: |
-          cd ..
-          for r in py-os:os_learning pebble-lang:pebble-lang pydb:pydb \
-                   pyweb:pyweb pygit:pygit pycrypt:pycrypt pynet:pynet \
-                   pysearch:pysearch pymq:pymq pykv:pykv pydoc-db:pydocdb \
-                   pygraphdb:pygraphdb pytsdb:pytsdb pyvecdb:pyvecdb \
-                   pycoldb:pycoldb pyllm:pyllm; do
-            git clone --depth 1 "https://github.com/robcox2910/${r%%:*}.git" "${r##*:}"
-          done
-
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync --locked --all-extras
 
       - name: Run ruff linter
         run: uv run ruff check .
@@ -59,19 +48,8 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
 
-      - name: Clone sibling projects
-        run: |
-          cd ..
-          for r in py-os:os_learning pebble-lang:pebble-lang pydb:pydb \
-                   pyweb:pyweb pygit:pygit pycrypt:pycrypt pynet:pynet \
-                   pysearch:pysearch pymq:pymq pykv:pykv pydoc-db:pydocdb \
-                   pygraphdb:pygraphdb pytsdb:pytsdb pyvecdb:pyvecdb \
-                   pycoldb:pycoldb pyllm:pyllm; do
-            git clone --depth 1 "https://github.com/robcox2910/${r%%:*}.git" "${r##*:}"
-          done
-
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync --locked --all-extras
 
       - name: Run tests with coverage
         run: uv run pytest
@@ -92,19 +70,8 @@ jobs:
       - name: Set up Python
         run: uv python install 3.14
 
-      - name: Clone sibling projects
-        run: |
-          cd ..
-          for r in py-os:os_learning pebble-lang:pebble-lang pydb:pydb \
-                   pyweb:pyweb pygit:pygit pycrypt:pycrypt pynet:pynet \
-                   pysearch:pysearch pymq:pymq pykv:pykv pydoc-db:pydocdb \
-                   pygraphdb:pygraphdb pytsdb:pytsdb pyvecdb:pyvecdb \
-                   pycoldb:pycoldb pyllm:pyllm; do
-            git clone --depth 1 "https://github.com/robcox2910/${r%%:*}.git" "${r##*:}"
-          done
-
       - name: Install dependencies
-        run: uv sync --all-extras
+        run: uv sync --locked --all-extras
 
       - name: Run security checks (advisory)
         run: uv run pip-audit --skip-editable
