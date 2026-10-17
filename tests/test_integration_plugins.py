@@ -128,7 +128,7 @@ class TestGitPlugin:
             output = env.run_pebble_source('import "git"\nprint(git_hash("hello"))')
             result = output.strip()
             assert len(result) == EXPECTED_SHA1_LENGTH
-            assert result == "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d"
+            assert result == "b6fc4c620b67d95f953a5c1c1230aaab5db5a1b0"
         finally:
             env.shutdown()
 
@@ -148,6 +148,10 @@ class TestGitPlugin:
         result = _git_hash(["test"])
         assert isinstance(result, str)
         assert len(result) == EXPECTED_SHA1_LENGTH
+
+    def test_git_hash_matches_real_git(self) -> None:
+        """git_hash gives exactly what ``printf 'hello' | git hash-object --stdin`` prints."""
+        assert _git_hash(["hello"]) == "b6fc4c620b67d95f953a5c1c1230aaab5db5a1b0"
 
     def test_git_diff_handler_directly(self) -> None:
         """The _git_diff handler should produce diff output."""

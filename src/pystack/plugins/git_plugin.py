@@ -22,15 +22,15 @@ Example Pebble usage::
 from pebble.builtins import Value as PebbleValue
 from pebble.stdlib import StdlibModule
 from pygit.diff import diff_lines, format_diff
-from pygit.hashing import hash_content
+from pygit.hashing import hash_object
 
 from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
 
 
 @pebble_handler
 def _git_hash(args: list[PebbleValue]) -> PebbleValue:
-    """Return the SHA-1 hash of a text string (Git-style)."""
-    return hash_content(str(args[0]))
+    """Return the Git blob hash of a text string -- the same as ``git hash-object``."""
+    return hash_object("blob", str(args[0]).encode())
 
 
 @pebble_handler
@@ -79,7 +79,7 @@ class GitPlugin(Plugin):
             if not args:
                 return "Usage: git-hash <text>"
             text = " ".join(args)
-            return hash_content(text)
+            return hash_object("blob", text.encode())
 
         def _git_diff_cmd(args: list[str]) -> str:
             """Show a diff (requires two arguments)."""
