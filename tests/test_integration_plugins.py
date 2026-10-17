@@ -428,12 +428,18 @@ class TestMqnetCommand:
     """Verify the mqnet demo of PyMQ's networked broker."""
 
     def test_mqnet_story(self) -> None:
-        """The mqnet command should finish two jobs and dead-letter the poison one."""
+        """The mqnet command should show a crash, the lease returning and a poison job."""
         cmds = {c.name: c.handler for c in MQPlugin().shell_commands()}
         output = cmds["mqnet"]([])
-        assert "job-1 done" in output
+        lines = output.splitlines()
+        story = [
+            "worker A: took job-1 (attempt 1) and crashed - connection lost",
+            "broker: took job-1 back from worker A (lease returned, attempt 1 used up)",
+            "worker B: job-1 done (attempt 2)",
+        ]
+        positions = [lines.index(line) for line in story]
+        assert positions == sorted(positions)
         assert "job-2 done" in output
-        assert "worker A crashed" in output
         assert "dead: job-boom (max_attempts)" in output
         assert "$sys.dead.jobs" in output
         assert "Traceback" not in output
