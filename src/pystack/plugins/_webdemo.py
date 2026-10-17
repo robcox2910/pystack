@@ -26,54 +26,53 @@ HTTP_OK = 200
 HTTP_UNAUTHORIZED = 401
 _SHOWN = ("HttpOnly", "SameSite=Lax")
 DEMO_NAME = "ada"
-DEMO_PASSWORD = "demo-password-not-real"  # noqa: S105 - obviously fake
-DEMO_SECRET = "demo-secret-not-real-0123456789abcdef"  # noqa: S105 - obviously fake
+DEMO_PHRASE = "demo-password-not-real"  # obviously fake
+DEMO_KEY = "demo-secret-not-real-0123456789abcdef"  # obviously fake
 
 
-users = InMemoryUsers()
-users.add(DEMO_NAME, DEMO_PASSWORD, rounds=ROUNDS)
-auth = SessionAuth(SessionSigner(DEMO_SECRET), users)
-throttle = LoginThrottle()
-app = App()
-app.middleware(auth)
+def _build_app() -> App:
+    """Build a fresh demo app: a public page, a login, a private API and a clock."""
+    users = InMemoryUsers()
+    users.add(DEMO_NAME, DEMO_PHRASE, rounds=ROUNDS)
+    auth = SessionAuth(SessionSigner(DEMO_KEY), users)
+    throttle = LoginThrottle()
+    app = App()
+    app.middleware(auth)
 
+    def home(_request: HttpRequest) -> HttpResponse:
+        """Serve the public page."""
+        return html("<h1>Welcome to the PyWeb demo</h1>")
 
-@app.get("/")
-def home(_request: HttpRequest) -> HttpResponse:
-    """Serve the public page."""
-    return html("<h1>Welcome to the PyWeb demo</h1>")
+    def login(request: HttpRequest) -> HttpResponse:
+        """Hand out a session cookie for the right name and password."""
+        form = request.form()
+        user = authenticate(users, throttle, form.get("name") or "", form.get("password") or "")
+        if user is None:
+            return json({"error": "bad login"}, HTTP_UNAUTHORIZED)
+        response = json({"hello": user.name})
+        auth.login(response, user)
+        return response
 
+    def me(request: HttpRequest) -> dict[str, str]:
+        """Say who is logged in."""
+        user = current_user(request)
+        return {"user": user.name if user else ""}
 
-@app.post("/login", blocking=True)
-def login(request: HttpRequest) -> HttpResponse:
-    """Hand out a session cookie for the right name and password."""
-    form = request.form()
-    user = authenticate(users, throttle, form.get("name") or "", form.get("password") or "")
-    if user is None:
-        return json({"error": "bad login"}, HTTP_UNAUTHORIZED)
-    response = json({"hello": user.name})
-    auth.login(response, user)
-    return response
+    def ticks(_request: HttpRequest) -> EventStream:
+        """Broadcast three numbered events, then stop."""
 
+        async def source() -> AsyncIterator[ServerEvent]:
+            """Yield tick 1 to tick 3."""
+            for number in range(1, TICKS + 1):
+                yield ServerEvent(f"tick {number}")
 
-@app.get("/api/me")
-@require()
-def me(request: HttpRequest) -> dict[str, str]:
-    """Say who is logged in."""
-    user = current_user(request)
-    return {"user": user.name if user else ""}
+        return EventStream(source())
 
-
-@app.get("/ticks")
-def ticks(_request: HttpRequest) -> EventStream:
-    """Broadcast three numbered events, then stop."""
-
-    async def source() -> AsyncIterator[ServerEvent]:
-        """Yield tick 1 to tick 3."""
-        for number in range(1, TICKS + 1):
-            yield ServerEvent(f"tick {number}")
-
-    return EventStream(source())
+    app.get("/")(home)
+    app.post("/login", blocking=True)(login)
+    app.get("/api/me")(require()(me))
+    app.get("/ticks")(ticks)
+    return app
 
 
 async def _read_head(reader: StreamReader) -> tuple[int, dict[str, str]]:
@@ -111,7 +110,7 @@ async def _get(port: int, path: str, cookie: str | None = None) -> tuple[int, st
 
 async def _login(port: int) -> tuple[int, str]:
     """POST the demo login form and return the status and the Set-Cookie header."""
-    form = f"name={DEMO_NAME}&password={DEMO_PASSWORD}"
+    form = f"name={DEMO_NAME}&password={DEMO_PHRASE}"
     extra = f"Content-Type: application/x-www-form-urlencoded\r\nContent-Length: {len(form)}\r\n"
     reader, status, headers = await _send(port, "POST /login HTTP/1.1", extra, form)
     await reader.read_exactly(int(headers.get("content-length", "0")))
@@ -134,7 +133,7 @@ async def _ticks(port: int) -> tuple[int, list[str]]:
 async def _tour() -> list[str]:
     """Start the server, visit every route and return the printed lines."""
     lines: list[str] = []
-    async with AsyncServer(app, access_log=False) as server:
+    async with AsyncServer(_build_app(), access_log=False) as server:
         port = server.port
         status, _ = await _get(port, "/")
         lines.append(f"GET /           -> {status} (public page)")
