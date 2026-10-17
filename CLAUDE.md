@@ -52,7 +52,6 @@
 
 - Pyright in strict mode -- run `uv run pyright src tests` before committing
 - All violations must be fixed, not ignored (except D203/D213 incompatible pair)
-- Minimum 80% coverage enforced by pytest-cov
 - Use conventional commits (enforced by commitizen): `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `ci:`, `chore:`
 - All changes go via PR from a feature branch (main is protected)
 - Sibling projects are pinned release tags in `[tool.uv.sources]` (git + tag); `uv.lock` records the commit
