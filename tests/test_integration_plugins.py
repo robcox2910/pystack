@@ -14,7 +14,7 @@ from pystack.environment import PyStackEnvironment
 from pystack.plugins._shared import url_parse as _url_parse
 from pystack.plugins.crypto_plugin import _caesar_decrypt, _caesar_encrypt, _hash
 from pystack.plugins.git_plugin import _git_diff, _git_hash
-from pystack.plugins.mq_plugin import _mq_create, _mq_get, _mq_put, reset_mq_state
+from pystack.plugins.mq_plugin import MQPlugin, _mq_create, _mq_get, _mq_put, reset_mq_state
 from pystack.plugins.net_plugin import NetPlugin, _base64_decode, _base64_encode
 from pystack.plugins.search_plugin import (
     _search_add,
@@ -418,3 +418,35 @@ class TestMQPlugin:
         finally:
             reset_mq_state()
             env.shutdown()
+
+
+MQNET_RUNS = 3
+MQNET_MAX_LINES = 40
+
+
+class TestMqnetCommand:
+    """Verify the mqnet demo of PyMQ's networked broker."""
+
+    def test_mqnet_story(self) -> None:
+        """The mqnet command should show a crash, the lease returning and a poison job."""
+        cmds = {c.name: c.handler for c in MQPlugin().shell_commands()}
+        output = cmds["mqnet"]([])
+        lines = output.splitlines()
+        story = [
+            "worker A: took job-1 (attempt 1) and crashed - connection lost",
+            "broker: took job-1 back from worker A (lease returned, attempt 1 used up)",
+            "worker B: job-1 done (attempt 2)",
+        ]
+        positions = [lines.index(line) for line in story]
+        assert positions == sorted(positions)
+        assert "job-2 done" in output
+        assert "dead: job-boom (max_attempts)" in output
+        assert "$sys.dead.jobs" in output
+        assert "Traceback" not in output
+        assert len(output.splitlines()) < MQNET_MAX_LINES
+
+    def test_mqnet_is_deterministic(self) -> None:
+        """The mqnet command should print the same story every run."""
+        cmds = {c.name: c.handler for c in MQPlugin().shell_commands()}
+        outputs = {cmds["mqnet"]([]) for _ in range(MQNET_RUNS)}
+        assert len(outputs) == 1
