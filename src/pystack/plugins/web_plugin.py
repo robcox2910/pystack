@@ -21,6 +21,7 @@ from pebble import Value as PebbleValue
 from pynet.http import get as http_get_impl
 
 from pystack.plugins._shared import url_parse as _url_parse
+from pystack.plugins._webdemo import webdemo as _webdemo
 from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
 
 
@@ -36,7 +37,7 @@ class WebPlugin(Plugin):
     """Integrate PyWeb and PyNet HTTP functions into PyStack.
 
     Register HTTP client and URL parsing functions in Pebble's ``web``
-    stdlib module, and a ``curl`` shell command.
+    stdlib module, and ``curl`` and ``webdemo`` shell commands.
     """
 
     def info(self) -> PluginInfo:
@@ -62,7 +63,7 @@ class WebPlugin(Plugin):
         )
 
     def shell_commands(self) -> list[ShellCommand]:
-        """Return the curl shell command."""
+        """Return the curl and webdemo shell commands."""
 
         def _curl_cmd(args: list[str]) -> str:
             """Fetch a URL and print the response body."""
@@ -76,10 +77,19 @@ class WebPlugin(Plugin):
             else:
                 return response.body
 
+        def _webdemo_cmd(_args: list[str]) -> str:
+            """Tour PyWeb's async server: login, cookie, protected API and events."""
+            return _webdemo()
+
         return [
             ShellCommand(
                 name="curl",
                 handler=_curl_cmd,
                 help_text="Fetch a URL (educational, may fail without network)",
+            ),
+            ShellCommand(
+                name="webdemo",
+                handler=_webdemo_cmd,
+                help_text="Tour PyWeb's async server: login, cookie, private API, live events",
             ),
         ]

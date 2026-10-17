@@ -138,6 +138,7 @@ The first two come from the core adapters. The rest come from plugins.
 | `sql <statement>` | Run a SQL statement | Core (OS-DB adapter) |
 | `hash <text>` | Print the SHA-256 hash of text | CryptoPlugin |
 | `curl <url>` | Fetch a URL and print the body | WebPlugin |
+| `webdemo` | Visit PyWeb's async restaurant: read the public menu, get turned away by the doorman, log in for a wristband (session cookie), then listen to a live stream of three events | WebPlugin |
 | `dns <hostname>` | Resolve a hostname to an IP address | NetPlugin |
 | `git-hash <text>` | Print the SHA-1 hash (Git-style) | GitPlugin |
 | `git-diff <old> <new>` | Show a unified diff | GitPlugin |
@@ -181,7 +182,7 @@ core three (PyOS, Pebble, PyDB):
 | Plugin | Pebble Module | Shell Commands | Project |
 |--------|--------------|----------------|---------|
 | CryptoPlugin | `import "crypto"` | `hash` | PyCrypt |
-| WebPlugin | `import "web"` | `curl` | PyWeb |
+| WebPlugin | `import "web"` | `curl`, `webdemo` | PyWeb |
 | GitPlugin | `import "git"` | `git-hash`, `git-diff` | PyGit |
 | NetPlugin | `import "net"` | `dns`, `overlap`, `netecho`, `wsecho` | PyNet |
 | SearchPlugin | `import "search"` | (none) | PySearch |

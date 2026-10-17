@@ -438,3 +438,44 @@ class TestMqnetCommand:
         cmds = {c.name: c.handler for c in MQPlugin().shell_commands()}
         outputs = {cmds["mqnet"]([]) for _ in range(MQNET_RUNS)}
         assert len(outputs) == 1
+
+
+WEBDEMO_RUNS = 3
+WEBDEMO_MAX_LINES = 30
+
+
+class TestWebdemoCommand:
+    """Verify the webdemo tour of PyWeb's async server."""
+
+    def test_webdemo_story(self) -> None:
+        """The webdemo command should show each step of the login story in order."""
+        cmds = {c.name: c.handler for c in WebPlugin().shell_commands()}
+        output = cmds["webdemo"]([])
+        lines = output.splitlines()
+        story = [
+            "GET /           -> 200 (public page)",
+            "GET /api/me     -> 401 (no wristband yet)",
+            "POST /login     -> 200",
+            "Set-Cookie: session=… (HttpOnly; SameSite=Lax)",
+            'GET /api/me     -> 200 {"user": "ada"} (wristband shown)',
+            "GET /ticks      -> 200 (event stream)",
+            "event: tick 1",
+            "event: tick 2",
+            "event: tick 3",
+        ]
+        positions = [lines.index(line) for line in story]
+        assert positions == sorted(positions)
+        assert "Traceback" not in output
+        assert len(lines) < WEBDEMO_MAX_LINES
+
+    def test_webdemo_never_prints_the_cookie_value(self) -> None:
+        """The webdemo command should elide the session token."""
+        cmds = {c.name: c.handler for c in WebPlugin().shell_commands()}
+        assert "session=…" in cmds["webdemo"]([])
+        assert "session=ey" not in cmds["webdemo"]([])
+
+    def test_webdemo_is_deterministic(self) -> None:
+        """The webdemo command should print the same story every run."""
+        cmds = {c.name: c.handler for c in WebPlugin().shell_commands()}
+        outputs = {cmds["webdemo"]([]) for _ in range(WEBDEMO_RUNS)}
+        assert len(outputs) == 1

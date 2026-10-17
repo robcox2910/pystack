@@ -277,6 +277,7 @@ When you run `pystack os`, these commands are available at the
 | `sql <statement>` | Run a SQL statement | PyOS + PyDB |
 | `hash <text>` | Print the SHA-256 hash | PyCrypt |
 | `curl <url>` | Fetch a URL | PyWeb + PyNet |
+| `webdemo` | Start a real PyWeb async server on localhost: public page, a doorman who says 401 until you log in, a session cookie wristband, then three live events | PyWeb |
 | `dns <hostname>` | Resolve hostname to IP | PyNet |
 | `overlap [n] [seconds]` | Run n sleeps at once on PyNet's event loop and time them | PyNet |
 | `netecho <text>` | Send a message through a local PyNet server and time the round trip | PyNet |
@@ -382,7 +383,7 @@ include:
 | Plugin | Pebble Module | Shell Commands |
 |--------|--------------|----------------|
 | CryptoPlugin | `crypto` | `hash` |
-| WebPlugin | `web` | `curl` |
+| WebPlugin | `web` | `curl`, `webdemo` |
 | GitPlugin | `git` | `git-hash`, `git-diff` |
 | NetPlugin | `net` | `dns`, `overlap`, `netecho`, `wsecho` |
 | SearchPlugin | `search` | (none -- used from Pebble) |
