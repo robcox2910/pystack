@@ -767,7 +767,7 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
     { name = "pytsdb", git = "https://github.com/robcox2910/pytsdb?tag=v0.2.0" },
     { name = "pyvecdb", git = "https://github.com/robcox2910/pyvecdb?tag=v0.2.0" },
-    { name = "pyweb", git = "https://github.com/robcox2910/pyweb?tag=v0.1.0" },
+    { name = "pyweb", git = "https://github.com/robcox2910/pyweb?tag=v0.2.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
 ]
 provides-extras = ["dev", "web"]
@@ -826,8 +826,12 @@ source = { git = "https://github.com/robcox2910/pyvecdb?tag=v0.2.0#3ca720ca372d1
 
 [[package]]
 name = "pyweb"
-version = "0.1.0"
-source = { git = "https://github.com/robcox2910/pyweb?tag=v0.1.0#5cfa8b629271ab57ec3f527ebf0fbcaca31995dd" }
+version = "0.2.0"
+source = { git = "https://github.com/robcox2910/pyweb?tag=v0.2.0#ce05d2b09feec26feecc35b68dbb7a7d1bb658ce" }
+dependencies = [
+    { name = "pycrypt" },
+    { name = "pynet" },
+]
 
 [[package]]
 name = "pyyaml"
