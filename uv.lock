@@ -610,8 +610,8 @@ wheels = [
 
 [[package]]
 name = "pycoldb"
-version = "0.1.0"
-source = { git = "https://github.com/robcox2910/pycoldb?tag=v0.1.0#148e4cca0b21993e979dcc6b28f75d26d830f5b7" }
+version = "0.2.0"
+source = { git = "https://github.com/robcox2910/pycoldb?tag=v0.2.0#d2abe9d1c1585de986714429c68eb764d39b328f" }
 
 [[package]]
 name = "pycrypt"
@@ -625,8 +625,8 @@ source = { git = "https://github.com/robcox2910/pydb?tag=v0.1.0#5b7414e0dcfaa156
 
 [[package]]
 name = "pydocdb"
-version = "0.1.0"
-source = { git = "https://github.com/robcox2910/pydoc-db?tag=v0.1.0#e2edb4e977c5dd9f8edcc635c81afefd0d9a0576" }
+version = "0.2.0"
+source = { git = "https://github.com/robcox2910/pydoc-db?tag=v0.2.0#b150038ecb4ba7f5ca9b9ca81a6d55d13f6f2cd4" }
 
 [[package]]
 name = "pygit"
@@ -649,8 +649,8 @@ source = { git = "https://github.com/robcox2910/pygraphdb?tag=v0.2.0#d9fe74f9458
 
 [[package]]
 name = "pykv"
-version = "0.1.0"
-source = { git = "https://github.com/robcox2910/pykv?tag=v0.1.0#ef72b62591b9817309c62569e2bf19fd7b5a413e" }
+version = "0.2.0"
+source = { git = "https://github.com/robcox2910/pykv?tag=v0.2.0#6d293f8b74ac21ee6867b5189aa4dfdc11c7fde4" }
 
 [[package]]
 name = "pyllm"
@@ -750,13 +750,13 @@ requires-dist = [
     { name = "pebble-lang", git = "https://github.com/robcox2910/pebble-lang?tag=v0.2.0" },
     { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pycoldb", git = "https://github.com/robcox2910/pycoldb?tag=v0.1.0" },
+    { name = "pycoldb", git = "https://github.com/robcox2910/pycoldb?tag=v0.2.0" },
     { name = "pycrypt", git = "https://github.com/robcox2910/pycrypt?tag=v0.1.0" },
     { name = "pydb", git = "https://github.com/robcox2910/pydb?tag=v0.1.0" },
-    { name = "pydocdb", git = "https://github.com/robcox2910/pydoc-db?tag=v0.1.0" },
+    { name = "pydocdb", git = "https://github.com/robcox2910/pydoc-db?tag=v0.2.0" },
     { name = "pygit", git = "https://github.com/robcox2910/pygit?tag=v0.1.0" },
     { name = "pygraphdb", git = "https://github.com/robcox2910/pygraphdb?tag=v0.2.0" },
-    { name = "pykv", git = "https://github.com/robcox2910/pykv?tag=v0.1.0" },
+    { name = "pykv", git = "https://github.com/robcox2910/pykv?tag=v0.2.0" },
     { name = "pyllm", git = "https://github.com/robcox2910/pyllm?tag=v0.2.0" },
     { name = "pymq", git = "https://github.com/robcox2910/pymq?tag=v0.2.0" },
     { name = "pynet", git = "https://github.com/robcox2910/pynet?tag=v0.1.0" },

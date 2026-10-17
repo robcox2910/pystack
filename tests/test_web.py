@@ -169,3 +169,25 @@ class TestWebServerSaves:
             )
             assert json.loads(response.data)["halted"]
         assert "pet" in (tmp_path / "kv" / "store.json").read_text(encoding="utf-8")
+
+    def test_changes_after_shell_exit_are_still_saved(self, tmp_path: Path) -> None:
+        """The Pebble panel keeps working after ``exit``; stopping the server saves it."""
+        app = create_app(data_dir=tmp_path)
+        with app.test_client() as client:
+            for source, command in (
+                ('kv_set("before", "1")', "exit"),
+                ('kv_set("after", "2")', None),
+            ):
+                client.post(
+                    "/api/pebble",
+                    data=json.dumps({"source": f'import "kv"\n{source}'}),
+                    content_type=CONTENT_TYPE,
+                )
+                if command:
+                    client.post(
+                        "/api/shell",
+                        data=json.dumps({"command": command}),
+                        content_type=CONTENT_TYPE,
+                    )
+        app.extensions["pystack_env"].shutdown()
+        assert "after" in (tmp_path / "kv" / "store.json").read_text(encoding="utf-8")

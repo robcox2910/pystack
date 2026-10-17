@@ -16,9 +16,10 @@ Example Pebble usage::
     print(results)
 """
 
+import hashlib
 import json
 from pathlib import Path
-from urllib.parse import quote, unquote
+from urllib.parse import quote
 
 from pebble import StdlibModule
 from pebble import Value as PebbleValue
@@ -26,6 +27,23 @@ from pydocdb.collection import Collection
 from pydocdb.persistence import load_collection, save_collection
 
 from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_method
+
+# Long enough to be readable, short enough for any file system.
+_MAX_READABLE_NAME = 60
+
+
+def _collection_file(name: str) -> str:
+    """Return a safe, unique file name for collection *name*.
+
+    The name comes from a Pebble program, so it could be anything: ``../x``,
+    an empty string, or ``Pets`` next to ``pets`` (the same file on a Mac,
+    whose disk ignores case). An escaped, shortened copy of the name keeps
+    the file readable; a short fingerprint of the exact name keeps it unique.
+    The real name is stored inside the file and used when loading.
+    """
+    readable = quote(name, safe="")[:_MAX_READABLE_NAME]
+    fingerprint = hashlib.sha256(name.encode("utf-8")).hexdigest()[:12]
+    return f"{readable}-{fingerprint}.json"
 
 
 class DocDBPlugin(Plugin):
@@ -80,15 +98,16 @@ class DocDBPlugin(Plugin):
         if not folder.is_dir():
             return
         for path in sorted(folder.glob("*.json")):
-            self._collections[unquote(path.stem)] = load_collection(path)
+            collection = load_collection(path)
+            self._collections[collection.name] = collection
 
     def save_state(self, folder: Path) -> None:
-        """Save every collection. File names are escaped, so any name is safe."""
+        """Save every collection, one file each (see :func:`_collection_file`)."""
         if not self._collections:
             return
         folder.mkdir(parents=True, exist_ok=True)
         for name, collection in self._collections.items():
-            save_collection(collection, folder / f"{quote(name, safe='')}.json")
+            save_collection(collection, folder / _collection_file(name))
 
     def info(self) -> PluginInfo:
         """Return plugin metadata."""

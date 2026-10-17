@@ -83,7 +83,11 @@ class VecDBPlugin(Plugin):
         """Search for the k most similar vectors."""
         query_vector = _parse_vector(args[0])
         k = int(str(args[1])) if len(args) > 1 else 1
-        store = self._get_store(dimensions=len(query_vector))
+        if self._store is None:
+            # Don't create the store here: that would fix its vector size
+            # (and save it) just because someone searched an empty store.
+            return "error: Cannot search an empty store"
+        store = self._store
         results = knn_search(store, query=query_vector, k=k)
         result_list: list[PebbleValue] = [r.record_id for r, _score in results]
         return result_list

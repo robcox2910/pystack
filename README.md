@@ -369,6 +369,11 @@ empty and overwriting your data.
 
 Message queues (`mq`) aren't saved yet; they start empty each time.
 
+Because data is kept, running the same example twice adds the same data
+twice. To start fresh, delete the `pystack_data/` folder (or just one
+plugin's folder, like `pystack_data/kv/`). Saved search engines keep their
+ids; `search_list()` lists them, so a later program can find them.
+
 ## Plugin System
 
 PyStack uses a plugin system to integrate projects. Active plugins

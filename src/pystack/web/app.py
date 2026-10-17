@@ -70,9 +70,18 @@ def create_app(data_dir: str | Path = "pystack_data") -> Flask:
         command: str = data["command"]
         result = shell.execute(command)
         halted = result == Shell.EXIT_SENTINEL
-        if halted:
-            env.shutdown()  # saves everything, then stops the kernel
-        return jsonify({"output": result if not halted else "System halted.", "halted": halted})
+        if not halted:
+            return jsonify({"output": result, "halted": False})
+        # Save now, but leave the environment open: the Pebble and SQL panels
+        # still work after ``exit``, and stopping the server saves those too.
+        message = "System halted."
+        try:
+            env.save()
+        except ExceptionGroup as exc:
+            message += f" Warning: {exc}"
+        if kernel and kernel.state is KernelState.RUNNING:
+            kernel.shutdown()
+        return jsonify({"output": message, "halted": True})
 
     @app.route("/api/pebble", methods=["POST"])
     def api_pebble() -> tuple[Response, int] | Response:  # pyright: ignore[reportUnusedFunction]

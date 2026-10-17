@@ -144,3 +144,68 @@ class TestNoGlobalState:
         source = (PLUGINS_DIR / f"{module}_plugin.py").read_text(encoding="utf-8")
         assert "global " not in source
         assert "def reset_" not in source
+
+
+class TestReviewFixes:
+    """Regressions found in the final review of plugin persistence."""
+
+    @pytest.mark.parametrize(
+        ("module", "filename", "content", "error"),
+        [
+            ("docdb", "pets.json", "{}", DocDBPersistenceError),
+            ("kv", "store.json", "[]", KVPersistenceError),
+            ("coldb", "keyspace.json", "{}", ColDBPersistenceError),
+        ],
+    )
+    def test_wrong_shape_save_file_stops_boot_and_is_kept(
+        self, tmp_path: Path, module: str, filename: str, content: str, error: type[Exception]
+    ) -> None:
+        """Valid JSON that isn't a save file stops start-up instead of loading as empty."""
+        folder = tmp_path / module
+        folder.mkdir()
+        (folder / filename).write_text(content, encoding="utf-8")
+        with pytest.raises(error, match=re.escape(filename)):
+            PyStackEnvironment(db_path=tmp_path)
+        assert (folder / filename).read_text(encoding="utf-8") == content
+
+    def test_docdb_collections_differing_only_in_case_stay_separate(self, tmp_path: Path) -> None:
+        """``Pets`` and ``pets`` are different collections, even on a case-insensitive disk."""
+        first = PyStackEnvironment(db_path=tmp_path)
+        _run(
+            first,
+            "docdb",
+            'doc_insert("Pets", {"n": 1})\ndoc_insert("pets", {"n": 2})\ndoc_insert("pets", {"n": 3})',
+        )
+        first.shutdown()
+        second = PyStackEnvironment(db_path=tmp_path)
+        try:
+            assert (
+                _run(second, "docdb", 'print(doc_count("Pets"))\nprint(doc_count("pets"))')
+                == "1\n2\n"
+            )
+        finally:
+            second.shutdown()
+
+    def test_saved_search_engines_can_be_listed(self, tmp_path: Path) -> None:
+        """A later program can find saved engines without guessing their ids."""
+        first = PyStackEnvironment(db_path=tmp_path)
+        _run(first, "search", "search_create()\nsearch_create()")
+        first.shutdown()
+        second = PyStackEnvironment(db_path=tmp_path)
+        try:
+            assert _run(second, "search", "print(search_list())") == "[engine_0, engine_1]\n"
+        finally:
+            second.shutdown()
+
+    def test_searching_an_empty_vector_store_does_not_fix_its_size(self, tmp_path: Path) -> None:
+        """A failed search on an empty store leaves the vector size open."""
+        env = PyStackEnvironment(db_path=tmp_path)
+        try:
+            output = _run(
+                env,
+                "vecdb",
+                'print(vec_search([1.0, 2.0], 1))\nprint(vec_insert("a", [1.0, 2.0, 3.0]))',
+            )
+            assert output.splitlines()[1] == "a"
+        finally:
+            env.shutdown()
