@@ -8,21 +8,25 @@ This is the bridge between a programming language and a database --
 just like how Python programs talk to SQLite or PostgreSQL.
 """
 
+from datetime import date
+
 from pebble import StdlibModule
 from pebble import Value as PebbleValue
 from pydb.database import Database
 from pydb.executor import execute
 from pydb.record import Value as PyDBValue
 from pydb.sql_parser import parse_sql
+from pydb.types import to_iso
 
 
 def _pydb_to_pebble(value: PyDBValue) -> PebbleValue:
     """Convert a PyDB value to a Pebble value.
 
-    PyDB values (str, int, float, bool) are a subset of Pebble values,
-    so this is a direct pass-through.
+    Text, numbers and booleans pass straight through. Dates and timestamps
+    become readable ISO text (``2026-10-17`` or ``2026-10-17T07:30:00Z``),
+    because Pebble has no date type of its own.
     """
-    return value
+    return to_iso(value) if isinstance(value, date) else value
 
 
 def _row_to_pebble_dict(row: dict[str, PyDBValue]) -> dict[str, PebbleValue]:

@@ -173,3 +173,25 @@ class TestEnvironmentsDontShareDb:
         finally:
             first.shutdown()
             second.shutdown()
+
+
+class TestPebbleDbDates:
+    """Verify DATE and TIMESTAMP columns reach Pebble as readable text."""
+
+    def test_dates_and_timestamps_become_iso_text(self, tmp_path: Path) -> None:
+        """A DATE and a TIMESTAMP read through db_query should be ISO strings."""
+        env = PyStackEnvironment(db_path=tmp_path)
+        try:
+            source = """
+import "db"
+db_execute("CREATE TABLE runs (job TEXT, day DATE, started TIMESTAMP)")
+db_execute("INSERT INTO runs VALUES ('backup', DATE '2026-10-17', TIMESTAMP '2026-10-17T07:30:00Z')")
+let rows = db_query("SELECT day, started FROM runs")
+print(rows[0]["day"])
+print(rows[0]["started"])
+"""
+            output = env.run_pebble_source(source)
+            assert "2026-10-17\n" in output
+            assert "2026-10-17T07:30:00Z" in output
+        finally:
+            env.shutdown()

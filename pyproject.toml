@@ -118,6 +118,8 @@ max-args = 9
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S101", "SLF001"]
+# Runs our own interpreter with a fixed argument list: S603 is a false positive.
+"src/pystack/plugins/pydb_plugin.py" = ["S603"]
 
 [tool.ruff.format]
 quote-style = "double"

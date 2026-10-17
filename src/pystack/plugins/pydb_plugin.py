@@ -40,7 +40,7 @@ def _dbcrash_cmd(_args: list[str]) -> str:
     lines = ["Starting a helper program that writes job runs to a journalled database..."]
     with tempfile.TemporaryDirectory() as tmp:
         folder = Path(tmp) / "jobs-db"
-        result = subprocess.run(  # noqa: S603 -- fixed argv: our own interpreter and module
+        result = subprocess.run(
             [sys.executable, "-m", CHILD_MODULE, str(folder)],
             check=False,
             capture_output=True,
