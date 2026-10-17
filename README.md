@@ -278,7 +278,7 @@ When you run `pystack os`, these commands are available at the
 | `hash <text>` | Print the SHA-256 hash | PyCrypt |
 | `curl <url>` | Fetch a URL | PyWeb + PyNet |
 | `dns <hostname>` | Resolve hostname to IP | PyNet |
-| `git-hash <text>` | Print the SHA-1 hash (Git-style) | PyGit |
+| `git-hash <text>` | Print the Git blob hash (same as `git hash-object`) | PyGit |
 | `git-diff <old> <new>` | Show a diff between two strings | PyGit |
 | `mq-put <queue> <msg>` | Put a message on a queue | PyMQ |
 | `mq-get <queue>` | Get the next message from a queue | PyMQ |
