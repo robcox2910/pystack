@@ -82,7 +82,7 @@ pygit = { git = "https://github.com/robcox2910/pygit", tag = "v0.1.0" }
 pycrypt = { git = "https://github.com/robcox2910/pycrypt", tag = "v0.1.0" }
 pynet = { git = "https://github.com/robcox2910/pynet", tag = "v0.1.0" }
 pysearch = { git = "https://github.com/robcox2910/pysearch", tag = "v0.2.0" }
-pymq = { git = "https://github.com/robcox2910/pymq", tag = "v0.3.0" }
+pymq = { git = "https://github.com/robcox2910/pymq", tag = "v0.3.1" }
 pykv = { git = "https://github.com/robcox2910/pykv", tag = "v0.2.0" }
 pydocdb = { git = "https://github.com/robcox2910/pydoc-db", tag = "v0.2.0" }
 pygraphdb = { git = "https://github.com/robcox2910/pygraphdb", tag = "v0.2.0" }
