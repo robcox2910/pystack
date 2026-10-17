@@ -14,8 +14,6 @@ from pystack.environment import PyStackEnvironment
 
 SRC = Path(__file__).parent.parent / "src" / "pystack"
 DEEP_IMPORT = re.compile(r"^\s*(from pebble\.|import pebble\.)", re.MULTILINE)
-# Left alone until its follow-up (spec section 5).
-EXEMPT = {"plugins/mq_plugin.py"}
 
 
 class TestFrontDoor:
@@ -49,6 +47,5 @@ class TestFrontDoor:
             path.relative_to(SRC).as_posix()
             for path in sorted(SRC.rglob("*.py"))
             if DEEP_IMPORT.search(path.read_text(encoding="utf-8"))
-            and path.relative_to(SRC).as_posix() not in EXEMPT
         ]
         assert offenders == []

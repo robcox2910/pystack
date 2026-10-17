@@ -14,6 +14,11 @@ connection is lost), so the broker takes the lease back and worker B gets
 the job on its second attempt. A poison job nobody can do ends up in the
 dead-letter box.
 
+Messages still waiting when PyStack stops are saved in
+``pystack_data/mq/queues.json`` and are there again next time, like a real
+broker. Pub/sub subscriptions are live only, like a radio: they don't
+outlive the run.
+
 Pebble module name: ``mq``
 
 Example Pebble usage::
@@ -25,14 +30,17 @@ Example Pebble usage::
     print(msg)
 """
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pathlib import Path
+
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 from pymq.broker import BrokerClient, BrokerServer, Delivery, QueueConfig, TopicEvent
+from pymq.persistence import load_queues, save_queues
 from pymq.pubsub import PubSub
-from pymq.queue import MessageQueue
+from pymq.queue import BaseMessageQueue, MessageQueue
 from pynet.loop import Event, run, sleep, timeout
 
-from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_method
 
 LOOPBACK = "127.0.0.1"
 MQNET_TIMEOUT = 5.0
@@ -41,85 +49,7 @@ MQNET_ACK_TIMEOUT = 0.5
 MQNET_RETRY_DELAY = 0.1
 MQNET_POLL = 0.01
 POISON_JOB = "job-boom"
-
-_queues: dict[str, MessageQueue] = {}
-_pubsub_instance: PubSub | None = None
-_topic_messages: dict[str, list[str]] = {}
-
-
-def _get_pubsub() -> PubSub:
-    """Return the shared PubSub instance, creating it if needed."""
-    global _pubsub_instance  # noqa: PLW0603
-    if _pubsub_instance is None:
-        _pubsub_instance = PubSub()
-    return _pubsub_instance
-
-
-@pebble_handler
-def _mq_create(args: list[PebbleValue]) -> PebbleValue:
-    """Create a named message queue and return its name."""
-    name = str(args[0])
-    if name not in _queues:
-        _queues[name] = MessageQueue(name)
-    return name
-
-
-@pebble_handler
-def _mq_put(args: list[PebbleValue]) -> PebbleValue:
-    """Put a message on a named queue."""
-    name = str(args[0])
-    message = str(args[1])
-    if name not in _queues:
-        return f"error: queue '{name}' not found"
-    _queues[name].put(message)
-    return "ok"
-
-
-@pebble_handler
-def _mq_get(args: list[PebbleValue]) -> PebbleValue:
-    """Get the next message body from a named queue, or 'empty'."""
-    name = str(args[0])
-    if name not in _queues:
-        return f"error: queue '{name}' not found"
-    msg = _queues[name].get()
-    if msg is None:
-        return "empty"
-    _queues[name].acknowledge(msg)
-    return msg.body
-
-
-@pebble_handler
-def _mq_publish(args: list[PebbleValue]) -> PebbleValue:
-    """Publish a message to a topic."""
-    topic = str(args[0])
-    message = str(args[1])
-    _get_pubsub().publish(topic, message)
-    return "ok"
-
-
-@pebble_handler
-def _mq_subscribe(args: list[PebbleValue]) -> PebbleValue:
-    """Subscribe to a topic and store messages for later retrieval."""
-    topic = str(args[0])
-    if topic not in _topic_messages:
-        _topic_messages[topic] = []
-
-        def _handler(_t: str, msg: str) -> None:
-            _topic_messages[topic].append(msg)
-
-        _get_pubsub().subscribe(topic, _handler)
-    return topic
-
-
-@pebble_handler
-def _mq_receive(args: list[PebbleValue]) -> PebbleValue:
-    """Get all stored messages for a subscribed topic."""
-    topic = str(args[0])
-    if topic not in _topic_messages:
-        return f"error: not subscribed to '{topic}'"
-    result: list[PebbleValue] = list(_topic_messages[topic])
-    _topic_messages[topic].clear()
-    return result
+_QUEUES_FILE = "queues.json"
 
 
 async def _mqnet_story(out: list[str]) -> None:
@@ -201,20 +131,105 @@ def _mqnet_cmd(_args: list[str]) -> str:
     return "\n".join(lines)
 
 
-def reset_mq_state() -> None:
-    """Reset all module-level state for testing."""
-    global _pubsub_instance  # noqa: PLW0603
-    _queues.clear()
-    _pubsub_instance = None
-    _topic_messages.clear()
-
-
 class MQPlugin(Plugin):
     """Integrate PyMQ message queue functions into PyStack.
 
     Register queue and pub/sub functions in Pebble's ``mq`` stdlib
     module, and ``mq-put`` / ``mq-get`` / ``mqnet`` shell commands.
     """
+
+    def __init__(self) -> None:
+        """Start with no queues; they are created on first use or loaded at start-up."""
+        self._queues: dict[str, BaseMessageQueue] | None = None
+        self._pubsub = PubSub()
+        self._inboxes: dict[str, list[str]] = {}
+
+    def _get_queues(self) -> dict[str, BaseMessageQueue]:
+        """Return this plugin's queues, creating the table on first use."""
+        if self._queues is None:
+            self._queues = {}
+        return self._queues
+
+    def _put(self, name: str, message: str) -> None:
+        """Put *message* on queue *name*, creating the queue if needed."""
+        self._get_queues().setdefault(name, MessageQueue(name)).put(message)
+
+    def _take(self, name: str) -> str | None:
+        """Take and acknowledge the next message body, or None if the queue is empty."""
+        queue = self._get_queues()[name]
+        msg = queue.get()
+        if msg is None:
+            return None
+        queue.acknowledge(msg)
+        return msg.body
+
+    @pebble_method
+    def mq_create(self, args: list[PebbleValue]) -> PebbleValue:
+        """Create a named message queue and return its name."""
+        name = str(args[0])
+        self._get_queues().setdefault(name, MessageQueue(name))
+        return name
+
+    @pebble_method
+    def mq_put(self, args: list[PebbleValue]) -> PebbleValue:
+        """Put a message on a named queue."""
+        name = str(args[0])
+        if name not in self._get_queues():
+            return f"error: queue '{name}' not found"
+        self._put(name, str(args[1]))
+        return "ok"
+
+    @pebble_method
+    def mq_get(self, args: list[PebbleValue]) -> PebbleValue:
+        """Get the next message body from a named queue, or 'empty'."""
+        name = str(args[0])
+        if name not in self._get_queues():
+            return f"error: queue '{name}' not found"
+        body = self._take(name)
+        return "empty" if body is None else body
+
+    @pebble_method
+    def mq_publish(self, args: list[PebbleValue]) -> PebbleValue:
+        """Publish a message to a topic."""
+        self._pubsub.publish(str(args[0]), str(args[1]))
+        return "ok"
+
+    @pebble_method
+    def mq_subscribe(self, args: list[PebbleValue]) -> PebbleValue:
+        """Subscribe to a topic and store messages for later retrieval."""
+        topic = str(args[0])
+        if topic not in self._inboxes:
+            inbox: list[str] = []
+            self._inboxes[topic] = inbox
+
+            def _handler(_t: str, msg: str) -> None:
+                inbox.append(msg)
+
+            self._pubsub.subscribe(topic, _handler)
+        return topic
+
+    @pebble_method
+    def mq_receive(self, args: list[PebbleValue]) -> PebbleValue:
+        """Get all stored messages for a subscribed topic."""
+        topic = str(args[0])
+        if topic not in self._inboxes:
+            return f"error: not subscribed to '{topic}'"
+        result: list[PebbleValue] = list(self._inboxes[topic])
+        self._inboxes[topic].clear()
+        return result
+
+    def load_state(self, folder: Path) -> None:
+        """Load the saved queues, if there are any."""
+        path = folder / _QUEUES_FILE
+        if path.exists():
+            self._queues = load_queues(path)
+
+    def save_state(self, folder: Path) -> None:
+        """Save the queues, if this run used or loaded any."""
+        if self._queues is None:
+            return
+        folder.mkdir(parents=True, exist_ok=True)
+        save_queues(self._queues.values(), folder / _QUEUES_FILE)
 
     def info(self) -> PluginInfo:
         """Return plugin metadata."""
@@ -232,12 +247,12 @@ class MQPlugin(Plugin):
         """Return the mq stdlib module with queue and pub/sub functions."""
         return StdlibModule(
             functions={
-                "mq_create": (1, _mq_create),
-                "mq_put": (2, _mq_put),
-                "mq_get": (1, _mq_get),
-                "mq_publish": (2, _mq_publish),
-                "mq_subscribe": (1, _mq_subscribe),
-                "mq_receive": (1, _mq_receive),
+                "mq_create": (1, self.mq_create),
+                "mq_put": (2, self.mq_put),
+                "mq_get": (1, self.mq_get),
+                "mq_publish": (2, self.mq_publish),
+                "mq_subscribe": (1, self.mq_subscribe),
+                "mq_receive": (1, self.mq_receive),
             },
             constants={},
         )
@@ -249,12 +264,9 @@ class MQPlugin(Plugin):
             """Put a message on a named queue."""
             if len(args) < 2:  # noqa: PLR2004
                 return "Usage: mq-put <queue> <message>"
-
             name = args[0]
             message = " ".join(args[1:])
-            if name not in _queues:
-                _queues[name] = MessageQueue(name)
-            _queues[name].put(message)
+            self._put(name, message)
             return f"Queued on '{name}': {message}"
 
         def _mq_get_cmd(args: list[str]) -> str:
@@ -262,13 +274,10 @@ class MQPlugin(Plugin):
             if not args:
                 return "Usage: mq-get <queue>"
             name = args[0]
-            if name not in _queues:
+            if name not in self._get_queues():
                 return f"Queue '{name}' not found"
-            msg = _queues[name].get()
-            if msg is None:
-                return "Queue is empty"
-            _queues[name].acknowledge(msg)
-            return msg.body
+            body = self._take(name)
+            return "Queue is empty" if body is None else body
 
         return [
             ShellCommand(
