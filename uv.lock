@@ -492,20 +492,8 @@ wheels = [
 
 [[package]]
 name = "pebble-lang"
-source = { editable = "../pebble-lang" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.5" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev", "docs"]
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pebble-lang?tag=v0.1.0#f0a4ab021d62417f88588c63c92b57648260f16f" }
 
 [[package]]
 name = "pip"
@@ -622,84 +610,28 @@ wheels = [
 
 [[package]]
 name = "pycoldb"
-source = { editable = "../pycoldb" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev"]
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pycoldb?tag=v0.1.0#148e4cca0b21993e979dcc6b28f75d26d830f5b7" }
 
 [[package]]
 name = "pycrypt"
-source = { editable = "../pycrypt" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev"]
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pycrypt?tag=v0.1.0#c834608a8ebeb50960d42a1cc998cd34adcbda17" }
 
 [[package]]
 name = "pydb"
-source = { editable = "../pydb" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.5" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev", "docs"]
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pydb?tag=v0.1.0#5b7414e0dcfaa156ea8d8e8984567728cb4a511b" }
 
 [[package]]
 name = "pydocdb"
-source = { editable = "../pydocdb" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev"]
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pydoc-db?tag=v0.1.0#e2edb4e977c5dd9f8edcc635c81afefd0d9a0576" }
 
 [[package]]
 name = "pygit"
-source = { editable = "../pygit" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev"]
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pygit?tag=v0.1.0#8d9884de2bffb8fa68523a22b1675b527e4a6577" }
 
 [[package]]
 name = "pygments"
@@ -712,110 +644,36 @@ wheels = [
 
 [[package]]
 name = "pygraphdb"
-source = { editable = "../pygraphdb" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev"]
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pygraphdb?tag=v0.1.0#319c913823f6c7687d73b46113c49d173ce59ec1" }
 
 [[package]]
 name = "pykv"
-source = { editable = "../pykv" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev"]
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pykv?tag=v0.1.0#ef72b62591b9817309c62569e2bf19fd7b5a413e" }
 
 [[package]]
 name = "pyllm"
-source = { editable = "../pyllm" }
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pyllm?tag=v0.1.0#c7584ce8e0864498a37ecf491d8e7b81291c0f33" }
 dependencies = [
     { name = "numpy" },
 ]
 
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.5" },
-    { name = "numpy", specifier = ">=2.1" },
-    { name = "pebble-lang", marker = "extra == 'pebble'", editable = "../pebble-lang" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev", "docs", "pebble"]
-
 [[package]]
 name = "pymq"
-source = { editable = "../pymq" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev"]
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pymq?tag=v0.1.0#5c04ec2873a8a5c1224bec13de6a22ce118825ed" }
 
 [[package]]
 name = "pynet"
-source = { editable = "../pynet" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.3.1" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev"]
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pynet?tag=v0.1.0#c43b2e1d06533f545ec7368288d5873e07ff5c33" }
 
 [[package]]
 name = "pyos-learn"
-source = { editable = "../os_learning" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "flask", marker = "extra == 'web'", specifier = ">=3.0" },
-    { name = "mkdocs-material", marker = "extra == 'docs'", specifier = ">=9.5" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.24" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-    { name = "textual", marker = "extra == 'tui'", specifier = ">=0.90" },
-]
-provides-extras = ["dev", "docs", "tui", "web"]
+version = "0.2.0"
+source = { git = "https://github.com/robcox2910/py-os?tag=v0.2.0#db220747ee6bc74ec8b4a4460c957130e6459cd7" }
 
 [[package]]
 name = "pyparsing"
@@ -841,19 +699,8 @@ wheels = [
 
 [[package]]
 name = "pysearch"
-source = { editable = "../pysearch" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev"]
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pysearch?tag=v0.1.0#b76e097bc550f38db3d8fffc72e5102418b09761" }
 
 [[package]]
 name = "pystack"
@@ -897,27 +744,27 @@ requires-dist = [
     { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
     { name = "flask", marker = "extra == 'dev'", specifier = ">=3.0" },
     { name = "flask", marker = "extra == 'web'", specifier = ">=3.0" },
-    { name = "pebble-lang", editable = "../pebble-lang" },
+    { name = "pebble-lang", git = "https://github.com/robcox2910/pebble-lang?tag=v0.1.0" },
     { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pycoldb", editable = "../pycoldb" },
-    { name = "pycrypt", editable = "../pycrypt" },
-    { name = "pydb", editable = "../pydb" },
-    { name = "pydocdb", editable = "../pydocdb" },
-    { name = "pygit", editable = "../pygit" },
-    { name = "pygraphdb", editable = "../pygraphdb" },
-    { name = "pykv", editable = "../pykv" },
-    { name = "pyllm", editable = "../pyllm" },
-    { name = "pymq", editable = "../pymq" },
-    { name = "pynet", editable = "../pynet" },
-    { name = "pyos-learn", editable = "../os_learning" },
+    { name = "pycoldb", git = "https://github.com/robcox2910/pycoldb?tag=v0.1.0" },
+    { name = "pycrypt", git = "https://github.com/robcox2910/pycrypt?tag=v0.1.0" },
+    { name = "pydb", git = "https://github.com/robcox2910/pydb?tag=v0.1.0" },
+    { name = "pydocdb", git = "https://github.com/robcox2910/pydoc-db?tag=v0.1.0" },
+    { name = "pygit", git = "https://github.com/robcox2910/pygit?tag=v0.1.0" },
+    { name = "pygraphdb", git = "https://github.com/robcox2910/pygraphdb?tag=v0.1.0" },
+    { name = "pykv", git = "https://github.com/robcox2910/pykv?tag=v0.1.0" },
+    { name = "pyllm", git = "https://github.com/robcox2910/pyllm?tag=v0.1.0" },
+    { name = "pymq", git = "https://github.com/robcox2910/pymq?tag=v0.1.0" },
+    { name = "pynet", git = "https://github.com/robcox2910/pynet?tag=v0.1.0" },
+    { name = "pyos-learn", git = "https://github.com/robcox2910/py-os?tag=v0.2.0" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pysearch", editable = "../pysearch" },
+    { name = "pysearch", git = "https://github.com/robcox2910/pysearch?tag=v0.1.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "pytsdb", editable = "../pytsdb" },
-    { name = "pyvecdb", editable = "../pyvecdb" },
-    { name = "pyweb", editable = "../pyweb" },
+    { name = "pytsdb", git = "https://github.com/robcox2910/pytsdb?tag=v0.1.0" },
+    { name = "pyvecdb", git = "https://github.com/robcox2910/pyvecdb?tag=v0.1.0" },
+    { name = "pyweb", git = "https://github.com/robcox2910/pyweb?tag=v0.1.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
 ]
 provides-extras = ["dev", "web"]
@@ -966,51 +813,18 @@ wheels = [
 
 [[package]]
 name = "pytsdb"
-source = { editable = "../pytsdb" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev"]
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pytsdb?tag=v0.1.0#61c2c61dccefd8701a7ab4092f8bbc8f992800b5" }
 
 [[package]]
 name = "pyvecdb"
-source = { editable = "../pyvecdb" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev"]
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pyvecdb?tag=v0.1.0#8d084ead90fdfce8623e27943ac9e7d96cd9b328" }
 
 [[package]]
 name = "pyweb"
-source = { editable = "../pyweb" }
-
-[package.metadata]
-requires-dist = [
-    { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
-    { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
-    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
-]
-provides-extras = ["dev"]
+version = "0.1.0"
+source = { git = "https://github.com/robcox2910/pyweb?tag=v0.1.0#5cfa8b629271ab57ec3f527ebf0fbcaca31995dd" }
 
 [[package]]
 name = "pyyaml"

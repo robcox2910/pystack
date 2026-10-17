@@ -303,7 +303,7 @@ When you run `pystack os`, these commands are available at the
 ## Quick Start
 
 ```bash
-# Install dependencies (all 17 projects wired together)
+# Install dependencies (pinned releases of all 16 sibling projects)
 uv sync --all-extras
 
 # Run an example program
@@ -321,6 +321,34 @@ pystack web
 # Run tests
 uv run pytest
 ```
+
+## Developing alongside a sibling
+
+Every sibling project is pinned to a release tag in `pyproject.toml`
+(`[tool.uv.sources]`), and `uv.lock` records the exact commit. A change merged
+into a sibling can't affect PyStack until PyStack chooses to upgrade.
+
+To try an unreleased change from a sibling checkout next to this one, install
+it over the pinned release:
+
+```bash
+uv pip install -e ../pebble-lang
+uv run --no-sync pytest
+```
+
+Use `uv run --no-sync` while you do this: a plain `uv run` (like `uv sync`)
+puts the pinned release back, which is how you undo the override.
+
+To upgrade a sibling, edit its tag in `[tool.uv.sources]`, run
+`uv lock --upgrade-package <name>`, and open a pull request so CI checks the
+pair together.
+
+## Releasing
+
+1. Merge the change to `main`.
+2. Tag it: `git tag -a vX.Y.Z -m vX.Y.Z && git push origin vX.Y.Z`.
+   A change to the public API bumps the minor version (`v0.1.0` → `v0.2.0`);
+   anything else bumps the patch (`v0.1.0` → `v0.1.1`).
 
 ## Plugin System
 
