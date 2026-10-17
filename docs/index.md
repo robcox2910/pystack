@@ -90,7 +90,13 @@ pystack-os> mq-get orders
 one coffee
 pystack-os> mqnet
 broker: listening on a free local port
-...
+boss: declared queue 'jobs' (2 attempts per job)
+worker A: took job-1 (attempt 1) and crashed - connection lost
+broker: took job-1 back from worker A (lease returned, attempt 1 used up)
+worker B: job-1 done (attempt 2)
+worker B: job-2 done (attempt 1)
+worker B: job-boom failed (attempt 1)
+worker B: job-boom failed (attempt 2)
 dead: job-boom (max_attempts) - poison job
 announced: $sys.dead.jobs
 broker: closed
@@ -137,7 +143,7 @@ The first two come from the core adapters. The rest come from plugins.
 | `git-diff <old> <new>` | Show a unified diff | GitPlugin |
 | `mq-put <queue> <msg>` | Put a message on a named queue | MQPlugin |
 | `mq-get <queue>` | Get the next message from a queue | MQPlugin |
-| `mqnet` | Visit PyMQ's networked post office: one worker crashes, another finishes, a poison job lands in the dead-letter box | MQPlugin |
+| `mqnet` | Visit PyMQ's networked post office: one worker crashes, its lease comes back to another, a poison job lands in the dead-letter box | MQPlugin |
 
 Plus all the standard PyOS commands like `ls`, `cat`, `mkdir`, `help`,
 and more.
