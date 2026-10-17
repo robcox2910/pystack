@@ -17,59 +17,15 @@ Example Pebble usage::
 """
 
 import json
+from pathlib import Path
+from urllib.parse import quote, unquote
 
 from pebble import StdlibModule
 from pebble import Value as PebbleValue
 from pydocdb.collection import Collection
+from pydocdb.persistence import load_collection, save_collection
 
-from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
-
-_collections: dict[str, Collection] = {}
-
-
-def _get_collection(name: str) -> Collection:
-    """Return a collection by name, creating it if needed."""
-    if name not in _collections:
-        _collections[name] = Collection(name)
-    return _collections[name]
-
-
-@pebble_handler
-def _doc_insert(args: list[PebbleValue]) -> PebbleValue:
-    """Insert a document into a named collection."""
-    collection_name = str(args[0])
-    data = args[1]
-    col = _get_collection(collection_name)
-    if isinstance(data, dict):
-        doc = col.insert_one(data)
-        return str(doc.id)
-    return "error: data must be a dictionary"
-
-
-@pebble_handler
-def _doc_find(args: list[PebbleValue]) -> PebbleValue:
-    """Find documents in a collection matching a query."""
-    collection_name = str(args[0])
-    query = args[1] if len(args) > 1 else {}
-    col = _get_collection(collection_name)
-    if not isinstance(query, dict):
-        query = {}
-    results = col.find(query)
-    result_list: list[PebbleValue] = [str(r) for r in results]
-    return result_list
-
-
-@pebble_handler
-def _doc_count(args: list[PebbleValue]) -> PebbleValue:
-    """Count documents in a collection."""
-    collection_name = str(args[0])
-    col = _get_collection(collection_name)
-    return col.count()
-
-
-def reset_docdb_state() -> None:
-    """Reset all module-level state for testing."""
-    _collections.clear()
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_method
 
 
 class DocDBPlugin(Plugin):
@@ -78,6 +34,61 @@ class DocDBPlugin(Plugin):
     Register insert/find/count functions in Pebble's ``docdb`` stdlib
     module and shell commands for interactive use.
     """
+
+    def __init__(self) -> None:
+        """Start with no data; it is created on first use or loaded at start-up."""
+        self._collections: dict[str, Collection] = {}
+
+    def _get_collection(self, name: str) -> Collection:
+        """Return a collection by name, creating it if needed."""
+        if name not in self._collections:
+            self._collections[name] = Collection(name)
+        return self._collections[name]
+
+    @pebble_method
+    def doc_insert(self, args: list[PebbleValue]) -> PebbleValue:
+        """Insert a document into a named collection."""
+        collection_name = str(args[0])
+        data = args[1]
+        col = self._get_collection(collection_name)
+        if isinstance(data, dict):
+            doc = col.insert_one(data)
+            return str(doc.id)
+        return "error: data must be a dictionary"
+
+    @pebble_method
+    def doc_find(self, args: list[PebbleValue]) -> PebbleValue:
+        """Find documents in a collection matching a query."""
+        collection_name = str(args[0])
+        query = args[1] if len(args) > 1 else {}
+        col = self._get_collection(collection_name)
+        if not isinstance(query, dict):
+            query = {}
+        results = col.find(query)
+        result_list: list[PebbleValue] = [str(r) for r in results]
+        return result_list
+
+    @pebble_method
+    def doc_count(self, args: list[PebbleValue]) -> PebbleValue:
+        """Count documents in a collection."""
+        collection_name = str(args[0])
+        col = self._get_collection(collection_name)
+        return col.count()
+
+    def load_state(self, folder: Path) -> None:
+        """Load every saved collection (one file each)."""
+        if not folder.is_dir():
+            return
+        for path in sorted(folder.glob("*.json")):
+            self._collections[unquote(path.stem)] = load_collection(path)
+
+    def save_state(self, folder: Path) -> None:
+        """Save every collection. File names are escaped, so any name is safe."""
+        if not self._collections:
+            return
+        folder.mkdir(parents=True, exist_ok=True)
+        for name, collection in self._collections.items():
+            save_collection(collection, folder / f"{quote(name, safe='')}.json")
 
     def info(self) -> PluginInfo:
         """Return plugin metadata."""
@@ -95,9 +106,9 @@ class DocDBPlugin(Plugin):
         """Return the docdb stdlib module with insert/find/count functions."""
         return StdlibModule(
             functions={
-                "doc_insert": (2, _doc_insert),
-                "doc_find": (2, _doc_find),
-                "doc_count": (1, _doc_count),
+                "doc_insert": (2, self.doc_insert),
+                "doc_find": (2, self.doc_find),
+                "doc_count": (1, self.doc_count),
             },
             constants={},
         )
@@ -113,7 +124,7 @@ class DocDBPlugin(Plugin):
                 data = json.loads(" ".join(args[1:]))
             except json.JSONDecodeError:
                 return "Error: invalid JSON"
-            doc = _get_collection(args[0]).insert_one(data)
+            doc = self._get_collection(args[0]).insert_one(data)
             return f"Inserted document {doc.id}"
 
         def _doc_find_cmd(args: list[str]) -> str:
@@ -126,14 +137,14 @@ class DocDBPlugin(Plugin):
                     query = json.loads(" ".join(args[1:]))
                 except json.JSONDecodeError:
                     return "Error: invalid JSON query"
-            results = _get_collection(args[0]).find(query)
+            results = self._get_collection(args[0]).find(query)
             return "\n".join(str(r) for r in results) if results else "(no documents found)"
 
         def _doc_count_cmd(args: list[str]) -> str:
             """Count documents in a collection."""
             if not args:
                 return "Usage: doc-count <collection>"
-            return str(_get_collection(args[0]).count())
+            return str(self._get_collection(args[0]).count())
 
         return [
             ShellCommand(name="doc-insert", handler=_doc_insert_cmd, help_text="Insert a document"),

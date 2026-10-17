@@ -18,79 +18,30 @@ Example Pebble usage::
     print(path)
 """
 
+from pathlib import Path
+from typing import cast
+
 from pebble import StdlibModule
 from pebble import Value as PebbleValue
 from pygraphdb.graph import Graph
 from pygraphdb.pathfinding import shortest_path
+from pygraphdb.persistence import load_graph, save_graph
 from pygraphdb.traversal import bfs
 
-from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_method
 
-_graph: Graph | None = None
-
-_edge_counter: int = 0
+_GRAPH_FILE = "graph.json"
 
 
-def _get_graph() -> Graph:
-    """Return the shared Graph instance, creating it if needed."""
-    global _graph  # noqa: PLW0603
-    if _graph is None:
-        _graph = Graph()
-    return _graph
+def _saved_edges(graph: Graph) -> list[dict[str, str]]:
+    """Return the edges of *graph* as plain dicts (each has an ``edge_id``)."""
+    edges = graph.to_dict()["edges"]
+    return cast("list[dict[str, str]]", edges)
 
 
-@pebble_handler
-def _graph_add_node(args: list[PebbleValue]) -> PebbleValue:
-    """Add a node to the graph with an id and label."""
-    node_id = str(args[0])
-    label = str(args[1]) if len(args) > 1 else ""
-    g = _get_graph()
-    g.add_node(node_id, label=label)
-    return node_id
-
-
-@pebble_handler
-def _graph_add_edge(args: list[PebbleValue]) -> PebbleValue:
-    """Add an edge between two nodes."""
-    global _edge_counter  # noqa: PLW0603
-    from_id = str(args[0])
-    to_id = str(args[1])
-    rel_type = str(args[2]) if len(args) > 2 else "CONNECTED"  # noqa: PLR2004
-    g = _get_graph()
-    _edge_counter += 1
-    edge_id = f"e{_edge_counter}"
-    g.add_edge(edge_id, from_id, to_id, rel_type=rel_type)
-    return edge_id
-
-
-@pebble_handler
-def _graph_shortest_path(args: list[PebbleValue]) -> PebbleValue:
-    """Find the shortest path between two nodes."""
-    from_id = str(args[0])
-    to_id = str(args[1])
-    g = _get_graph()
-    path = shortest_path(g, from_id, to_id)
-    if not path:
-        return "no path"
-    result: list[PebbleValue] = [n.node_id for n in path]
-    return result
-
-
-@pebble_handler
-def _graph_bfs(args: list[PebbleValue]) -> PebbleValue:
-    """Perform breadth-first search from a start node."""
-    start_id = str(args[0])
-    g = _get_graph()
-    visited = bfs(g, start_id)
-    result: list[PebbleValue] = [n.node_id for n in visited]
-    return result
-
-
-def reset_graphdb_state() -> None:
-    """Reset all module-level state for testing."""
-    global _graph, _edge_counter  # noqa: PLW0603
-    _graph = None
-    _edge_counter = 0
+def _is_counter_id(edge_id: str) -> bool:
+    """Return True for ids this plugin makes itself: ``e1``, ``e2``, ..."""
+    return edge_id.startswith("e") and edge_id[1:].isdigit()
 
 
 class GraphDBPlugin(Plugin):
@@ -99,6 +50,81 @@ class GraphDBPlugin(Plugin):
     Register node/edge/path/traversal functions in Pebble's ``graphdb``
     stdlib module and shell commands for interactive use.
     """
+
+    def __init__(self) -> None:
+        """Start with no data; it is created on first use or loaded at start-up."""
+        self._graph: Graph | None = None
+        self._edge_counter: int = 0
+
+    def _get_graph(self) -> Graph:
+        """Return this plugin's Graph, creating it on first use."""
+        if self._graph is None:
+            self._graph = Graph()
+        return self._graph
+
+    @pebble_method
+    def graph_add_node(self, args: list[PebbleValue]) -> PebbleValue:
+        """Add a node to the graph with an id and label."""
+        node_id = str(args[0])
+        label = str(args[1]) if len(args) > 1 else ""
+        g = self._get_graph()
+        g.add_node(node_id, label=label)
+        return node_id
+
+    @pebble_method
+    def graph_add_edge(self, args: list[PebbleValue]) -> PebbleValue:
+        """Add an edge between two nodes."""
+        from_id = str(args[0])
+        to_id = str(args[1])
+        rel_type = str(args[2]) if len(args) > 2 else "CONNECTED"  # noqa: PLR2004
+        g = self._get_graph()
+        self._edge_counter += 1
+        edge_id = f"e{self._edge_counter}"
+        g.add_edge(edge_id, from_id, to_id, rel_type=rel_type)
+        return edge_id
+
+    @pebble_method
+    def graph_shortest_path(self, args: list[PebbleValue]) -> PebbleValue:
+        """Find the shortest path between two nodes."""
+        from_id = str(args[0])
+        to_id = str(args[1])
+        g = self._get_graph()
+        path = shortest_path(g, from_id, to_id)
+        if not path:
+            return "no path"
+        result: list[PebbleValue] = [n.node_id for n in path]
+        return result
+
+    @pebble_method
+    def graph_bfs(self, args: list[PebbleValue]) -> PebbleValue:
+        """Perform breadth-first search from a start node."""
+        start_id = str(args[0])
+        g = self._get_graph()
+        visited = bfs(g, start_id)
+        result: list[PebbleValue] = [n.node_id for n in visited]
+        return result
+
+    def load_state(self, folder: Path) -> None:
+        """Load the saved graph, if there is one."""
+        path = folder / _GRAPH_FILE
+        if path.exists():
+            self._graph = load_graph(path)
+            # New edges get ids after the saved ones (e1, e2, ...).
+            self._edge_counter = max(
+                (
+                    int(edge["edge_id"][1:])
+                    for edge in _saved_edges(self._graph)
+                    if _is_counter_id(edge["edge_id"])
+                ),
+                default=0,
+            )
+
+    def save_state(self, folder: Path) -> None:
+        """Save the graph, if this run used or loaded one."""
+        if self._graph is None:
+            return
+        folder.mkdir(parents=True, exist_ok=True)
+        save_graph(self._graph, folder / _GRAPH_FILE)
 
     def info(self) -> PluginInfo:
         """Return plugin metadata."""
@@ -116,10 +142,10 @@ class GraphDBPlugin(Plugin):
         """Return the graphdb stdlib module with node/edge/path functions."""
         return StdlibModule(
             functions={
-                "graph_add_node": (2, _graph_add_node),
-                "graph_add_edge": (3, _graph_add_edge),
-                "graph_shortest_path": (2, _graph_shortest_path),
-                "graph_bfs": (1, _graph_bfs),
+                "graph_add_node": (2, self.graph_add_node),
+                "graph_add_edge": (3, self.graph_add_edge),
+                "graph_shortest_path": (2, self.graph_shortest_path),
+                "graph_bfs": (1, self.graph_bfs),
             },
             constants={},
         )
@@ -140,23 +166,22 @@ class GraphDBPlugin(Plugin):
             if sub == "add-node" and len(args) >= min_add_node_args:
                 node_id = args[1]
                 label = args[2]
-                _get_graph().add_node(node_id, label=label)
+                self._get_graph().add_node(node_id, label=label)
                 return f"Added node '{node_id}' ({label})"
 
             if sub == "add-edge" and len(args) >= min_path_args:
-                global _edge_counter  # noqa: PLW0603
                 from_id = args[1]
                 to_id = args[2]
                 rel_type = args[3] if len(args) >= min_add_edge_args else "CONNECTED"
-                _edge_counter += 1
-                edge_id = f"e{_edge_counter}"
-                _get_graph().add_edge(edge_id, from_id, to_id, rel_type=rel_type)
+                self._edge_counter += 1
+                edge_id = f"e{self._edge_counter}"
+                self._get_graph().add_edge(edge_id, from_id, to_id, rel_type=rel_type)
                 return f"Added edge {from_id} -[{rel_type}]-> {to_id}"
 
             if sub == "path" and len(args) >= min_path_args:
                 from_id = args[1]
                 to_id = args[2]
-                path = shortest_path(_get_graph(), from_id, to_id)
+                path = shortest_path(self._get_graph(), from_id, to_id)
                 if not path:
                     return "No path found"
                 return " -> ".join(n.node_id for n in path)

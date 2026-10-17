@@ -18,25 +18,18 @@ Example Pebble usage::
     print(results)
 """
 
+from pathlib import Path
+
 from pebble import StdlibModule
 from pebble import Value as PebbleValue
 from pyvecdb.distance import cosine_similarity
+from pyvecdb.persistence import load_store, save_store
 from pyvecdb.search import knn_search
 from pyvecdb.store import VectorStore
 
-from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
-
-_store: VectorStore | None = None
+from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler, pebble_method
 
 DEFAULT_DIMENSIONS = 3
-
-
-def _get_store(dimensions: int = DEFAULT_DIMENSIONS) -> VectorStore:
-    """Return the shared VectorStore instance, creating it if needed."""
-    global _store  # noqa: PLW0603
-    if _store is None:
-        _store = VectorStore(dimensions=dimensions)
-    return _store
 
 
 def _parse_vector(raw: PebbleValue) -> list[float]:
@@ -49,27 +42,6 @@ def _parse_vector(raw: PebbleValue) -> list[float]:
 
 
 @pebble_handler
-def _vec_insert(args: list[PebbleValue]) -> PebbleValue:
-    """Insert a vector with an id into the store."""
-    record_id = str(args[0])
-    vector = _parse_vector(args[1])
-    store = _get_store(dimensions=len(vector))
-    store.insert(record_id, vector)
-    return record_id
-
-
-@pebble_handler
-def _vec_search(args: list[PebbleValue]) -> PebbleValue:
-    """Search for the k most similar vectors."""
-    query_vector = _parse_vector(args[0])
-    k = int(str(args[1])) if len(args) > 1 else 1
-    store = _get_store(dimensions=len(query_vector))
-    results = knn_search(store, query=query_vector, k=k)
-    result_list: list[PebbleValue] = [r.record_id for r, _score in results]
-    return result_list
-
-
-@pebble_handler
 def _vec_cosine(args: list[PebbleValue]) -> PebbleValue:
     """Compute cosine similarity between two vectors."""
     vec_a = _parse_vector(args[0])
@@ -77,10 +49,7 @@ def _vec_cosine(args: list[PebbleValue]) -> PebbleValue:
     return cosine_similarity(vec_a, vec_b)
 
 
-def reset_vecdb_state() -> None:
-    """Reset all module-level state for testing."""
-    global _store  # noqa: PLW0603
-    _store = None
+_STORE_FILE = "store.json"
 
 
 class VecDBPlugin(Plugin):
@@ -89,6 +58,48 @@ class VecDBPlugin(Plugin):
     Register insert/search/cosine functions in Pebble's ``vecdb``
     stdlib module and shell commands for interactive use.
     """
+
+    def __init__(self) -> None:
+        """Start with no data; it is created on first use or loaded at start-up."""
+        self._store: VectorStore | None = None
+
+    def _get_store(self, dimensions: int = DEFAULT_DIMENSIONS) -> VectorStore:
+        """Return this plugin's VectorStore, creating it on first use."""
+        if self._store is None:
+            self._store = VectorStore(dimensions=dimensions)
+        return self._store
+
+    @pebble_method
+    def vec_insert(self, args: list[PebbleValue]) -> PebbleValue:
+        """Insert a vector with an id into the store."""
+        record_id = str(args[0])
+        vector = _parse_vector(args[1])
+        store = self._get_store(dimensions=len(vector))
+        store.insert(record_id, vector)
+        return record_id
+
+    @pebble_method
+    def vec_search(self, args: list[PebbleValue]) -> PebbleValue:
+        """Search for the k most similar vectors."""
+        query_vector = _parse_vector(args[0])
+        k = int(str(args[1])) if len(args) > 1 else 1
+        store = self._get_store(dimensions=len(query_vector))
+        results = knn_search(store, query=query_vector, k=k)
+        result_list: list[PebbleValue] = [r.record_id for r, _score in results]
+        return result_list
+
+    def load_state(self, folder: Path) -> None:
+        """Load the saved vector store, if there is one."""
+        path = folder / _STORE_FILE
+        if path.exists():
+            self._store = load_store(path)
+
+    def save_state(self, folder: Path) -> None:
+        """Save the vector store, if this run used or loaded one."""
+        if self._store is None:
+            return
+        folder.mkdir(parents=True, exist_ok=True)
+        save_store(self._store, folder / _STORE_FILE)
 
     def info(self) -> PluginInfo:
         """Return plugin metadata."""
@@ -106,8 +117,8 @@ class VecDBPlugin(Plugin):
         """Return the vecdb stdlib module with insert/search/cosine functions."""
         return StdlibModule(
             functions={
-                "vec_insert": (2, _vec_insert),
-                "vec_search": (2, _vec_search),
+                "vec_insert": (2, self.vec_insert),
+                "vec_search": (2, self.vec_search),
                 "vec_cosine": (2, _vec_cosine),
             },
             constants={},
@@ -129,14 +140,14 @@ class VecDBPlugin(Plugin):
             if sub == "insert" and len(args) >= min_insert_args:
                 record_id = args[1]
                 vector = _parse_vector(args[2])
-                store = _get_store(dimensions=len(vector))
+                store = self._get_store(dimensions=len(vector))
                 store.insert(record_id, vector)
                 return f"Inserted '{record_id}'"
 
             if sub == "search" and len(args) >= min_search_args:
                 query_vector = _parse_vector(args[1])
                 k = int(args[2]) if len(args) >= min_cosine_args else 1
-                store = _get_store(dimensions=len(query_vector))
+                store = self._get_store(dimensions=len(query_vector))
                 results = knn_search(store, query=query_vector, k=k)
                 return "\n".join(f"{r.record_id}: {score:.4f}" for r, score in results)
 

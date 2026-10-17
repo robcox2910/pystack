@@ -14,12 +14,7 @@ from pystack.plugins.crypto_plugin import _caesar_decrypt, _caesar_encrypt, _has
 from pystack.plugins.git_plugin import _git_diff, _git_hash
 from pystack.plugins.mq_plugin import MQPlugin, _mq_create, _mq_get, _mq_put, reset_mq_state
 from pystack.plugins.net_plugin import NetPlugin, _base64_decode, _base64_encode
-from pystack.plugins.search_plugin import (
-    _search_add,
-    _search_create,
-    _search_query,
-    reset_engines,
-)
+from pystack.plugins.search_plugin import SearchPlugin
 from pystack.plugins.web_plugin import WebPlugin
 
 EXPECTED_SHA256_LENGTH = 64
@@ -250,7 +245,6 @@ class TestSearchPlugin:
 
     def test_search_create_add_query(self, tmp_path: Path) -> None:
         """Create an engine, add docs, and query should return results."""
-        reset_engines()
         env = PyStackEnvironment(db_path=tmp_path)
         try:
             source = (
@@ -265,30 +259,26 @@ class TestSearchPlugin:
             count = int(output.strip())
             assert count >= 1
         finally:
-            reset_engines()
             env.shutdown()
 
     def test_search_handlers_directly(self) -> None:
         """The search handlers should create, add, and query correctly."""
-        reset_engines()
-        try:
-            engine_id = _search_create([])
-            assert isinstance(engine_id, str)
-            assert engine_id.startswith("engine_")
+        plugin = SearchPlugin()
+        engine_id = plugin.search_create([])
+        assert isinstance(engine_id, str)
+        assert engine_id.startswith("engine_")
 
-            result = _search_add([engine_id, "doc1", "cats and dogs"])
-            assert result is True
+        result = plugin.search_add([engine_id, "doc1", "cats and dogs"])
+        assert result is True
 
-            results = _search_query([engine_id, "cats"])
-            assert isinstance(results, list)
-            assert len(results) >= 1
-        finally:
-            reset_engines()
+        results = plugin.search_query([engine_id, "cats"])
+        assert isinstance(results, list)
+        assert len(results) >= 1
 
     def test_search_unknown_engine(self) -> None:
         """Querying an unknown engine should return an error string."""
-        reset_engines()
-        result = _search_query(["nonexistent", "query"])
+        plugin = SearchPlugin()
+        result = plugin.search_query(["nonexistent", "query"])
         assert isinstance(result, str)
         assert "error" in result
 

@@ -48,6 +48,25 @@ def pebble_handler(fn: PebbleHandler) -> PebbleHandler:
     return _wrapper
 
 
+def pebble_method[P](
+    fn: Callable[[P, list[PebbleValue]], PebbleValue],
+) -> Callable[[P, list[PebbleValue]], PebbleValue]:
+    """Like :func:`pebble_handler`, for a Pebble function that is a plugin method.
+
+    Plugins keep their data on ``self``, so their Pebble functions are
+    methods. Errors still become ``"error: ..."`` strings.
+    """
+
+    @functools.wraps(fn)
+    def _wrapper(self: P, args: list[PebbleValue]) -> PebbleValue:
+        try:
+            return fn(self, args)
+        except Exception as exc:  # noqa: BLE001
+            return f"error: {exc}"
+
+    return _wrapper
+
+
 type ShellHandler = Callable[[list[str]], str]
 
 
