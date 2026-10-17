@@ -12,6 +12,7 @@ from pycoldb.errors import PersistenceError as ColDBPersistenceError
 from pydocdb.errors import PersistenceError as DocDBPersistenceError
 from pygraphdb.errors import PersistenceError as GraphPersistenceError
 from pykv.errors import PersistenceError as KVPersistenceError
+from pymq.errors import PersistenceError as MQPersistenceError
 from pysearch.errors import PersistenceError as SearchPersistenceError
 from pytsdb.errors import PersistenceError as TSDBPersistenceError
 from pyvecdb.errors import PersistenceError as VecDBPersistenceError
@@ -19,7 +20,7 @@ from pyvecdb.errors import PersistenceError as VecDBPersistenceError
 from pystack.environment import PyStackEnvironment
 
 PLUGINS_DIR = Path(__file__).parent.parent / "src" / "pystack" / "plugins"
-STATEFUL = ("kv", "docdb", "graphdb", "coldb", "tsdb", "vecdb", "search")
+STATEFUL = ("kv", "docdb", "graphdb", "coldb", "tsdb", "vecdb", "search", "mq")
 
 # (module, program that writes data, program that reads it back)
 ROUND_TRIPS = [
@@ -54,6 +55,7 @@ SAVE_FILES = [
     ("tsdb", "db.json", TSDBPersistenceError),
     ("vecdb", "store.json", VecDBPersistenceError),
     ("search", "engine_0.json", SearchPersistenceError),
+    ("mq", "queues.json", MQPersistenceError),
 ]
 
 
@@ -90,6 +92,65 @@ class TestDataSurvivesARestart:
         try:
             assert _run(second, "search", "print(search_create())") == "engine_2\n"
         finally:
+            second.shutdown()
+
+
+class TestMessagesSurviveARestart:
+    """Waiting messages are kept like a real broker keeps them; live subscriptions are not."""
+
+    def test_waiting_messages_survive_a_restart(self, tmp_path: Path) -> None:
+        """Messages still waiting when PyStack stops are handed out, in order, next time."""
+        first = PyStackEnvironment(db_path=tmp_path)
+        _run(
+            first,
+            "mq",
+            'mq_create("orders")\nmq_put("orders", "one coffee")\nmq_put("orders", "two muffins")\n'
+            'print(mq_get("orders"))',
+        )
+        first.shutdown()
+        second = PyStackEnvironment(db_path=tmp_path)
+        try:
+            assert _run(second, "mq", 'print(mq_get("orders"))\nprint(mq_get("orders"))') == (
+                "two muffins\nempty\n"
+            )
+        finally:
+            second.shutdown()
+
+    def test_shell_commands_share_the_saved_queues(self, tmp_path: Path) -> None:
+        """``mq-put`` in one session is waiting for ``mq-get`` in the next."""
+        first = PyStackEnvironment(db_path=tmp_path, os_mode=True)
+        first.execute_shell("mq-put orders one coffee")
+        first.shutdown()
+        second = PyStackEnvironment(db_path=tmp_path, os_mode=True)
+        try:
+            assert second.execute_shell("mq-get orders").strip() == "one coffee"
+        finally:
+            second.shutdown()
+
+    def test_subscriptions_are_live_only(self, tmp_path: Path) -> None:
+        """Pub/sub is like live radio: a subscription doesn't outlive the run."""
+        first = PyStackEnvironment(db_path=tmp_path)
+        _run(first, "mq", 'mq_subscribe("news")\nmq_publish("news", "hello")')
+        first.shutdown()
+        second = PyStackEnvironment(db_path=tmp_path)
+        try:
+            assert _run(second, "mq", 'print(mq_receive("news"))') == (
+                "error: not subscribed to 'news'\n"
+            )
+        finally:
+            second.shutdown()
+
+    def test_two_environments_do_not_share_queues(self, tmp_path: Path) -> None:
+        """A queue made in one environment doesn't exist in another."""
+        first = PyStackEnvironment(db_path=tmp_path / "first")
+        second = PyStackEnvironment(db_path=tmp_path / "second")
+        try:
+            _run(first, "mq", 'mq_create("orders")\nmq_put("orders", "x")')
+            assert _run(second, "mq", 'print(mq_get("orders"))') == (
+                "error: queue 'orders' not found\n"
+            )
+        finally:
+            first.shutdown()
             second.shutdown()
 
 
@@ -155,6 +216,7 @@ class TestReviewFixes:
             ("docdb", "pets.json", "{}", DocDBPersistenceError),
             ("kv", "store.json", "[]", KVPersistenceError),
             ("coldb", "keyspace.json", "{}", ColDBPersistenceError),
+            ("mq", "queues.json", "{}", MQPersistenceError),
         ],
     )
     def test_wrong_shape_save_file_stops_boot_and_is_kept(

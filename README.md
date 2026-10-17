@@ -357,7 +357,7 @@ pair together.
 
 PyStack is like a real database: what you store is still there next time.
 Your SQL tables and the data in `kv`, `docdb`, `graphdb`, `coldb`, `tsdb`,
-`vecdb` and `search` are all kept in the `pystack_data/` folder. Each
+`vecdb`, `search` and `mq` are all kept in the `pystack_data/` folder. Each
 plugin has its own sub-folder (for example `pystack_data/kv/store.json`).
 
 PyStack saves when it stops: `.quit` or `exit`, the end of a script, or
@@ -369,7 +369,11 @@ swapped in at once, so a file is never half-written. If a save file is ever
 damaged, PyStack refuses to start and names the file, rather than starting
 empty and overwriting your data.
 
-Message queues (`mq`) aren't saved yet; they start empty each time.
+Message queues (`mq`) work like a real broker: messages still waiting in a
+queue are saved in `pystack_data/mq/queues.json` and are there next time, in
+the same order. Pub/sub subscriptions are different. They are like live
+radio: a message published while nobody is listening is gone, and
+subscriptions don't outlive the run.
 
 Because data is kept, running the same example twice adds the same data
 twice. To start fresh, delete the `pystack_data/` folder (or just one

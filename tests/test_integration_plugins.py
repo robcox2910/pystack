@@ -12,7 +12,7 @@ from pystack.environment import PyStackEnvironment
 from pystack.plugins._shared import url_parse as _url_parse
 from pystack.plugins.crypto_plugin import _caesar_decrypt, _caesar_encrypt, _hash
 from pystack.plugins.git_plugin import _git_diff, _git_hash
-from pystack.plugins.mq_plugin import MQPlugin, _mq_create, _mq_get, _mq_put, reset_mq_state
+from pystack.plugins.mq_plugin import MQPlugin
 from pystack.plugins.net_plugin import NetPlugin, _base64_decode, _base64_encode
 from pystack.plugins.search_plugin import SearchPlugin
 from pystack.plugins.web_plugin import WebPlugin
@@ -340,58 +340,40 @@ class TestMQPlugin:
 
     def test_mq_create_returns_name(self) -> None:
         """The mq_create handler should return the queue name."""
-        reset_mq_state()
-        try:
-            result = _mq_create(["orders"])
-            assert result == "orders"
-        finally:
-            reset_mq_state()
+        assert MQPlugin().mq_create(["orders"]) == "orders"
 
     def test_mq_put_and_get(self) -> None:
         """Put a message and get it back via handlers."""
-        reset_mq_state()
-        try:
-            _mq_create(["tasks"])
-            result = _mq_put(["tasks", "do laundry"])
-            assert result == "ok"
-            msg = _mq_get(["tasks"])
-            assert msg == "do laundry"
-        finally:
-            reset_mq_state()
+        plugin = MQPlugin()
+        plugin.mq_create(["tasks"])
+        assert plugin.mq_put(["tasks", "do laundry"]) == "ok"
+        assert plugin.mq_get(["tasks"]) == "do laundry"
 
     def test_mq_get_empty_returns_empty(self) -> None:
         """Getting from an empty queue should return 'empty'."""
-        reset_mq_state()
-        try:
-            _mq_create(["empty-q"])
-            result = _mq_get(["empty-q"])
-            assert result == "empty"
-        finally:
-            reset_mq_state()
+        plugin = MQPlugin()
+        plugin.mq_create(["empty-q"])
+        assert plugin.mq_get(["empty-q"]) == "empty"
 
     def test_mq_get_unknown_queue_returns_error(self) -> None:
         """Getting from an unknown queue should return an error string."""
-        reset_mq_state()
-        try:
-            result = _mq_get(["nonexistent"])
-            assert isinstance(result, str)
-            assert "error" in result
-        finally:
-            reset_mq_state()
+        assert MQPlugin().mq_get(["nonexistent"]) == "error: queue 'nonexistent' not found"
 
     def test_mq_put_unknown_queue_returns_error(self) -> None:
         """Putting to an unknown queue should return an error string."""
-        reset_mq_state()
-        try:
-            result = _mq_put(["nonexistent", "msg"])
-            assert isinstance(result, str)
-            assert "error" in result
-        finally:
-            reset_mq_state()
+        assert MQPlugin().mq_put(["nonexistent", "msg"]) == "error: queue 'nonexistent' not found"
+
+    def test_publish_reaches_subscribers_once(self) -> None:
+        """A subscriber receives each published message once, then its inbox is empty."""
+        plugin = MQPlugin()
+        plugin.mq_subscribe(["news"])
+        plugin.mq_publish(["news", "hello"])
+        plugin.mq_publish(["other", "ignored"])
+        assert plugin.mq_receive(["news"]) == ["hello"]
+        assert plugin.mq_receive(["news"]) == []
 
     def test_mq_pebble_source(self, tmp_path: Path) -> None:
         """Run a Pebble program that creates a queue, puts, and gets a message."""
-        reset_mq_state()
         env = PyStackEnvironment(db_path=tmp_path)
         try:
             source = (
@@ -404,7 +386,6 @@ class TestMQPlugin:
             output = env.run_pebble_source(source)
             assert output.strip() == "hello from pebble"
         finally:
-            reset_mq_state()
             env.shutdown()
 
 
