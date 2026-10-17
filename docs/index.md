@@ -145,6 +145,7 @@ The first two come from the core adapters. The rest come from plugins.
 | `mq-put <queue> <msg>` | Put a message on a named queue | MQPlugin |
 | `mq-get <queue>` | Get the next message from a queue | MQPlugin |
 | `mqnet` | Visit PyMQ's networked post office: one worker crashes, its lease comes back to another, a poison job lands in the dead-letter box | MQPlugin |
+| `dbcrash` | Pull the plug on PyDB's diary-keeping (journalled) database: three finished job runs survive a crash, the unfinished fourth is gone | PyDBPlugin |
 
 Plus all the standard PyOS commands like `ls`, `cat`, `mkdir`, `help`,
 and more.
@@ -187,6 +188,7 @@ core three (PyOS, Pebble, PyDB):
 | NetPlugin | `import "net"` | `dns`, `overlap`, `netecho`, `wsecho` | PyNet |
 | SearchPlugin | `import "search"` | (none) | PySearch |
 | MQPlugin | `import "mq"` | `mq-put`, `mq-get`, `mqnet` | PyMQ |
+| PyDBPlugin | (none) | `dbcrash` | PyDB |
 
 The `db` module is handled separately by the Pebble-DB adapter because
 it needs a live database instance.
