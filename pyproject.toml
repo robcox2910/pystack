@@ -76,7 +76,7 @@ packages = ["src/pystack"]
 [tool.uv.sources]
 pyos-learn = { git = "https://github.com/robcox2910/py-os", tag = "v0.2.0" }
 pebble-lang = { git = "https://github.com/robcox2910/pebble-lang", tag = "v0.2.0" }
-pydb = { git = "https://github.com/robcox2910/pydb", tag = "v0.2.0" }
+pydb = { git = "https://github.com/robcox2910/pydb", tag = "v0.3.0" }
 pyweb = { git = "https://github.com/robcox2910/pyweb", tag = "v0.2.0" }
 pygit = { git = "https://github.com/robcox2910/pygit", tag = "v0.1.0" }
 pycrypt = { git = "https://github.com/robcox2910/pycrypt", tag = "v0.1.0" }
