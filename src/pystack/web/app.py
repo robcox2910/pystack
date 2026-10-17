@@ -8,6 +8,9 @@ Provide a browser-based interface with three panels:
 All three share the same integrated environment.
 """
 
+import atexit
+from pathlib import Path
+
 from flask import Flask, Response, jsonify, render_template, request
 from py_os.kernel import KernelState
 from py_os.shell import Shell
@@ -17,17 +20,22 @@ from pystack.environment import PyStackEnvironment
 _HTTP_BAD_REQUEST = 400
 
 
-def create_app() -> Flask:
+def create_app(data_dir: str | Path = "pystack_data") -> Flask:
     """Create the PyStack web application.
 
     Boot the integrated environment (kernel + database + Pebble) and
     wire up the API endpoints.
 
+    Args:
+        data_dir: Where the database and plugin data are kept.
+
     Returns:
-        A configured Flask application.
+        A configured Flask application. Its environment is in
+        ``app.extensions["pystack_env"]``, so whoever runs the app can
+        shut it down (which saves everything).
 
     """
-    env = PyStackEnvironment(os_mode=True)
+    env = PyStackEnvironment(db_path=data_dir, os_mode=True)
 
     shell = env.shell
     kernel = env.kernel
@@ -38,6 +46,7 @@ def create_app() -> Flask:
     boot_log = "\n".join(kernel.dmesg()) if kernel else ""
 
     app = Flask(__name__)
+    app.extensions["pystack_env"] = env
 
     @app.route("/")
     def index() -> str:  # pyright: ignore[reportUnusedFunction]
@@ -61,8 +70,8 @@ def create_app() -> Flask:
         command: str = data["command"]
         result = shell.execute(command)
         halted = result == Shell.EXIT_SENTINEL
-        if halted and kernel and kernel.state is KernelState.RUNNING:
-            kernel.shutdown()
+        if halted:
+            env.shutdown()  # saves everything, then stops the kernel
         return jsonify({"output": result if not halted else "System halted.", "halted": halted})
 
     @app.route("/api/pebble", methods=["POST"])
@@ -104,7 +113,17 @@ def create_app() -> Flask:
     return app
 
 
-def main() -> None:
-    """Run the web UI development server."""
-    app = create_app()
-    app.run(port=8080)
+def main(data_dir: str | Path = "pystack_data") -> None:
+    """Run the web UI development server, saving everything when it stops.
+
+    Args:
+        data_dir: Where the database and plugin data are kept.
+
+    """
+    app = create_app(data_dir)
+    env: PyStackEnvironment = app.extensions["pystack_env"]
+    atexit.register(env.shutdown)  # backstop; shutdown() only runs once
+    try:
+        app.run(port=8080)
+    finally:
+        env.shutdown()

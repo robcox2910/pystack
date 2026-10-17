@@ -34,3 +34,11 @@
 - Try an unreleased sibling change: `uv pip install -e ../<folder>`, then run with `uv run --no-sync ...`; a plain `uv run` or `uv sync` restores the pin
 - Never use `path` sources -- `tests/test_dependency_pins.py` enforces this
 - Run `uv sync --all-extras` after modifying dependencies
+
+## Plugins
+
+- Plugin state lives on the plugin instance, never in module-level variables (`tests/test_plugin_persistence.py` enforces this for the storage plugins)
+- Pebble functions are plugin methods decorated with `@pebble_method`; build the `StdlibModule` from bound methods
+- Persist with `load_state(folder)` / `save_state(folder)`; `folder` is `<db_path>/<pebble_module_name()>/`; write nothing if the plugin has no state; let the library's `PersistenceError` propagate from `load_state`
+- Run Pebble only through its public API (`from pebble import ...`); never write to `pebble.stdlib.STDLIB_MODULES`
+
