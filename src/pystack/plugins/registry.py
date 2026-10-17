@@ -6,6 +6,7 @@ the PyStack environment. Plugins are registered manually via
 """
 
 import importlib.metadata
+from pathlib import Path
 
 from pebble import StdlibModule
 from py_os.shell import Shell
@@ -63,14 +64,18 @@ class PluginRegistry:
                 count += 1
         return count
 
-    def activate_all(self, shell: Shell | None = None) -> None:
+    def activate_all(self, shell: Shell | None = None, data_dir: Path | None = None) -> None:
         """Activate all registered plugins.
 
-        Registers shell commands, Pebble stdlib modules, and calls
-        each plugin's ``on_boot()`` hook.
+        Registers shell commands and Pebble modules, then calls each
+        plugin's ``load_state()`` (when there is a data folder) and
+        ``on_boot()`` hooks.
 
         Args:
             shell: The PyOS shell to register commands in (optional).
+            data_dir: The environment's data folder; each plugin loads from
+                ``data_dir / plugin.pebble_module_name()``. ``None`` skips
+                loading.
 
         """
         for plugin in self._plugins:
@@ -87,8 +92,44 @@ class PluginRegistry:
             if stdlib is not None:
                 self._pebble_modules[plugin.pebble_module_name()] = stdlib
 
-            # Run custom boot logic.
+            # Load saved data, then run custom boot logic.
+            if data_dir is not None:
+                plugin.load_state(data_dir / plugin.pebble_module_name())
             plugin.on_boot()
+
+    def save_all(self, data_dir: Path) -> list[tuple[str, Exception]]:
+        """Ask every plugin to save, carrying on past failures.
+
+        Args:
+            data_dir: The environment's data folder.
+
+        Returns:
+            ``(plugin module name, error)`` for each plugin that failed.
+
+        """
+        failures: list[tuple[str, Exception]] = []
+        for plugin in self._plugins:
+            name = plugin.pebble_module_name()
+            try:
+                plugin.save_state(data_dir / name)
+            except Exception as exc:  # noqa: BLE001 -- reported by the caller
+                failures.append((name, exc))
+        return failures
+
+    def shutdown_all(self) -> list[tuple[str, Exception]]:
+        """Call every plugin's ``on_shutdown()``, carrying on past failures.
+
+        Returns:
+            ``(plugin module name, error)`` for each plugin that failed.
+
+        """
+        failures: list[tuple[str, Exception]] = []
+        for plugin in self._plugins:
+            try:
+                plugin.on_shutdown()
+            except Exception as exc:  # noqa: BLE001 -- reported by the caller
+                failures.append((plugin.pebble_module_name(), exc))
+        return failures
 
     def pebble_modules(self) -> dict[str, StdlibModule]:
         """Return the Pebble modules of every activated plugin, by import name.

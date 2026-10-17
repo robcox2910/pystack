@@ -12,6 +12,7 @@ game (PyStack) works on its own, but each expansion adds new pieces.
 import functools
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 
 from pebble import StdlibModule
 from pebble import Value as PebbleValue
@@ -152,3 +153,30 @@ class Plugin:
 
         Override this for setup that needs the full environment running.
         """
+
+    def load_state(self, folder: Path) -> None:
+        """Load this plugin's saved data, before :meth:`on_boot` runs.
+
+        Like opening your saved game: if there's a save in *folder*, pick up
+        where you left off. The folder may not exist yet (first run), in which
+        case there is nothing to load.
+
+        Args:
+            folder: This plugin's own data folder,
+                ``<data dir>/<pebble module name>/``.
+
+        """
+
+    def save_state(self, folder: Path) -> None:
+        """Save this plugin's data so it's there next time.
+
+        Create *folder* only if there is something to write.
+
+        Args:
+            folder: This plugin's own data folder (same as for
+                :meth:`load_state`).
+
+        """
+
+    def on_shutdown(self) -> None:
+        """Run custom clean-up when PyStack stops (after saving)."""

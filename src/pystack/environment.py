@@ -5,6 +5,7 @@ the Pebble adapter, and provides a ready-to-use integrated runtime.
 """
 
 import contextlib
+import sys
 from pathlib import Path
 
 from pebble import run_source
@@ -16,7 +17,11 @@ from pydb.formatter import format_results
 from pydb.query import Query
 from pydb.sql_parser import parse_sql
 
-from pystack.adapters.os_pebble import register_pebble_command, register_sql_command
+from pystack.adapters.os_pebble import (
+    register_pebble_command,
+    register_save_command,
+    register_sql_command,
+)
 from pystack.adapters.pebble_db import make_db_module
 from pystack.plugins.base import Plugin
 from pystack.plugins.coldb_plugin import ColDBPlugin
@@ -52,6 +57,7 @@ class PyStackEnvironment:
     """
 
     __slots__ = (
+        "_closed",
         "_database",
         "_db_module",
         "_db_path",
@@ -69,6 +75,7 @@ class PyStackEnvironment:
     ) -> None:
         """Create and boot the integrated environment."""
         self._db_path = Path(db_path)
+        self._closed = False
         self._os_mode = os_mode
         self._kernel: Kernel | None = None
         self._shell: Shell | None = None
@@ -88,7 +95,7 @@ class PyStackEnvironment:
         # shell (which is None outside OS mode) means plugin Pebble modules
         # and on_boot() hooks always run, while shell commands are only
         # registered when there is a shell to register them in.
-        self._plugin_registry.activate_all(shell=self._shell)
+        self._plugin_registry.activate_all(shell=self._shell, data_dir=self._db_path)
 
     def _register_all_plugins(self) -> None:
         """Register all built-in integration plugins with the registry.
@@ -123,6 +130,7 @@ class PyStackEnvironment:
 
         register_pebble_command(shell, kernel, self.run_pebble_source)
         register_sql_command(shell, self.run_sql)
+        register_save_command(shell, self.save)
 
         # Discover any third-party plugins installed via entry points so
         # they are activated alongside the built-ins.
@@ -170,17 +178,49 @@ class PyStackEnvironment:
         return self._shell.execute(command)
 
     def save(self) -> None:
-        """Save the database to disk."""
-        self._database.save()
+        """Save the database and every plugin's data.
+
+        Every part is tried even if an earlier one fails.
+
+        Raises:
+            ExceptionGroup: If anything couldn't be saved, after trying
+                everything.
+
+        """
+        failures = self._save_everything()
+        if failures:
+            names = ", ".join(name for name, _ in failures)
+            msg = f"pystack could not save {names}"
+            raise ExceptionGroup(msg, [exc for _, exc in failures])
 
     def shutdown(self) -> None:
-        """Save the database and stop the OS kernel. Safe to call multiple times."""
-        with contextlib.suppress(Exception):
-            self._database.save()
+        """Save everything, shut plugins down and stop the OS kernel.
+
+        Never raises -- it runs in ``finally:`` blocks, where an error would
+        hide the real one -- but prints one line per failure to stderr.
+        Safe to call more than once; later calls do nothing.
+        """
+        if self._closed:
+            return
+        self._closed = True
+        for name, exc in self._save_everything():
+            sys.stderr.write(f"pystack: could not save {name}: {exc}\n")
+        for name, exc in self._plugin_registry.shutdown_all():
+            sys.stderr.write(f"pystack: could not shut down {name}: {exc}\n")
         if self._kernel is not None:
             with contextlib.suppress(Exception):
                 self._kernel.shutdown()
             self._kernel = None
+
+    def _save_everything(self) -> list[tuple[str, Exception]]:
+        """Save the database and every plugin, returning what failed."""
+        failures: list[tuple[str, Exception]] = []
+        try:
+            self._database.save()
+        except Exception as exc:  # noqa: BLE001 -- reported by save()/shutdown()
+            failures.append(("database", exc))
+        failures.extend(self._plugin_registry.save_all(self._db_path))
+        return failures
 
     def run_pebble_source(self, source: str) -> str:
         """Compile and run a Pebble source string with database access.
