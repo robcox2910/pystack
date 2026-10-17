@@ -26,7 +26,7 @@ COMMITTED_RUNS = (
     ("send-report", date(2026, 10, 17), datetime(2026, 10, 17, 7, 30, tzinfo=UTC)),
 )
 UNFINISHED_RUN = ("rebuild-index", date(2026, 10, 17), datetime(2026, 10, 17, 8, 0, tzinfo=UTC))
-CRASH_EXIT_CODE = 1
+CRASH_EXIT_CODE = 9  # unusual on purpose: a program that hits an error exits with 1
 
 
 def runs_schema() -> Schema:
