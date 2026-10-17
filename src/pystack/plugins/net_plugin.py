@@ -130,8 +130,12 @@ def _netecho_cmd(args: list[str]) -> str:
 
 
 async def _ws_echo_handler(ws: WebSocket) -> None:
-    """Send the first message received straight back."""
-    await ws.send_text(await ws.recv())
+    """Send the first message received straight back, as text or bytes."""
+    msg = await ws.recv()
+    if isinstance(msg, str):
+        await ws.send_text(msg)
+    else:
+        await ws.send_bytes(msg)
 
 
 async def _ws_echo_round_trip(text: str) -> str:
@@ -141,7 +145,8 @@ async def _ws_echo_round_trip(text: str) -> str:
         client = await connect_websocket(LOOPBACK, server.port)
         try:
             await client.send_text(text)
-            return str(await client.recv())
+            reply = await client.recv()
+            return reply if isinstance(reply, str) else reply.decode(errors="replace")
         finally:
             await client.close()
     finally:
