@@ -5,6 +5,7 @@ Pebble stdlib functions correctly and that Pebble programs can call
 them through the PyStackEnvironment.
 """
 
+import re
 from pathlib import Path
 
 from pebble.stdlib import STDLIB_MODULES
@@ -14,7 +15,7 @@ from pystack.plugins._shared import url_parse as _url_parse
 from pystack.plugins.crypto_plugin import _caesar_decrypt, _caesar_encrypt, _hash
 from pystack.plugins.git_plugin import _git_diff, _git_hash
 from pystack.plugins.mq_plugin import _mq_create, _mq_get, _mq_put, reset_mq_state
-from pystack.plugins.net_plugin import _base64_decode, _base64_encode
+from pystack.plugins.net_plugin import NetPlugin, _base64_decode, _base64_encode
 from pystack.plugins.search_plugin import (
     _search_add,
     _search_create,
@@ -26,6 +27,9 @@ from pystack.plugins.web_plugin import WebPlugin
 EXPECTED_SHA256_LENGTH = 64
 EXPECTED_SHA1_LENGTH = 40
 HTTPS_DEFAULT_PORT = 443
+OVERLAP_COPIES = 3
+OVERLAP_SECONDS = "0.2"
+OVERLAP_MAX_ELAPSED = 0.5
 
 
 class TestCryptoPlugin:
@@ -204,6 +208,43 @@ class TestNetPlugin:
         result = _url_parse(["http://example.com/path"])
         assert isinstance(result, dict)
         assert result["host"] == "example.com"
+
+    def test_overlap_runs_concurrently(self) -> None:
+        """The overlap command should run its sleeps at the same time."""
+        cmds = {c.name: c.handler for c in NetPlugin().shell_commands()}
+        output = cmds["overlap"]([str(OVERLAP_COPIES), OVERLAP_SECONDS])
+        assert f"{OVERLAP_COPIES} \u00d7 sleep {OVERLAP_SECONDS}" in output
+        match = re.search(r"in (\d+\.\d{2})s", output)
+        assert match is not None
+        assert float(match.group(1)) < OVERLAP_MAX_ELAPSED
+
+    def test_overlap_bad_args_returns_usage(self) -> None:
+        """The overlap command should return usage for invalid arguments."""
+        cmds = {c.name: c.handler for c in NetPlugin().shell_commands()}
+        for bad in (["0"], ["x"], ["3", "-1"], ["3", "abc"], ["1", "2", "3"], ["999"], ["1", "99"]):
+            assert cmds["overlap"](bad).startswith("Usage: overlap")
+
+    def test_netecho_round_trip(self) -> None:
+        """The netecho command should echo text back with a round-trip time."""
+        cmds = {c.name: c.handler for c in NetPlugin().shell_commands()}
+        output = cmds["netecho"](["hello", "world"])
+        assert output.startswith("echo: hello world")
+        assert re.search(r"\(round trip \d+\.\d ms\)$", output)
+
+    def test_netecho_usage(self) -> None:
+        """The netecho command should return usage when given no text."""
+        cmds = {c.name: c.handler for c in NetPlugin().shell_commands()}
+        assert cmds["netecho"]([]).startswith("Usage: netecho")
+
+    def test_wsecho_round_trip(self) -> None:
+        """The wsecho command should echo text back through a local WebSocket."""
+        cmds = {c.name: c.handler for c in NetPlugin().shell_commands()}
+        assert cmds["wsecho"](["hello", "socket"]) == "ws echo: hello socket"
+
+    def test_wsecho_usage(self) -> None:
+        """The wsecho command should return usage when given no text."""
+        cmds = {c.name: c.handler for c in NetPlugin().shell_commands()}
+        assert cmds["wsecho"]([]).startswith("Usage: wsecho")
 
 
 class TestSearchPlugin:

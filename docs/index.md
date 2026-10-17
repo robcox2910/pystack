@@ -19,7 +19,7 @@ how a real piece of technology works:
 | **PyDB** | Database engine | The filing cabinet -- stores and retrieves data |
 | **PyCrypt** | Cryptography toolkit | The combination lock -- keeps secrets safe |
 | **PyWeb** | HTTP web server | The front office -- talks to visitors |
-| **PyNet** | Networking library | The phone system -- connects to the outside world |
+| **PyNet** | Networking library (DNS, event loop, messaging, WebSockets) | The phone system -- connects to the outside world |
 | **PyGit** | Version control | The yearbook archive -- tracks every change |
 | **PySearch** | Full-text search engine | The library index -- finds things fast |
 | **PyMQ** | Message queue | The intercom -- sends messages between rooms |
@@ -170,7 +170,7 @@ core three (PyOS, Pebble, PyDB):
 | CryptoPlugin | `import "crypto"` | `hash` | PyCrypt |
 | WebPlugin | `import "web"` | `curl` | PyWeb |
 | GitPlugin | `import "git"` | `git-hash`, `git-diff` | PyGit |
-| NetPlugin | `import "net"` | `dns` | PyNet |
+| NetPlugin | `import "net"` | `dns`, `overlap`, `netecho`, `wsecho` | PyNet |
 | SearchPlugin | `import "search"` | (none) | PySearch |
 | MQPlugin | `import "mq"` | `mq-put`, `mq-get` | PyMQ |
 
