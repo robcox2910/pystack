@@ -35,8 +35,8 @@ Example Pebble usage::
 
 import time
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 from pynet.base64 import b64_decode, b64_encode
 from pynet.dns import resolve
 from pynet.loop import gather, run

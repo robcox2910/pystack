@@ -18,8 +18,8 @@ Example Pebble usage::
     print(path)
 """
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 from pygraphdb.graph import Graph
 from pygraphdb.pathfinding import shortest_path
 from pygraphdb.traversal import bfs

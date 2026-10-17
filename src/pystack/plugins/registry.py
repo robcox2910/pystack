@@ -7,7 +7,7 @@ the PyStack environment. Plugins are registered manually via
 
 import importlib.metadata
 
-from pebble.stdlib import STDLIB_MODULES
+from pebble import StdlibModule
 from py_os.shell import Shell
 
 from pystack.plugins.base import Plugin, PluginInfo, shell_handler
@@ -23,11 +23,12 @@ class PluginRegistry:
 
     """
 
-    __slots__ = ("_plugins",)
+    __slots__ = ("_pebble_modules", "_plugins")
 
     def __init__(self) -> None:
         """Create an empty plugin registry."""
         self._plugins: list[Plugin] = []
+        self._pebble_modules: dict[str, StdlibModule] = {}
 
     @property
     def plugins(self) -> list[Plugin]:
@@ -79,14 +80,24 @@ class PluginRegistry:
                 for cmd in plugin.shell_commands():
                     shell._commands[cmd.name] = shell_handler(cmd.handler)  # noqa: SLF001
 
-            # Register Pebble stdlib module.
+            # Collect the plugin's Pebble module. It's handed to Pebble with
+            # each run (never written into Pebble's shared table), so two
+            # environments can't see each other's modules.
             stdlib = plugin.pebble_stdlib()
             if stdlib is not None:
-                module_name = plugin.pebble_module_name()
-                STDLIB_MODULES[module_name] = stdlib
+                self._pebble_modules[plugin.pebble_module_name()] = stdlib
 
             # Run custom boot logic.
             plugin.on_boot()
+
+    def pebble_modules(self) -> dict[str, StdlibModule]:
+        """Return the Pebble modules of every activated plugin, by import name.
+
+        Returns:
+            A new dict mapping each module name (e.g. ``"kv"``) to its module.
+
+        """
+        return dict(self._pebble_modules)
 
     def list_plugins(self) -> list[PluginInfo]:
         """Return info for all registered plugins.

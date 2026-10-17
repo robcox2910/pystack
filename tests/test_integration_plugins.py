@@ -8,8 +8,6 @@ them through the PyStackEnvironment.
 import re
 from pathlib import Path
 
-from pebble.stdlib import STDLIB_MODULES
-
 from pystack.environment import PyStackEnvironment
 from pystack.plugins._shared import url_parse as _url_parse
 from pystack.plugins.crypto_plugin import _caesar_decrypt, _caesar_encrypt, _hash
@@ -318,7 +316,7 @@ class TestEnvironmentRegistersPlugins:
                 "llm",
             ]
             for module_name in expected_modules:
-                assert module_name in STDLIB_MODULES, f"{module_name} not registered"
+                assert module_name in env.plugin_registry.pebble_modules(), module_name
         finally:
             env.shutdown()
 

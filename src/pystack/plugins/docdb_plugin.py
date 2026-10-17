@@ -18,8 +18,8 @@ Example Pebble usage::
 
 import json
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 from pydocdb.collection import Collection
 
 from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler

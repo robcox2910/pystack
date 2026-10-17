@@ -19,8 +19,8 @@ Example Pebble usage::
     print(d)
 """
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 from pygit.diff import diff_lines, format_diff
 from pygit.hashing import hash_object
 

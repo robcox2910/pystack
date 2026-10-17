@@ -6,7 +6,7 @@ copying the code (which is like writing the same homework answer
 twice!), we put shared handlers here so every plugin can reuse them.
 """
 
-from pebble.builtins import Value as PebbleValue
+from pebble import Value as PebbleValue
 from pynet.url import parse_url
 
 from pystack.plugins.base import pebble_handler

@@ -1,6 +1,6 @@
 """Pebble ↔ PyDB adapter.
 
-Register a ``db`` stdlib module in Pebble so that Pebble programs can
+Build a ``db`` module for Pebble so that Pebble programs can
 query and modify a PyDB database using functions like ``db_query()``
 and ``db_execute()``.
 
@@ -8,12 +8,8 @@ This is the bridge between a programming language and a database --
 just like how Python programs talk to SQLite or PostgreSQL.
 """
 
-import threading
-from collections.abc import Iterator
-from contextlib import contextmanager
-
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import STDLIB_MODULES, StdlibModule
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 from pydb.database import Database
 from pydb.executor import execute
 from pydb.record import Value as PyDBValue
@@ -76,24 +72,6 @@ def _make_db_query(database: Database) -> StdlibModule:
     )
 
 
-def register_db_module(database: Database) -> None:
-    """Register the ``db`` stdlib module in Pebble's module registry.
-
-    After calling this, Pebble programs can ``import "db"`` and use
-    ``db_query()``, ``db_execute()``, and ``db_tables()``.
-
-    Args:
-        database: The PyDB database instance to make available.
-
-    """
-    STDLIB_MODULES["db"] = _make_db_query(database)
-
-
-def unregister_db_module() -> None:
-    """Remove the ``db`` stdlib module from Pebble's registry."""
-    STDLIB_MODULES.pop("db", None)
-
-
 def make_db_module(database: Database) -> StdlibModule:
     """Build a ``db`` module wired to one particular database.
 
@@ -101,28 +79,3 @@ def make_db_module(database: Database) -> StdlibModule:
     reading (or deleting) each other's tables.
     """
     return _make_db_query(database)
-
-
-# Pebble keeps one shared shelf of modules for the whole process. Only one
-# environment may put its ``db`` on that shelf at a time.
-_DB_SHELF_LOCK = threading.RLock()
-
-
-@contextmanager
-def bound_db_module(module: StdlibModule) -> Iterator[None]:
-    """Put ``module`` on Pebble's shelf as ``db`` just while a program runs.
-
-    Like borrowing the classroom's only microphone: you take it, speak, and
-    hand back whatever was there before -- so whoever spoke last can't walk
-    off with everyone else's microphone.
-    """
-    with _DB_SHELF_LOCK:
-        previous = STDLIB_MODULES.get("db")
-        STDLIB_MODULES["db"] = module
-        try:
-            yield
-        finally:
-            if previous is None:
-                STDLIB_MODULES.pop("db", None)
-            else:
-                STDLIB_MODULES["db"] = previous

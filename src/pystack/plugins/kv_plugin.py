@@ -16,8 +16,8 @@ Example Pebble usage::
     print(who)
 """
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 from pykv.store import BasicStore
 
 from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler

@@ -13,8 +13,8 @@ import functools
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 
 # Type alias for a Pebble handler function (takes args, returns a value).
 type PebbleHandler = Callable[[list[PebbleValue]], PebbleValue]

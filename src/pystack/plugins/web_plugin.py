@@ -16,8 +16,8 @@ Example Pebble usage::
     print(parsed["host"])
 """
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 from pynet.http import get as http_get_impl
 
 from pystack.plugins._shared import url_parse as _url_parse

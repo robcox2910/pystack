@@ -18,8 +18,8 @@ Example Pebble usage::
     print(results)
 """
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 from pyvecdb.distance import cosine_similarity
 from pyvecdb.search import knn_search
 from pyvecdb.store import VectorStore

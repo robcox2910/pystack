@@ -7,8 +7,6 @@ can call them through the PyStackEnvironment.
 
 from pathlib import Path
 
-from pebble.stdlib import STDLIB_MODULES
-
 from pystack.environment import PyStackEnvironment
 from pystack.plugins.coldb_plugin import (
     ColDBPlugin,
@@ -672,7 +670,7 @@ class TestEnvironmentRegistersNoSQLPlugins:
         try:
             expected_modules = ["kv", "docdb", "graphdb", "tsdb", "vecdb", "coldb"]
             for module_name in expected_modules:
-                assert module_name in STDLIB_MODULES, f"{module_name} not registered"
+                assert module_name in env.plugin_registry.pebble_modules(), module_name
         finally:
             env.shutdown()
 

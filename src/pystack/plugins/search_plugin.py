@@ -20,8 +20,8 @@ Example Pebble usage::
     print(results)
 """
 
-from pebble.builtins import Value as PebbleValue
-from pebble.stdlib import StdlibModule
+from pebble import StdlibModule
+from pebble import Value as PebbleValue
 from pysearch.engine import SearchEngine
 
 from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_handler
