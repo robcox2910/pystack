@@ -33,7 +33,7 @@ pyllm and os_learning are brought up to the lint and type standard first. Then t
   - Pages build type is `workflow`, deployed with `actions/upload-pages-artifact` and `actions/deploy-pages`;
   - `exclude_docs` covers `superpowers/`;
   - builds use `mkdocs build --strict`.
-- **The pip-audit check** (pre-commit and CI) runs `uv export --frozen --no-emit-project --all-extras --no-hashes`, then `pip-audit -r <file> --disable-pip --no-deps`.
+- **The pip-audit check** (pre-commit and CI) runs `uv export --frozen --no-emit-project --all-extras --no-hashes`, then `uvx pip-audit==2.10.0 -r <file> --disable-pip --no-deps`. It goes through `uvx`, so no repo needs pip-audit as a dependency.
 - **Where the sync may write.** Only in fresh clones under the session scratchpad, on the branch `chore/series-standard`, one PR per repo, merged on green CI. It never writes to local checkouts or `*-wt` worktrees.
 - **No library release tags** for any of this. It's docs and tooling only.
 
@@ -164,6 +164,9 @@ pyllm and os_learning are brought up to the lint and type standard first. Then t
 - Produces: `render(project: Project, series: list[Project], repo_root: Path) -> Rendered`. It reads `repo_root` only to decide two things: whether `mkdocs.yml` and `docs/index.md` exist, and whether `docs/coverage` is wanted. `coverage_report` is true only when the existing `docs.yml` runs pytest with an HTML coverage report.
 
 **Content rules:**
+- **`pre-commit-config.yaml`:** pystack's hooks, with the same repos and revs, except for two changes:
+  - the `pypa/pip-audit` repo is replaced by a `local` hook: `language: system`, `pass_filenames: false`, `files: ^(pyproject\.toml|uv\.lock)$`, with an entry that runs the Global Constraints pip-audit command on a `mktemp` file and then removes the file;
+  - the commitizen hook stays only if the repo already has commitizen in its dev deps (`render` checks `pyproject.toml`).
 - **README series block:** a table with the columns `Project | What it teaches | Repository | Docs`, listing all 17 in `series.yml` order, with the current project's row in bold.
 - **README docs block:** `## Documentation`, followed by `Full docs (with kid-friendly explanations of every idea): <site_url>`.
 - **`claude_standard.md`:** the generic sections from pystack's CLAUDE.md (Code Style, Linting, Testing, Commits, Dependencies, Releasing), worded generically. It refers to `per-file-ignores` as repo-owned.
