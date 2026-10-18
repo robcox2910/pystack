@@ -16,6 +16,10 @@ scheduler and start a brand-new one on the same state folder: the runs
 are still there, because every change was written to its journalled
 PyDB store first.
 
+Shell command ``schedalerts`` (in ``_schedalerts.py``) runs a job that
+always fails and follows its alert: written down first, routed to a
+``log`` notifier, and delivered.
+
 This plugin has no Pebble module.
 """
 
@@ -156,13 +160,20 @@ def second_start(client: ApiClient) -> list[str]:
 def _sched_cmd(_args: list[str]) -> str:
     """Run the demo chain, print its board, restart and show the history survived."""
     lines = ["Starting a scheduler on PyNet's event loop..."]
-    with tempfile.TemporaryDirectory() as tmp:
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         config = write_config(Path(tmp))
         lines.extend(with_scheduler(config, first_start))
         lines.append("")
         lines.append("Stopping the scheduler and starting a new one on the same state folder...")
         lines.extend(with_scheduler(config, second_start))
     return "\n".join(lines)
+
+
+def _schedalerts_cmd(args: list[str]) -> str:
+    """Run the alert demo (imported lazily: it reuses this module's helpers)."""
+    from pystack.plugins._schedalerts import schedalerts_cmd  # noqa: PLC0415
+
+    return schedalerts_cmd(args)
 
 
 class PySchedulerPlugin(Plugin):
@@ -183,5 +194,10 @@ class PySchedulerPlugin(Plugin):
                 name="sched",
                 handler=_sched_cmd,
                 help_text="Run a small job chain on PyScheduler and restart it",
+            ),
+            ShellCommand(
+                name="schedalerts",
+                handler=_schedalerts_cmd,
+                help_text="Fail a PyScheduler job and follow its alert to a log notifier",
             ),
         ]
