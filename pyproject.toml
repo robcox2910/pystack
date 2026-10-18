@@ -202,6 +202,8 @@ reportPrivateUsage = false
 root = "tests"
 extraPaths = ["."]
 reportPrivateUsage = false
+# Hypothesis's stateful TestCase has no type hints (as in pykv).
+reportUnknownMemberType = false
 
 [tool.commitizen]
 name = "cz_conventional_commits"

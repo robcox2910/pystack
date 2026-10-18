@@ -378,7 +378,9 @@ subscriptions don't outlive the run.
 Because data is kept, running the same example twice adds the same data
 twice. To start fresh, delete the `pystack_data/` folder (or just one
 plugin's folder, like `pystack_data/kv/`). Saved search engines keep their
-ids; `search_list()` lists them, so a later program can find them.
+ids; `search_list()` lists them, so a later program can find them. Files in
+`pystack_data/search/` that aren't named like a saved engine (`engine_7.json`)
+are left alone.
 
 ## Plugin System
 
