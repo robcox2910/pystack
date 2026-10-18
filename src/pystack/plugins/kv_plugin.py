@@ -65,7 +65,7 @@ class KVPlugin(Plugin):
 
     @pebble_method
     def kv_delete(self, args: list[PebbleValue]) -> PebbleValue:
-        """Delete a key from the store."""
+        """Delete a key: answer "ok", or "error: key '<key>' not found" if it wasn't there."""
         key = str(args[0])
         if not self._get_store().delete(key):
             return f"error: key '{key}' not found"
@@ -136,7 +136,7 @@ class KVPlugin(Plugin):
                 return f"Key '{args[0]}' not found"
 
         def _kv_delete_cmd(args: list[str]) -> str:
-            """Delete a key."""
+            """Delete a key: "Deleted '<key>'", or "Key '<key>' not found"."""
             if not args:
                 return "Usage: kv-delete <key>"
             if not self._get_store().delete(args[0]):
