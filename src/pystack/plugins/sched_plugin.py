@@ -160,7 +160,7 @@ def second_start(client: ApiClient) -> list[str]:
 def _sched_cmd(_args: list[str]) -> str:
     """Run the demo chain, print its board, restart and show the history survived."""
     lines = ["Starting a scheduler on PyNet's event loop..."]
-    with tempfile.TemporaryDirectory() as tmp:
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         config = write_config(Path(tmp))
         lines.extend(with_scheduler(config, first_start))
         lines.append("")

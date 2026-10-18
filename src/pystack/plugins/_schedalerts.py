@@ -96,7 +96,7 @@ def alert_story(client: ApiClient, log_path: Path) -> list[str]:
 def schedalerts_cmd(_args: list[str]) -> str:
     """Run the alert demo and return its story."""
     lines = ["Starting a scheduler with a log notifier and a route for every alert..."]
-    with tempfile.TemporaryDirectory() as tmp:
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         folder = Path(tmp)
         config = write_config(folder)
         lines.extend(with_scheduler(config, lambda client: alert_story(client, folder / ALERT_LOG)))
