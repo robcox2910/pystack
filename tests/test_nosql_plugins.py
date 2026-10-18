@@ -50,6 +50,11 @@ class TestKVPlugin:
         value = plugin.kv_get(["temp"])
         assert value == "not found"
 
+    def test_kv_delete_missing_key_says_not_found(self) -> None:
+        """Deleting a key that was never set is an error, not "ok" (found by the model check)."""
+        plugin = KVPlugin()
+        assert plugin.kv_delete([""]) == "error: key '' not found"
+
     def test_kv_keys_returns_list(self) -> None:
         """The kv_keys handler should return a list of key names."""
         plugin = KVPlugin()
@@ -322,6 +327,12 @@ class TestKVShellCommands:
         cmds["kv-set"](["mykey", "myval"])
         result = cmds["kv-delete"](["mykey"])
         assert "Deleted" in result
+
+    def test_kv_shell_delete_missing_says_not_found(self) -> None:
+        """``kv-delete`` on a key that was never set says so (found by the model check)."""
+        plugin = KVPlugin()
+        cmds = {c.name: c.handler for c in plugin.shell_commands()}
+        assert cmds["kv-delete"]([""]) == "Key '' not found"
 
     def test_kv_shell_get_missing(self) -> None:
         """Getting a missing key should return not-found message."""

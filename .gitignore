@@ -13,3 +13,4 @@ htmlcov/
 src/pystack/_version.py
 site/
 .superpowers/
+.hypothesis/

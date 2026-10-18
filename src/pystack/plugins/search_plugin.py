@@ -35,6 +35,12 @@ def _engine_number(engine_id: str) -> int:
     return int(engine_id.removeprefix("engine_"))
 
 
+def _is_engine_id(name: str) -> bool:
+    """Return True for ids this plugin makes itself: ``engine_0``, ``engine_1``, ..."""
+    number = name.removeprefix("engine_")
+    return name.startswith("engine_") and number.isascii() and number.isdigit()
+
+
 class SearchPlugin(Plugin):
     """Integrate PySearch full-text search into PyStack.
 
@@ -89,11 +95,17 @@ class SearchPlugin(Plugin):
         return ids
 
     def load_state(self, folder: Path) -> None:
-        """Load every saved engine; new engines get ids after the saved ones."""
+        """Load every saved engine; new engines get ids after the saved ones.
+
+        Only files named like the ids this plugin makes (``engine_7.json``)
+        are engines. Anything else in the folder, even ``engine_.json`` or
+        ``engine_two.json``, is left alone, like any other stray file.
+        """
         if not folder.is_dir():
             return
         for path in sorted(folder.glob("engine_*.json")):
-            self._engines[path.stem] = load_engine(path)
+            if _is_engine_id(path.stem):
+                self._engines[path.stem] = load_engine(path)
         numbers = [_engine_number(engine_id) for engine_id in self._engines]
         self._next_id[0] = max(numbers, default=-1) + 1
 

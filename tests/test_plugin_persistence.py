@@ -11,9 +11,13 @@ import pytest
 from pycoldb.errors import PersistenceError as ColDBPersistenceError
 from pydocdb.errors import PersistenceError as DocDBPersistenceError
 from pygraphdb.errors import PersistenceError as GraphPersistenceError
+from pygraphdb.graph import Graph
+from pygraphdb.persistence import save_graph
 from pykv.errors import PersistenceError as KVPersistenceError
 from pymq.errors import PersistenceError as MQPersistenceError
+from pysearch.engine import SearchEngine
 from pysearch.errors import PersistenceError as SearchPersistenceError
+from pysearch.persistence import save_engine
 from pytsdb.errors import PersistenceError as TSDBPersistenceError
 from pyvecdb.errors import PersistenceError as VecDBPersistenceError
 
@@ -269,5 +273,49 @@ class TestReviewFixes:
                 'print(vec_search([1.0, 2.0], 1))\nprint(vec_insert("a", [1.0, 2.0, 3.0]))',
             )
             assert output.splitlines()[1] == "a"
+        finally:
+            env.shutdown()
+
+
+class TestOddNamesInSaveFiles:
+    """Names PyStack didn't make itself never crash start-up (found by a property test)."""
+
+    def test_engine_file_without_a_number_is_left_alone(self, tmp_path: Path) -> None:
+        """``engine_.json`` isn't an engine PyStack saved: start-up skips it and leaves it be."""
+        folder = tmp_path / "search"
+        folder.mkdir()
+        stray = folder / "engine_.json"
+        save_engine(SearchEngine(), stray)
+        env = PyStackEnvironment(db_path=tmp_path)
+        try:
+            assert _run(env, "search", "print(search_list())") == "[]\n"
+            assert _run(env, "search", "print(search_create())") == "engine_0\n"
+        finally:
+            env.shutdown()
+        assert stray.exists()
+
+    def test_saved_edge_id_with_a_superscript_digit_loads(self, tmp_path: Path) -> None:
+        """An edge called ``e²`` isn't one PyStack numbered, so new edges start at ``e1``."""
+        graph = Graph()
+        graph.add_node("a")
+        graph.add_edge("e²", "a", "a")
+        (tmp_path / "graphdb").mkdir()
+        save_graph(graph, tmp_path / "graphdb" / "graph.json")
+        env = PyStackEnvironment(db_path=tmp_path)
+        try:
+            assert _run(env, "graphdb", 'print(graph_add_edge("a", "a", "LOOP"))') == "e1\n"
+        finally:
+            env.shutdown()
+
+    def test_saved_edge_id_with_thousands_of_digits_loads(self, tmp_path: Path) -> None:
+        """An edge id too long for ``int`` to read isn't one PyStack numbered either."""
+        graph = Graph()
+        graph.add_node("a")
+        graph.add_edge("e" + "1" * 5000, "a", "a")
+        (tmp_path / "graphdb").mkdir()
+        save_graph(graph, tmp_path / "graphdb" / "graph.json")
+        env = PyStackEnvironment(db_path=tmp_path)
+        try:
+            assert _run(env, "graphdb", 'print(graph_add_edge("a", "a", "LOOP"))') == "e1\n"
         finally:
             env.shutdown()

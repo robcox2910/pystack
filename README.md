@@ -154,7 +154,7 @@ kv_set("name", "Alice")
 let who = kv_get("name")
 print(who)
 
-kv_delete("name")
+kv_delete("name")   # "ok", or "error: key 'name' not found"
 let keys = kv_keys()
 print(keys)
 ```
@@ -290,7 +290,7 @@ When you run `pystack os`, these commands are available at the
 | `dbcrash` | Pull the plug on a journalled PyDB: a helper commits three job runs (with dates and timestamps) and dies mid-way through a fourth; reopening brings back the three and not the fourth | PyDB |
 | `kv-set <key> <value>` | Store a value under a key | PyKV |
 | `kv-get <key>` | Get a value by key | PyKV |
-| `kv-delete <key>` | Delete a key | PyKV |
+| `kv-delete <key>` | Delete a key (says so if it wasn't there) | PyKV |
 | `kv-keys` | List all keys | PyKV |
 | `doc-insert <collection> <json>` | Insert a document | PyDocDB |
 | `doc-find <collection> [query]` | Find documents | PyDocDB |
@@ -378,7 +378,9 @@ subscriptions don't outlive the run.
 Because data is kept, running the same example twice adds the same data
 twice. To start fresh, delete the `pystack_data/` folder (or just one
 plugin's folder, like `pystack_data/kv/`). Saved search engines keep their
-ids; `search_list()` lists them, so a later program can find them.
+ids; `search_list()` lists them, so a later program can find them. Files in
+`pystack_data/search/` that aren't named like a saved engine (`engine_7.json`)
+are left alone.
 
 ## Plugin System
 
