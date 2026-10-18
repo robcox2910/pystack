@@ -41,7 +41,10 @@ def _saved_edges(graph: Graph) -> list[dict[str, str]]:
 
 def _is_counter_id(edge_id: str) -> bool:
     """Return True for ids this plugin makes itself: ``e1``, ``e2``, ..."""
-    return edge_id.startswith("e") and edge_id[1:].isdigit()
+    number = edge_id[1:]
+    # ``isdigit`` alone also says yes to "²", which ``int`` can't read,
+    # and this plugin only ever writes 0-9.
+    return edge_id.startswith("e") and number.isascii() and number.isdigit()
 
 
 class GraphDBPlugin(Plugin):

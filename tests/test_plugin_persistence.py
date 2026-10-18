@@ -11,6 +11,8 @@ import pytest
 from pycoldb.errors import PersistenceError as ColDBPersistenceError
 from pydocdb.errors import PersistenceError as DocDBPersistenceError
 from pygraphdb.errors import PersistenceError as GraphPersistenceError
+from pygraphdb.graph import Graph
+from pygraphdb.persistence import save_graph
 from pykv.errors import PersistenceError as KVPersistenceError
 from pymq.errors import PersistenceError as MQPersistenceError
 from pysearch.engine import SearchEngine
@@ -291,3 +293,16 @@ class TestOddNamesInSaveFiles:
         finally:
             env.shutdown()
         assert stray.exists()
+
+    def test_saved_edge_id_with_a_superscript_digit_loads(self, tmp_path: Path) -> None:
+        """An edge called ``e²`` isn't one PyStack numbered, so new edges start at ``e1``."""
+        graph = Graph()
+        graph.add_node("a")
+        graph.add_edge("e²", "a", "a")
+        (tmp_path / "graphdb").mkdir()
+        save_graph(graph, tmp_path / "graphdb" / "graph.json")
+        env = PyStackEnvironment(db_path=tmp_path)
+        try:
+            assert _run(env, "graphdb", 'print(graph_add_edge("a", "a", "LOOP"))') == "e1\n"
+        finally:
+            env.shutdown()
