@@ -33,6 +33,7 @@ SIBLINGS = frozenset(
         "pyvecdb",
         "pycoldb",
         "pyllm",
+        "pyscheduler",
     }
 )
 

@@ -35,6 +35,7 @@ from pystack.plugins.mq_plugin import MQPlugin
 from pystack.plugins.net_plugin import NetPlugin
 from pystack.plugins.pydb_plugin import PyDBPlugin
 from pystack.plugins.registry import PluginRegistry
+from pystack.plugins.sched_plugin import PySchedulerPlugin
 from pystack.plugins.search_plugin import SearchPlugin
 from pystack.plugins.tsdb_plugin import TSDBPlugin
 from pystack.plugins.vecdb_plugin import VecDBPlugin
@@ -102,7 +103,7 @@ class PyStackEnvironment:
         """Register all built-in integration plugins with the registry.
 
         Add the crypto, web, git, net, search, mq, kv, docdb, graphdb,
-        tsdb, vecdb, coldb, and llm plugins so the registry can wire their
+        tsdb, vecdb, coldb, llm, and sched plugins so the registry can wire their
         Pebble modules, shell commands, and boot hooks during activation.
         """
         plugins: list[Plugin] = [
@@ -113,6 +114,7 @@ class PyStackEnvironment:
             SearchPlugin(),
             MQPlugin(),
             PyDBPlugin(),
+            PySchedulerPlugin(),
             KVPlugin(),
             DocDBPlugin(),
             GraphDBPlugin(),

@@ -394,6 +394,7 @@ include:
 | SearchPlugin | `search` | (none -- used from Pebble) |
 | MQPlugin | `mq` | `mq-put`, `mq-get`, `mqnet` |
 | PyDBPlugin | (none) | `dbcrash` |
+| PySchedulerPlugin | (none) | `sched` |
 | LLMPlugin | `llm` | `dream` |
 
 The `db` module comes from the Pebble-DB adapter instead of a plugin,
