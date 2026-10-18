@@ -199,6 +199,20 @@ class TestSavingIsCareful:
             PyStackEnvironment(db_path=tmp_path)
         assert damaged.read_text(encoding="utf-8") == "{not json"
 
+    @pytest.mark.parametrize(("module", "filename", "error"), SAVE_FILES)
+    def test_save_file_that_is_not_utf8_stops_boot_and_is_kept(
+        self, tmp_path: Path, module: str, filename: str, error: type[Exception]
+    ) -> None:
+        """A save file that isn't UTF-8 text raises the library's PersistenceError, naming it."""
+        folder = tmp_path / module
+        folder.mkdir()
+        damaged = folder / filename
+        content = b"\xff\xfe not utf-8"
+        damaged.write_bytes(content)
+        with pytest.raises(error, match=re.escape(filename)):
+            PyStackEnvironment(db_path=tmp_path)
+        assert damaged.read_bytes() == content
+
 
 class TestNoGlobalState:
     """Plugin data lives on plugin instances, not in module-level variables."""

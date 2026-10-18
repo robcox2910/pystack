@@ -56,3 +56,17 @@ class TestDependencyPins:
     def test_every_sibling_has_a_pinned_source(self) -> None:
         """A new sibling can't sneak in without a pinned source."""
         assert set(_sources()) == SIBLINGS
+
+    def test_overrides_use_the_pinned_tags(self) -> None:
+        """An override for a sibling names exactly the repo and tag of its pinned source.
+
+        Some siblings pin older tags of other siblings in their own sources;
+        the overrides win, so they must never drift from the pins above.
+        """
+        config = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))["tool"]["uv"]
+        sources = config["sources"]
+        for override in config.get("override-dependencies", []):
+            name, url = (part.strip() for part in override.split("@", 1))
+            assert name in SIBLINGS, override
+            source = sources[name]
+            assert url == f"git+{source['git']}@{source['tag']}", override
