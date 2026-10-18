@@ -59,6 +59,7 @@ dev = [
     "commitizen>=4.4.0",
     "pip-audit>=2.10.0",
     "flask>=3.0",
+    "hypothesis>=6.170",
 ]
 
 [build-system]
