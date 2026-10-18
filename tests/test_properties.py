@@ -15,8 +15,9 @@ The step-by-step check of the kv plugin against a plain dict lives in
 ``tests/test_model.py``. See ``docs/property-testing.md`` for the walk-through.
 """
 
+import re
 import tempfile
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 from hypothesis import given
@@ -24,7 +25,7 @@ from hypothesis import strategies as st
 from pydb.database import Database
 from pydb.record import Value as PyDBValue
 from pydb.schema import Column, Schema
-from pydb.types import DataType, from_iso
+from pydb.types import DataType
 from pygraphdb.graph import Graph
 from pygraphdb.persistence import save_graph
 from pysearch.engine import SearchEngine
@@ -34,6 +35,12 @@ from pysearch.persistence import save_engine
 from pystack.adapters.pebble_db import make_db_module
 from pystack.environment import PyStackEnvironment
 from tests.strategies import call_pebble, kv_keys, kv_values
+
+# The file names this plugin gives saved engines: ``engine_`` and a number.
+OUR_ENGINE_FILE = re.compile(r"engine_[0-9]+")
+
+# Python's ``int`` refuses to read more than 4,300 digits at once.
+INT_DIGIT_LIMIT = 4300
 
 # The Pebble values a database row may turn into: plain text, numbers,
 # True/False and nothing. (Pebble has lists, dicts and more, but a single
@@ -87,11 +94,17 @@ def search_file_stems() -> st.SearchStrategy[str]:
     return st.one_of(ours, name_pieces().map("engine_".__add__), name_pieces())
 
 
+def long_digit_runs() -> st.SearchStrategy[str]:
+    """Make a run of ``1``s around Python's 4,300-digit limit for ``int``."""
+    lengths = st.integers(min_value=INT_DIGIT_LIMIT - 10, max_value=INT_DIGIT_LIMIT + 10)
+    return lengths.map("1".__mul__)
+
+
 def edge_ids() -> st.SearchStrategy[str]:
-    """Make an edge id: ``e7``, look-alikes such as ``e²`` (digits from any script), anything."""
+    """Make an edge id: ``e7``, look-alikes such as ``e²`` or ``e111...1``, anything."""
     ours = st.integers(min_value=1, max_value=20).map("e{}".format)
     digits = st.text(alphabet=st.characters(categories=["N"]), min_size=1, max_size=3)
-    return st.one_of(ours, digits.map("e".__add__), st.text())
+    return st.one_of(ours, digits.map("e".__add__), long_digit_runs().map("e".__add__), st.text())
 
 
 # --- Helpers -----------------------------------------------------------------
@@ -111,9 +124,20 @@ def start_or_refuse(folder: Path) -> PyStackEnvironment | None:
 
 
 def pebble_value_back_to_pydb(value: object, data_type: DataType) -> object:
-    """Turn a value Pebble received back into the PyDB value it came from."""
-    if value is not None and data_type in {DataType.DATE, DataType.TIMESTAMP}:
-        return from_iso(str(value), data_type)
+    """Turn a value Pebble received back into the PyDB value it came from.
+
+    This uses Python's own ``fromisoformat``, not PyDB's helpers, so it
+    doesn't share any code with the adapter it checks.
+    """
+    if value is None:
+        return None
+    if data_type is DataType.DATE:
+        return date.fromisoformat(str(value))
+    if data_type is DataType.TIMESTAMP:
+        text = str(value)
+        # A TIMESTAMP crosses as UTC, written with a ``Z`` on the end.
+        assert text.endswith("Z")
+        return datetime.fromisoformat(text)
     return value
 
 
@@ -126,6 +150,8 @@ def test_every_pydb_value_reaches_pebble_and_maps_back(row: dict[str, PyDBValue]
     with tempfile.TemporaryDirectory() as folder:
         database = Database(path=Path(folder))
         columns = [Column(name, DataType(name.upper())) for name in row]
+        # The row has a column of every type PyDB has, so no type is left out.
+        assert {column.data_type for column in columns} == set(DataType)
         database.create_table("cells", Schema(columns))
         stored = database.get_table("cells").insert(row).data
         db_query = make_db_module(database).functions["db_query"][1]
@@ -141,8 +167,12 @@ def test_every_pydb_value_reaches_pebble_and_maps_back(row: dict[str, PyDBValue]
         original = stored[column.name]
         # ``==`` thinks True == 1 == 1.0, so check the type separately.
         assert type(back) is type(original)
-        # NaN ("not a number") never equals anything, not even itself.
-        assert back == original or repr(back) == repr(original) == "nan"
+        if isinstance(original, float):
+            # ``repr`` tells -0.0 from 0.0, and NaN (which never equals
+            # itself) is written ``nan``.
+            assert repr(back) == repr(original)
+        else:
+            assert back == original
 
 
 # --- Restarting: what a program stored is still there --------------------------
@@ -173,7 +203,7 @@ def test_kv_data_survives_a_restart(contents: dict[str, str]) -> None:
 
 @given(stems=st.lists(search_file_stems(), max_size=3, unique=True))
 def test_any_engine_file_name_starts_or_raises_persistence_error(stems: list[str]) -> None:
-    """Whatever the saved engine files are called, PyStack starts and lists them, or refuses cleanly."""
+    """Whatever the saved engine files are called, PyStack starts and lists its own, or refuses cleanly."""
     with tempfile.TemporaryDirectory() as folder:
         search_folder = Path(folder) / "search"
         search_folder.mkdir()
@@ -181,7 +211,10 @@ def test_any_engine_file_name_starts_or_raises_persistence_error(stems: list[str
             save_engine(SearchEngine(), search_folder / f"{stem}.json")
         env = start_or_refuse(Path(folder))
         if env is not None:
-            call_pebble(env, "search", "search_list")
+            listed = call_pebble(env, "search", "search_list")
+            assert isinstance(listed, list)
+            ours = [stem for stem in stems if OUR_ENGINE_FILE.fullmatch(stem)]
+            assert sorted(map(str, listed)) == sorted(ours)
             new_id = call_pebble(env, "search", "search_create")
             assert new_id not in stems
             env.shutdown()

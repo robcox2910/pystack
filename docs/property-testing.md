@@ -113,23 +113,23 @@ Notice what the test *doesn't* say. It never says "store `name -> Ada`
 and you get `Ada`". It doesn't need to know any answers. It only needs a
 rule that's always true.
 
-The two "odd files" properties below only ask PyStack to start (or refuse
-cleanly) without crashing. **A plugin that does nothing at all -- never
-loads, never saves -- passes those**, because ignoring every file never
-crashes. So this round-trip sits beside them: it fails the moment there is
-one key to read back. The other properties check different corners of
-PyStack:
+**A "starts without crashing" check on its own is passed by a plugin that
+does nothing**, because ignoring every file never crashes. That's why the
+two "odd files" properties below also check what PyStack does *next*, and
+why this round-trip sits beside them: a plugin that never saves fails it
+the moment there is one key to read back. The other properties check
+different corners of PyStack:
 
 | Rule | Test |
 |---|---|
 | Every value a table holds reaches Pebble as a plain Pebble value, and maps back exactly | `test_every_pydb_value_reaches_pebble_and_maps_back` |
-| Whatever the saved engine files are called, PyStack starts and lists them, or refuses cleanly | `test_any_engine_file_name_starts_or_raises_persistence_error` |
+| Whatever the saved engine files are called, PyStack starts and lists its own, or refuses cleanly | `test_any_engine_file_name_starts_or_raises_persistence_error` |
 | Whatever ids the saved edges have, PyStack starts and a new edge gets an id nobody has | `test_new_edges_never_reuse_a_saved_edge_id` |
 
 The first one checks the bridge between PyDB and Pebble: Pebble has no
 date type, so a DATE or TIMESTAMP crosses as ISO text like `2026-10-17`,
-and the property checks that text turns back into exactly the date it came
-from. The other two put odd files in the data folder, the way a curious
+and the property checks, with Python's own `fromisoformat`, that the text
+turns back into exactly the date it came from. The other two put odd files in the data folder, the way a curious
 pupil (or a crashed editor) might, and both of them found real bugs.
 
 ## Checking Against a Model
@@ -200,8 +200,8 @@ Piece by piece:
 - **`self.env` and `self.model`** are the school and the notebook. Every
   story starts with an empty data folder and an empty dict.
 - **Each `@rule`** is one kind of step. It does the same thing to PyStack
-  and to the dict. The real file has rules to set a new key, overwrite a
-  key (from Pebble and from the `kv-set` shell command), delete (both
+  and to the dict. The real file has rules to set a new key and overwrite
+  one (from Pebble and from the `kv-set` shell command), delete (both
   ways), read (both ways) and restart. `self.kv(...)` is `call_pebble` for
   the `kv` module.
 - **`keys = Bundle("keys")`** is a bag of keys used earlier in the story.
@@ -345,7 +345,9 @@ The shrunk input became an ordinary example test in
 
 Its twin found the same kind of bug in `graphdb`: a saved edge called `e²`
 crashed start-up, because Python's `isdigit()` says `"²"` is a digit but
-`int("²")` can't read it. And the model check found that deleting a key
+`int("²")` can't read it. (Then a reviewer asked about very long ids:
+`int()` refuses more than 4,300 digits, so an edge called `e111...1` with
+5,000 ones crashed too. Now the strategy makes those as well.) And the model check found that deleting a key
 that was never set answered `"ok"`: PyKV's `delete` returns `False` for a
 missing key, but the plugin was waiting for an error that never came.
 

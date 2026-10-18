@@ -79,6 +79,13 @@ class KVMachine(RuleBasedStateMachine):
         assert self.kv("kv_set", key, value) == "ok"
         self.model[key] = value
 
+    @rule(target=keys, key=kv_keys(), value=kv_values())
+    def set_new_key_from_the_shell(self, key: str, value: str) -> str:
+        """Set a fresh key with the ``kv-set`` shell command, and remember it."""
+        assert self.shell("kv-set", key, value) == f"Set '{key}' = '{value}'"
+        self.model[key] = value
+        return key
+
     @rule(key=keys, value=kv_values())
     def overwrite_key_from_the_shell(self, key: str, value: str) -> None:
         """Set a key with the ``kv-set`` shell command instead of Pebble."""
