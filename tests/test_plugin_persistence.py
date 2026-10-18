@@ -13,7 +13,9 @@ from pydocdb.errors import PersistenceError as DocDBPersistenceError
 from pygraphdb.errors import PersistenceError as GraphPersistenceError
 from pykv.errors import PersistenceError as KVPersistenceError
 from pymq.errors import PersistenceError as MQPersistenceError
+from pysearch.engine import SearchEngine
 from pysearch.errors import PersistenceError as SearchPersistenceError
+from pysearch.persistence import save_engine
 from pytsdb.errors import PersistenceError as TSDBPersistenceError
 from pyvecdb.errors import PersistenceError as VecDBPersistenceError
 
@@ -271,3 +273,21 @@ class TestReviewFixes:
             assert output.splitlines()[1] == "a"
         finally:
             env.shutdown()
+
+
+class TestOddNamesInSaveFiles:
+    """Names PyStack didn't make itself never crash start-up (found by a property test)."""
+
+    def test_engine_file_without_a_number_is_left_alone(self, tmp_path: Path) -> None:
+        """``engine_.json`` isn't an engine PyStack saved: start-up skips it and leaves it be."""
+        folder = tmp_path / "search"
+        folder.mkdir()
+        stray = folder / "engine_.json"
+        save_engine(SearchEngine(), stray)
+        env = PyStackEnvironment(db_path=tmp_path)
+        try:
+            assert _run(env, "search", "print(search_list())") == "[]\n"
+            assert _run(env, "search", "print(search_create())") == "engine_0\n"
+        finally:
+            env.shutdown()
+        assert stray.exists()
