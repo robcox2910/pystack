@@ -8,6 +8,7 @@ can call them through the PyStackEnvironment.
 from pathlib import Path
 
 from pystack.environment import PyStackEnvironment
+from pystack.plugins.base import shell_handler
 from pystack.plugins.coldb_plugin import (
     ColDBPlugin,
 )
@@ -200,6 +201,15 @@ class TestTSDBPlugin:
         assert isinstance(values, list)
         expected_count = 2
         assert len(values) == expected_count
+
+    def test_ts_add_refuses_nan(self) -> None:
+        """A NaN reading is refused with an error (PyTSDB v0.3.0) and nothing is stored."""
+        plugin = TSDBPlugin()
+        result = plugin.ts_add(["temp", "nan"])
+        assert isinstance(result, str)
+        assert result.startswith("error:")
+        assert "NaN" in result
+        assert plugin.ts_query(["temp"]) == []
 
     def test_tsdb_plugin_registers_module(self) -> None:
         """The TSDBPlugin should register a 'tsdb' stdlib module."""
@@ -444,6 +454,15 @@ class TestTSDBShellCommands:
         cmds["ts-add"](["temp", "80.0"])
         result = cmds["ts-avg"](["temp", "86400"])
         assert result != "(no data points)"
+
+    def test_ts_shell_add_refuses_nan(self) -> None:
+        """The ts-add shell command reports a NaN reading as an error and stores nothing."""
+        plugin = TSDBPlugin()
+        cmds = {c.name: shell_handler(c.handler) for c in plugin.shell_commands()}
+        result = cmds["ts-add"](["temp", "nan"])
+        assert result.startswith("error:")
+        assert "NaN" in result
+        assert cmds["ts-query"](["temp"]) == "(no data points)"
 
     def test_ts_shell_usage(self) -> None:
         """Shell commands with missing args should show usage."""
