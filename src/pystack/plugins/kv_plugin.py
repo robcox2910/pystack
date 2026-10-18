@@ -67,10 +67,7 @@ class KVPlugin(Plugin):
     def kv_delete(self, args: list[PebbleValue]) -> PebbleValue:
         """Delete a key from the store."""
         key = str(args[0])
-        store = self._get_store()
-        try:
-            store.delete(key)
-        except Exception:  # noqa: BLE001
+        if not self._get_store().delete(key):
             return f"error: key '{key}' not found"
         return "ok"
 
@@ -142,9 +139,7 @@ class KVPlugin(Plugin):
             """Delete a key."""
             if not args:
                 return "Usage: kv-delete <key>"
-            try:
-                self._get_store().delete(args[0])
-            except Exception:  # noqa: BLE001
+            if not self._get_store().delete(args[0]):
                 return f"Key '{args[0]}' not found"
             return f"Deleted '{args[0]}'"
 
