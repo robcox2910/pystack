@@ -620,8 +620,8 @@ source = { git = "https://github.com/robcox2910/pycrypt?tag=v0.1.0#c834608a8ebeb
 
 [[package]]
 name = "pydb"
-version = "0.3.0"
-source = { git = "https://github.com/robcox2910/pydb?tag=v0.3.0#85adca382cc6b2528e79beec412e553a5728fcc1" }
+version = "0.4.0"
+source = { git = "https://github.com/robcox2910/pydb?tag=v0.4.0#97aab3550080a5ef52d0d89b3a0661887b5e64c3" }
 
 [[package]]
 name = "pydocdb"
@@ -752,7 +752,7 @@ requires-dist = [
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
     { name = "pycoldb", git = "https://github.com/robcox2910/pycoldb?tag=v0.2.0" },
     { name = "pycrypt", git = "https://github.com/robcox2910/pycrypt?tag=v0.1.0" },
-    { name = "pydb", git = "https://github.com/robcox2910/pydb?tag=v0.3.0" },
+    { name = "pydb", git = "https://github.com/robcox2910/pydb?tag=v0.4.0" },
     { name = "pydocdb", git = "https://github.com/robcox2910/pydoc-db?tag=v0.2.0" },
     { name = "pygit", git = "https://github.com/robcox2910/pygit?tag=v0.1.0" },
     { name = "pygraphdb", git = "https://github.com/robcox2910/pygraphdb?tag=v0.2.0" },
