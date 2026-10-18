@@ -39,12 +39,17 @@ def _saved_edges(graph: Graph) -> list[dict[str, str]]:
     return cast("list[dict[str, str]]", edges)
 
 
-def _is_counter_id(edge_id: str) -> bool:
-    """Return True for ids this plugin makes itself: ``e1``, ``e2``, ..."""
+def _counter_number(edge_id: str) -> int | None:
+    """Return the number in an id this plugin makes itself (``e7`` -> 7), else None."""
     number = edge_id[1:]
     # ``isdigit`` alone also says yes to "²", which ``int`` can't read,
     # and this plugin only ever writes 0-9.
-    return edge_id.startswith("e") and number.isascii() and number.isdigit()
+    if not (edge_id.startswith("e") and number.isascii() and number.isdigit()):
+        return None
+    try:
+        return int(number)
+    except ValueError:  # over 4,300 digits: too long for ``int`` to read
+        return None
 
 
 class GraphDBPlugin(Plugin):
@@ -113,14 +118,8 @@ class GraphDBPlugin(Plugin):
         if path.exists():
             self._graph = load_graph(path)
             # New edges get ids after the saved ones (e1, e2, ...).
-            self._edge_counter = max(
-                (
-                    int(edge["edge_id"][1:])
-                    for edge in _saved_edges(self._graph)
-                    if _is_counter_id(edge["edge_id"])
-                ),
-                default=0,
-            )
+            numbers = (_counter_number(edge["edge_id"]) for edge in _saved_edges(self._graph))
+            self._edge_counter = max((n for n in numbers if n is not None), default=0)
 
     def save_state(self, folder: Path) -> None:
         """Save the graph, if this run used or loaded one."""

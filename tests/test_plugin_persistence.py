@@ -306,3 +306,16 @@ class TestOddNamesInSaveFiles:
             assert _run(env, "graphdb", 'print(graph_add_edge("a", "a", "LOOP"))') == "e1\n"
         finally:
             env.shutdown()
+
+    def test_saved_edge_id_with_thousands_of_digits_loads(self, tmp_path: Path) -> None:
+        """An edge id too long for ``int`` to read isn't one PyStack numbered either."""
+        graph = Graph()
+        graph.add_node("a")
+        graph.add_edge("e" + "1" * 5000, "a", "a")
+        (tmp_path / "graphdb").mkdir()
+        save_graph(graph, tmp_path / "graphdb" / "graph.json")
+        env = PyStackEnvironment(db_path=tmp_path)
+        try:
+            assert _run(env, "graphdb", 'print(graph_add_edge("a", "a", "LOOP"))') == "e1\n"
+        finally:
+            env.shutdown()
