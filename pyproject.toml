@@ -1,7 +1,7 @@
 [project]
 name = "pystack"
 dynamic = ["version"]
-description = "A unified educational platform integrating PyOS, Pebble, and PyDB"
+description = "Every project in the from-scratch-in-Python series joined into one working platform"
 readme = "README.md"
 requires-python = ">=3.14"
 license = {text = "MIT"}
