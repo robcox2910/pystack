@@ -147,6 +147,7 @@ The first two come from the core adapters. The rest come from plugins.
 | `mqnet` | Visit PyMQ's networked post office: one worker crashes, its lease comes back to another, a poison job lands in the dead-letter box | MQPlugin |
 | `dbcrash` | Pull the plug on PyDB's diary-keeping (journalled) database: three finished job runs survive a crash, the unfinished fourth is gone | PyDBPlugin |
 | `sched` | Run a tiny job chain on PyScheduler: a flaky job passes on its retry, a cleanup job is skipped because nothing failed, and the history survives a restart | PySchedulerPlugin |
+| `schedalerts` | Make a PyScheduler job fail and follow its alert: stored first, routed to a log notifier, delivered once | PySchedulerPlugin |
 
 Plus all the standard PyOS commands like `ls`, `cat`, `mkdir`, `help`,
 and more.
@@ -190,7 +191,7 @@ core three (PyOS, Pebble, PyDB):
 | SearchPlugin | `import "search"` | (none) | PySearch |
 | MQPlugin | `import "mq"` | `mq-put`, `mq-get`, `mqnet` | PyMQ |
 | PyDBPlugin | (none) | `dbcrash` | PyDB |
-| PySchedulerPlugin | (none) | `sched` | PyScheduler |
+| PySchedulerPlugin | (none) | `sched`, `schedalerts` | PyScheduler |
 
 The `db` module is handled separately by the Pebble-DB adapter because
 it needs a live database instance.

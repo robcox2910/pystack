@@ -764,10 +764,11 @@ wheels = [
 
 [[package]]
 name = "pyscheduler"
-version = "0.1.1"
-source = { git = "https://github.com/robcox2910/pyscheduler?tag=v0.1.1#59260b926379142ab5cb1d310181818dc9ed9b6a" }
+version = "0.2.0"
+source = { git = "https://github.com/robcox2910/pyscheduler?tag=v0.2.0#a5b54c65b9dbb585a49d759959006fad793a4a1a" }
 dependencies = [
     { name = "pydb" },
+    { name = "pymq" },
     { name = "pynet" },
     { name = "pyweb" },
 ]
@@ -837,7 +838,7 @@ requires-dist = [
     { name = "pynet", git = "https://github.com/robcox2910/pynet?tag=v0.1.0" },
     { name = "pyos-learn", git = "https://github.com/robcox2910/py-os?tag=v0.2.0" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pyscheduler", git = "https://github.com/robcox2910/pyscheduler?tag=v0.1.1" },
+    { name = "pyscheduler", git = "https://github.com/robcox2910/pyscheduler?tag=v0.2.0" },
     { name = "pysearch", git = "https://github.com/robcox2910/pysearch?tag=v0.2.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },

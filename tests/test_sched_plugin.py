@@ -64,7 +64,7 @@ class TestSchedulerPluginInfo:
         """The plugin is called PyScheduler and adds only the sched command."""
         plugin = PySchedulerPlugin()
         assert plugin.info().name == "PyScheduler"
-        assert [c.name for c in plugin.shell_commands()] == ["sched"]
+        assert [c.name for c in plugin.shell_commands()] == ["sched", "schedalerts"]
 
 
 class _PartialClient(ApiClient):
