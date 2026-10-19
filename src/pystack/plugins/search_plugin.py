@@ -20,6 +20,7 @@ Example Pebble usage::
     print(results)
 """
 
+import logging
 from pathlib import Path
 
 from pebble import StdlibModule
@@ -28,6 +29,8 @@ from pysearch.engine import SearchEngine
 from pysearch.persistence import load_engine, save_engine
 
 from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_method
+
+_log = logging.getLogger(__name__)
 
 
 def _engine_number(engine_id: str) -> int:
@@ -99,13 +102,15 @@ class SearchPlugin(Plugin):
 
         Only files named like the ids this plugin makes (``engine_7.json``)
         are engines. Anything else in the folder, even ``engine_.json`` or
-        ``engine_two.json``, is left alone, like any other stray file.
+        ``engine_two.json``, is left alone, with a warning naming it.
         """
         if not folder.is_dir():
             return
-        for path in sorted(folder.glob("engine_*.json")):
-            if _is_engine_id(path.stem):
+        for path in sorted(folder.iterdir()):
+            if path.suffix == ".json" and _is_engine_id(path.stem):
                 self._engines[path.stem] = load_engine(path)
+            else:
+                _log.warning("search: skipping %s, which isn't a saved engine", path.name)
         numbers = [_engine_number(engine_id) for engine_id in self._engines]
         self._next_id[0] = max(numbers, default=-1) + 1
 

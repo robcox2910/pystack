@@ -316,12 +316,16 @@ had a number. The caretaker didn't need to think of a bad name: the
 strategy makes names like `engine_x` all the time.
 
 The fix: only files named like the ids the plugin makes are engines.
-Anything else is left alone, like any other stray file in the folder:
+Anything else is left alone, like any other stray file in the folder, and
+start-up logs a warning naming each file it skipped, so nothing goes
+missing silently:
 
 ```python
-        for path in sorted(folder.glob("engine_*.json")):
-            if _is_engine_id(path.stem):  # was: no check, so every engine_*.json loaded
+        for path in sorted(folder.iterdir()):
+            if path.suffix == ".json" and _is_engine_id(path.stem):  # was: every engine_*.json
                 self._engines[path.stem] = load_engine(path)
+            else:
+                _log.warning("search: skipping %s, which isn't a saved engine", path.name)
 ```
 
 The shrunk input became an ordinary example test in
@@ -347,7 +351,11 @@ Its twin found the same kind of bug in `graphdb`: a saved edge called `e²`
 crashed start-up, because Python's `isdigit()` says `"²"` is a digit but
 `int("²")` can't read it. (Then a reviewer asked about very long ids:
 `int()` refuses more than 4,300 digits, so an edge called `e111...1` with
-5,000 ones crashed too. Now the strategy makes those as well.) And the model check found that deleting a key
+5,000 ones crashed too. Now the strategy makes those as well. One digit
+short is still a trap: after `e` plus 4,300 nines the next id has 4,301
+digits, which Python can't write down, so ids that long don't count
+towards the next number, and the counter skips any id the graph already
+has.) And the model check found that deleting a key
 that was never set answered `"ok"`: PyKV's `delete` returns `False` for a
 missing key, but the plugin was waiting for an error that never came.
 

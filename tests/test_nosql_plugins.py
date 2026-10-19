@@ -426,6 +426,18 @@ class TestGraphDBShellCommands:
         assert "a" in result
         assert "b" in result
 
+    def test_graph_add_edge_skips_ids_already_in_the_graph(self) -> None:
+        """The counter never hands out an id the graph already has."""
+        plugin = GraphDBPlugin()
+        plugin.graph_add_node(["a", "Node"])
+        plugin.graph_add_node(["b", "Node"])
+        plugin._get_graph().add_edge("e1", "a", "b")  # not counted by the plugin
+        assert plugin.graph_add_edge(["a", "b", "LINK"]) == "e2"
+        cmds = {c.name: c.handler for c in plugin.shell_commands()}
+        plugin._get_graph().add_edge("e3", "a", "b")
+        assert "Added edge" in cmds["graph"](["add-edge", "a", "b"])
+        assert plugin._get_graph().has_edge("e4")
+
     def test_graph_shell_usage(self) -> None:
         """Shell command with no args should show usage."""
         plugin = GraphDBPlugin()
@@ -463,6 +475,26 @@ class TestTSDBShellCommands:
         assert result.startswith("error:")
         assert "NaN" in result
         assert cmds["ts-query"](["temp"]) == "(no data points)"
+
+    def test_ts_shell_add_answers_error_for_bad_values_on_its_own(self) -> None:
+        """Regression: ts-add answered "error: ..." only behind the registry's safety net.
+
+        Called straight from ``shell_commands()``, a value that isn't a number
+        (or one PyTSDB refuses, like NaN) raised out of the plugin instead.
+        """
+        plugin = TSDBPlugin()
+        cmds = {c.name: c.handler for c in plugin.shell_commands()}
+        for bad in ("abc", "nan"):
+            result = cmds["ts-add"](["temp", bad])
+            assert result.startswith("error:"), (bad, result)
+        assert cmds["ts-query"](["temp"]) == "(no data points)"
+
+    def test_ts_add_answers_error_for_a_value_that_is_not_a_number(self) -> None:
+        """The Pebble function answers "error: ..." for "abc" instead of raising."""
+        plugin = TSDBPlugin()
+        result = plugin.ts_add(["temp", "abc"])
+        assert isinstance(result, str)
+        assert result.startswith("error:")
 
     def test_ts_shell_usage(self) -> None:
         """Shell commands with missing args should show usage."""

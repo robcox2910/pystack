@@ -4,6 +4,7 @@ Write something through Pebble, shut PyStack down, start it again on the
 same data folder, and the data is still there -- just like a real database.
 """
 
+import logging
 import re
 from pathlib import Path
 
@@ -308,6 +309,27 @@ class TestOddNamesInSaveFiles:
             env.shutdown()
         assert stray.exists()
 
+    def test_stray_search_files_are_skipped_with_a_warning(
+        self, tmp_path: Path, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """Start-up names every file in ``search/`` it skips, instead of staying silent."""
+        folder = tmp_path / "search"
+        folder.mkdir()
+        save_engine(SearchEngine(), folder / "engine_0.json")
+        strays = ("engine_.json", "engine_two.json", "notes.txt")
+        for name in strays:
+            (folder / name).write_text("{}")
+        with caplog.at_level(logging.WARNING, logger="pystack.plugins.search_plugin"):
+            env = PyStackEnvironment(db_path=tmp_path)
+            try:
+                assert _run(env, "search", "print(search_list())") == "[engine_0]\n"
+            finally:
+                env.shutdown()
+        warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
+        for name in strays:
+            assert any(name in message for message in warnings), (name, warnings)
+        assert not any("engine_0.json" in message for message in warnings)
+
     def test_saved_edge_id_with_a_superscript_digit_loads(self, tmp_path: Path) -> None:
         """An edge called ``e²`` isn't one PyStack numbered, so new edges start at ``e1``."""
         graph = Graph()
@@ -333,3 +355,29 @@ class TestOddNamesInSaveFiles:
             assert _run(env, "graphdb", 'print(graph_add_edge("a", "a", "LOOP"))') == "e1\n"
         finally:
             env.shutdown()
+
+    def test_edge_ids_stay_fresh_after_the_counter_outgrows_int(self, tmp_path: Path) -> None:
+        """Regression: ``e`` + 4,300 nines made the next id 4,301 digits long.
+
+        That id can't be read back after a restart, so the counter handed it
+        out a second time and ``graph_add_edge`` answered "error: ...".
+        """
+        graph = Graph()
+        graph.add_node("a")
+        graph.add_edge("e" + "9" * 4300, "a", "a")
+        (tmp_path / "graphdb").mkdir()
+        save_graph(graph, tmp_path / "graphdb" / "graph.json")
+        add = 'print(graph_add_edge("a", "a", "LOOP"))'
+        first = PyStackEnvironment(db_path=tmp_path)
+        try:
+            first_id = _run(first, "graphdb", add)
+        finally:
+            first.shutdown()
+        second = PyStackEnvironment(db_path=tmp_path)
+        try:
+            second_id = _run(second, "graphdb", add)
+        finally:
+            second.shutdown()
+        assert not first_id.startswith("error")
+        assert not second_id.startswith("error"), second_id[:80]
+        assert second_id != first_id

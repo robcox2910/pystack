@@ -24,6 +24,7 @@ from pebble import StdlibModule
 from pebble import Value as PebbleValue
 from pytsdb.aggregation import AggFunc, aggregate
 from pytsdb.database import TimeSeriesDB
+from pytsdb.errors import PyTSDBError
 from pytsdb.persistence import load, save
 
 from pystack.plugins.base import Plugin, PluginInfo, ShellCommand, pebble_method
@@ -48,17 +49,30 @@ class TSDBPlugin(Plugin):
             self._db = TimeSeriesDB()
         return self._db
 
+    def _add_point(self, series_name: str, raw_value: str) -> float | str:
+        """Add *raw_value* to *series_name*, creating the series if needed.
+
+        Returns:
+            The value added, or an ``"error: ..."`` message when the value
+            isn't a number (``"abc"``) or PyTSDB refuses it (``"nan"``).
+
+        """
+        try:
+            value = float(raw_value)
+            db = self._get_db()
+            # Auto-create the series if it doesn't exist.
+            if series_name not in db.list_series():
+                db.create_series(series_name)
+            db.add_point(series_name, value=value)
+        except (ValueError, PyTSDBError) as exc:
+            return f"error: {exc}"
+        return value
+
     @pebble_method
     def ts_add(self, args: list[PebbleValue]) -> PebbleValue:
-        """Add a data point to a named time series."""
-        series_name = str(args[0])
-        value = float(str(args[1]))
-        db = self._get_db()
-        # Auto-create the series if it doesn't exist.
-        if series_name not in db.list_series():
-            db.create_series(series_name)
-        db.add_point(series_name, value=value)
-        return "ok"
+        """Add a data point to a named time series: "ok", or "error: ..." for a bad value."""
+        added = self._add_point(str(args[0]), str(args[1]))
+        return added if isinstance(added, str) else "ok"
 
     @pebble_method
     def ts_query(self, args: list[PebbleValue]) -> PebbleValue:
@@ -128,12 +142,11 @@ class TSDBPlugin(Plugin):
             """Add a data point to a series."""
             if len(args) < 2:  # noqa: PLR2004
                 return "Usage: ts-add <series> <value>"
-            series_name, value = args[0], float(args[1])
-            db = self._get_db()
-            if series_name not in db.list_series():
-                db.create_series(series_name)
-            db.add_point(series_name, value=value)
-            return f"Added {value} to '{series_name}'"
+            series_name = args[0]
+            added = self._add_point(series_name, args[1])
+            if isinstance(added, str):
+                return added
+            return f"Added {added} to '{series_name}'"
 
         def _ts_query_cmd(args: list[str]) -> str:
             """Query data points in a series."""
