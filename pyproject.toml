@@ -76,7 +76,7 @@ version-file = "src/pystack/_version.py"
 packages = ["src/pystack"]
 
 [tool.uv]
-# pyscheduler v0.2.1 pins older pynet/pyweb/pydb/pymq tags in its own sources.
+# pyscheduler v0.3.0 pins older pynet/pyweb/pydb/pymq tags in its own sources.
 # Override those so the whole stack resolves to the tags below.
 override-dependencies = [
     "pydb @ git+https://github.com/robcox2910/pydb@v0.4.1",
@@ -95,7 +95,7 @@ pycrypt = { git = "https://github.com/robcox2910/pycrypt", tag = "v0.1.1" }
 pynet = { git = "https://github.com/robcox2910/pynet", tag = "v0.1.1" }
 pysearch = { git = "https://github.com/robcox2910/pysearch", tag = "v0.2.2" }
 pymq = { git = "https://github.com/robcox2910/pymq", tag = "v0.4.1" }
-pyscheduler = { git = "https://github.com/robcox2910/pyscheduler", tag = "v0.2.1" }
+pyscheduler = { git = "https://github.com/robcox2910/pyscheduler", tag = "v0.3.0" }
 pykv = { git = "https://github.com/robcox2910/pykv", tag = "v0.3.0" }
 pydocdb = { git = "https://github.com/robcox2910/pydoc-db", tag = "v0.2.2" }
 pygraphdb = { git = "https://github.com/robcox2910/pygraphdb", tag = "v0.3.0" }
@@ -164,6 +164,8 @@ max-args = 9
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S101", "SLF001"]
+# Fetches our own demo's loopback http:// URL, never a user-supplied one: S310 is a false positive.
+"src/pystack/plugins/_schedweb.py" = ["S310"]
 # Runs our own interpreter with a fixed argument list: S603 is a false positive.
 "src/pystack/plugins/pydb_plugin.py" = ["S603"]
 
