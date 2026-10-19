@@ -4,11 +4,10 @@ requires-python = ">=3.14"
 
 [manifest]
 overrides = [
-    { name = "pycrypt", git = "https://github.com/robcox2910/pycrypt?tag=v0.1.1" },
     { name = "pydb", git = "https://github.com/robcox2910/pydb?tag=v0.4.1" },
-    { name = "pymq", git = "https://github.com/robcox2910/pymq?tag=v0.4.0" },
+    { name = "pymq", git = "https://github.com/robcox2910/pymq?tag=v0.4.1" },
     { name = "pynet", git = "https://github.com/robcox2910/pynet?tag=v0.1.1" },
-    { name = "pyweb", git = "https://github.com/robcox2910/pyweb?tag=v0.2.1" },
+    { name = "pyweb", git = "https://github.com/robcox2910/pyweb?tag=v0.2.2" },
 ]
 
 [[package]]
@@ -563,8 +562,8 @@ wheels = [
 
 [[package]]
 name = "pebble-lang"
-version = "0.2.1"
-source = { git = "https://github.com/robcox2910/pebble-lang?tag=v0.2.1#7d451432dbcc7cd7e8396c70864fc426a0c2df21" }
+version = "0.2.2"
+source = { git = "https://github.com/robcox2910/pebble-lang?tag=v0.2.2#7770162524deba9197ac252243949f60e732d101" }
 
 [[package]]
 name = "pip"
@@ -696,8 +695,8 @@ source = { git = "https://github.com/robcox2910/pydb?tag=v0.4.1#4256469224eb0981
 
 [[package]]
 name = "pydocdb"
-version = "0.2.1"
-source = { git = "https://github.com/robcox2910/pydoc-db?tag=v0.2.1#0a19b52d1c28ce4c7620b19a9d5606da0a502a44" }
+version = "0.2.2"
+source = { git = "https://github.com/robcox2910/pydoc-db?tag=v0.2.2#4b174cf739413ef00d01362ad5610cb7f4a2cacc" }
 
 [[package]]
 name = "pygit"
@@ -725,16 +724,16 @@ source = { git = "https://github.com/robcox2910/pykv?tag=v0.3.0#fc8d6fdfc3d73434
 
 [[package]]
 name = "pyllm"
-version = "0.3.0"
-source = { git = "https://github.com/robcox2910/pyllm?tag=v0.3.0#07ffa65a417560f2f2b76dc9f3b7c99c4c008005" }
+version = "0.4.1"
+source = { git = "https://github.com/robcox2910/pyllm?tag=v0.4.1#9b9fd67dd796b017fff0a54d5842040748f5653d" }
 dependencies = [
     { name = "numpy" },
 ]
 
 [[package]]
 name = "pymq"
-version = "0.4.0"
-source = { git = "https://github.com/robcox2910/pymq?tag=v0.4.0#7f7546ea5656518ac6de092c916158e327006c86" }
+version = "0.4.1"
+source = { git = "https://github.com/robcox2910/pymq?tag=v0.4.1#651ee7e44e28a288311d1519085b55888e69c0da" }
 dependencies = [
     { name = "pynet" },
 ]
@@ -746,8 +745,8 @@ source = { git = "https://github.com/robcox2910/pynet?tag=v0.1.1#824795ac00ddddd
 
 [[package]]
 name = "pyos-learn"
-version = "0.2.1"
-source = { git = "https://github.com/robcox2910/py-os?tag=v0.2.1#a2c6a9636dfc028a1fab691cd3325e8a82275977" }
+version = "0.2.2"
+source = { git = "https://github.com/robcox2910/py-os?tag=v0.2.2#9759c4914286f5b13f86020fe3fc2e800cfe9ad6" }
 
 [[package]]
 name = "pyparsing"
@@ -784,8 +783,8 @@ dependencies = [
 
 [[package]]
 name = "pysearch"
-version = "0.2.1"
-source = { git = "https://github.com/robcox2910/pysearch?tag=v0.2.1#c4dc13f3a3bf53ed15946fa5218b89ac71de0a7f" }
+version = "0.2.2"
+source = { git = "https://github.com/robcox2910/pysearch?tag=v0.2.2#a1b8d46624f0c58fedfeedb10a35135209cb1a5d" }
 
 [[package]]
 name = "pystack"
@@ -832,28 +831,28 @@ requires-dist = [
     { name = "flask", marker = "extra == 'dev'", specifier = ">=3.0" },
     { name = "flask", marker = "extra == 'web'", specifier = ">=3.0" },
     { name = "hypothesis", marker = "extra == 'dev'", specifier = ">=6.170" },
-    { name = "pebble-lang", git = "https://github.com/robcox2910/pebble-lang?tag=v0.2.1" },
+    { name = "pebble-lang", git = "https://github.com/robcox2910/pebble-lang?tag=v0.2.2" },
     { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
     { name = "pycoldb", git = "https://github.com/robcox2910/pycoldb?tag=v0.3.0" },
     { name = "pycrypt", git = "https://github.com/robcox2910/pycrypt?tag=v0.1.1" },
     { name = "pydb", git = "https://github.com/robcox2910/pydb?tag=v0.4.1" },
-    { name = "pydocdb", git = "https://github.com/robcox2910/pydoc-db?tag=v0.2.1" },
+    { name = "pydocdb", git = "https://github.com/robcox2910/pydoc-db?tag=v0.2.2" },
     { name = "pygit", git = "https://github.com/robcox2910/pygit?tag=v0.2.0" },
     { name = "pygraphdb", git = "https://github.com/robcox2910/pygraphdb?tag=v0.3.0" },
     { name = "pykv", git = "https://github.com/robcox2910/pykv?tag=v0.3.0" },
-    { name = "pyllm", git = "https://github.com/robcox2910/pyllm?tag=v0.3.0" },
-    { name = "pymq", git = "https://github.com/robcox2910/pymq?tag=v0.4.0" },
+    { name = "pyllm", git = "https://github.com/robcox2910/pyllm?tag=v0.4.1" },
+    { name = "pymq", git = "https://github.com/robcox2910/pymq?tag=v0.4.1" },
     { name = "pynet", git = "https://github.com/robcox2910/pynet?tag=v0.1.1" },
-    { name = "pyos-learn", git = "https://github.com/robcox2910/py-os?tag=v0.2.1" },
+    { name = "pyos-learn", git = "https://github.com/robcox2910/py-os?tag=v0.2.2" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
     { name = "pyscheduler", git = "https://github.com/robcox2910/pyscheduler?tag=v0.2.1" },
-    { name = "pysearch", git = "https://github.com/robcox2910/pysearch?tag=v0.2.1" },
+    { name = "pysearch", git = "https://github.com/robcox2910/pysearch?tag=v0.2.2" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "pytsdb", git = "https://github.com/robcox2910/pytsdb?tag=v0.3.0" },
+    { name = "pytsdb", git = "https://github.com/robcox2910/pytsdb?tag=v0.3.1" },
     { name = "pyvecdb", git = "https://github.com/robcox2910/pyvecdb?tag=v0.2.1" },
-    { name = "pyweb", git = "https://github.com/robcox2910/pyweb?tag=v0.2.1" },
+    { name = "pyweb", git = "https://github.com/robcox2910/pyweb?tag=v0.2.2" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
 ]
 provides-extras = ["dev", "web"]
@@ -902,8 +901,8 @@ wheels = [
 
 [[package]]
 name = "pytsdb"
-version = "0.3.0"
-source = { git = "https://github.com/robcox2910/pytsdb?tag=v0.3.0#265eedd5c6f578cfece8036ea22d8e7538952b6c" }
+version = "0.3.1"
+source = { git = "https://github.com/robcox2910/pytsdb?tag=v0.3.1#9b79d7efc0acbf1b2e964d5943b0a880eff967b0" }
 
 [[package]]
 name = "pyvecdb"
@@ -912,8 +911,8 @@ source = { git = "https://github.com/robcox2910/pyvecdb?tag=v0.2.1#9431fb75c611c
 
 [[package]]
 name = "pyweb"
-version = "0.2.1"
-source = { git = "https://github.com/robcox2910/pyweb?tag=v0.2.1#82a528700a9ad6bdfc9fcd9a14614c9cd7083bbb" }
+version = "0.2.2"
+source = { git = "https://github.com/robcox2910/pyweb?tag=v0.2.2#015d2e473383bfd09f177d0d383307efa239742f" }
 dependencies = [
     { name = "pycrypt" },
     { name = "pynet" },
