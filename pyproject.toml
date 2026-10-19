@@ -77,7 +77,7 @@ packages = ["src/pystack"]
 
 [tool.uv.sources]
 pyos-learn = { git = "https://github.com/robcox2910/py-os", tag = "v0.2.2" }
-pebble-lang = { git = "https://github.com/robcox2910/pebble-lang", tag = "v0.2.2" }
+pebble-lang = { git = "https://github.com/robcox2910/pebble-lang", tag = "v0.2.3" }
 pydb = { git = "https://github.com/robcox2910/pydb", tag = "v0.4.1" }
 pyweb = { git = "https://github.com/robcox2910/pyweb", tag = "v0.3.1" }
 pygit = { git = "https://github.com/robcox2910/pygit", tag = "v0.2.0" }
@@ -92,7 +92,7 @@ pygraphdb = { git = "https://github.com/robcox2910/pygraphdb", tag = "v0.3.0" }
 pytsdb = { git = "https://github.com/robcox2910/pytsdb", tag = "v0.3.1" }
 pyvecdb = { git = "https://github.com/robcox2910/pyvecdb", tag = "v0.2.1" }
 pycoldb = { git = "https://github.com/robcox2910/pycoldb", tag = "v0.3.0" }
-pyllm = { git = "https://github.com/robcox2910/pyllm", tag = "v0.4.2" }
+pyllm = { git = "https://github.com/robcox2910/pyllm", tag = "v0.4.3" }
 
 # Ruff configuration
 [tool.ruff]
