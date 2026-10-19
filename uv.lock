@@ -724,8 +724,8 @@ source = { git = "https://github.com/robcox2910/pykv?tag=v0.3.0#fc8d6fdfc3d73434
 
 [[package]]
 name = "pyllm"
-version = "0.4.1"
-source = { git = "https://github.com/robcox2910/pyllm?tag=v0.4.1#9b9fd67dd796b017fff0a54d5842040748f5653d" }
+version = "0.4.2"
+source = { git = "https://github.com/robcox2910/pyllm?tag=v0.4.2#082d375e941de19b44eed510bdc322ab579abe8f" }
 dependencies = [
     { name = "numpy" },
 ]
@@ -841,7 +841,7 @@ requires-dist = [
     { name = "pygit", git = "https://github.com/robcox2910/pygit?tag=v0.2.0" },
     { name = "pygraphdb", git = "https://github.com/robcox2910/pygraphdb?tag=v0.3.0" },
     { name = "pykv", git = "https://github.com/robcox2910/pykv?tag=v0.3.0" },
-    { name = "pyllm", git = "https://github.com/robcox2910/pyllm?tag=v0.4.1" },
+    { name = "pyllm", git = "https://github.com/robcox2910/pyllm?tag=v0.4.2" },
     { name = "pymq", git = "https://github.com/robcox2910/pymq?tag=v0.4.1" },
     { name = "pynet", git = "https://github.com/robcox2910/pynet?tag=v0.1.1" },
     { name = "pyos-learn", git = "https://github.com/robcox2910/py-os?tag=v0.2.2" },
