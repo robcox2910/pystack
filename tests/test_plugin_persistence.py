@@ -4,6 +4,7 @@ Write something through Pebble, shut PyStack down, start it again on the
 same data folder, and the data is still there -- just like a real database.
 """
 
+import logging
 import re
 from pathlib import Path
 
@@ -307,6 +308,27 @@ class TestOddNamesInSaveFiles:
         finally:
             env.shutdown()
         assert stray.exists()
+
+    def test_stray_search_files_are_skipped_with_a_warning(
+        self, tmp_path: Path, caplog: pytest.LogCaptureFixture
+    ) -> None:
+        """Start-up names every file in ``search/`` it skips, instead of staying silent."""
+        folder = tmp_path / "search"
+        folder.mkdir()
+        save_engine(SearchEngine(), folder / "engine_0.json")
+        strays = ("engine_.json", "engine_two.json", "notes.txt")
+        for name in strays:
+            (folder / name).write_text("{}")
+        with caplog.at_level(logging.WARNING, logger="pystack.plugins.search_plugin"):
+            env = PyStackEnvironment(db_path=tmp_path)
+            try:
+                assert _run(env, "search", "print(search_list())") == "[engine_0]\n"
+            finally:
+                env.shutdown()
+        warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
+        for name in strays:
+            assert any(name in message for message in warnings), (name, warnings)
+        assert not any("engine_0.json" in message for message in warnings)
 
     def test_saved_edge_id_with_a_superscript_digit_loads(self, tmp_path: Path) -> None:
         """An edge called ``e²`` isn't one PyStack numbered, so new edges start at ``e1``."""

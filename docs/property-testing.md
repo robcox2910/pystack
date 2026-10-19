@@ -316,12 +316,16 @@ had a number. The caretaker didn't need to think of a bad name: the
 strategy makes names like `engine_x` all the time.
 
 The fix: only files named like the ids the plugin makes are engines.
-Anything else is left alone, like any other stray file in the folder:
+Anything else is left alone, like any other stray file in the folder, and
+start-up logs a warning naming each file it skipped, so nothing goes
+missing silently:
 
 ```python
-        for path in sorted(folder.glob("engine_*.json")):
-            if _is_engine_id(path.stem):  # was: no check, so every engine_*.json loaded
+        for path in sorted(folder.iterdir()):
+            if path.suffix == ".json" and _is_engine_id(path.stem):  # was: every engine_*.json
                 self._engines[path.stem] = load_engine(path)
+            else:
+                _log.warning("search: skipping %s, which isn't a saved engine", path.name)
 ```
 
 The shrunk input became an ordinary example test in
