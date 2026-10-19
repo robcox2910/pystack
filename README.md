@@ -245,13 +245,13 @@ writes code underneath:
 
 ```
 # add two numbers
-
-let x = step()
-
-let z = j
-
-count = 95 - (81 + 54)
-let z = 88 - b % y
+print(self)
+yse = 36
+print(c)
+a = 43
+let total = 83 % (total - 73)
+let a = value * (25 + 14)
+print(step())
 ```
 
 ## All Commands
