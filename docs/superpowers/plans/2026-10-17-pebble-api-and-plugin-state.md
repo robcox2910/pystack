@@ -117,7 +117,7 @@ class TestCompileSource:
 
 class TestCheckAndFormat:
     def test_check_accepts_valid_and_rejects_invalid(self) -> None:
-        check("let x = 1"); 
+        check("let x = 1");
         with pytest.raises(PebbleError): check("let = 1")
     def test_format_source_is_canonical(self) -> None:
         assert format_source("let   x=1") == "let x = 1\n"
