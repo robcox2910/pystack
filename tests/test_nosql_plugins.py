@@ -464,6 +464,26 @@ class TestTSDBShellCommands:
         assert "NaN" in result
         assert cmds["ts-query"](["temp"]) == "(no data points)"
 
+    def test_ts_shell_add_answers_error_for_bad_values_on_its_own(self) -> None:
+        """Regression: ts-add answered "error: ..." only behind the registry's safety net.
+
+        Called straight from ``shell_commands()``, a value that isn't a number
+        (or one PyTSDB refuses, like NaN) raised out of the plugin instead.
+        """
+        plugin = TSDBPlugin()
+        cmds = {c.name: c.handler for c in plugin.shell_commands()}
+        for bad in ("abc", "nan"):
+            result = cmds["ts-add"](["temp", bad])
+            assert result.startswith("error:"), (bad, result)
+        assert cmds["ts-query"](["temp"]) == "(no data points)"
+
+    def test_ts_add_answers_error_for_a_value_that_is_not_a_number(self) -> None:
+        """The Pebble function answers "error: ..." for "abc" instead of raising."""
+        plugin = TSDBPlugin()
+        result = plugin.ts_add(["temp", "abc"])
+        assert isinstance(result, str)
+        assert result.startswith("error:")
+
     def test_ts_shell_usage(self) -> None:
         """Shell commands with missing args should show usage."""
         plugin = TSDBPlugin()
