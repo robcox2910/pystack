@@ -2,14 +2,6 @@ version = 1
 revision = 3
 requires-python = ">=3.14"
 
-[manifest]
-overrides = [
-    { name = "pydb", git = "https://github.com/robcox2910/pydb?tag=v0.4.1" },
-    { name = "pymq", git = "https://github.com/robcox2910/pymq?tag=v0.4.1" },
-    { name = "pynet", git = "https://github.com/robcox2910/pynet?tag=v0.1.1" },
-    { name = "pyweb", git = "https://github.com/robcox2910/pyweb?tag=v0.2.2" },
-]
-
 [[package]]
 name = "argcomplete"
 version = "3.6.3"
@@ -772,8 +764,8 @@ wheels = [
 
 [[package]]
 name = "pyscheduler"
-version = "0.3.0"
-source = { git = "https://github.com/robcox2910/pyscheduler?tag=v0.3.0#137b8846696d19752127ecea639fadd8bc21a6f3" }
+version = "0.3.1"
+source = { git = "https://github.com/robcox2910/pyscheduler?tag=v0.3.1#69ad003d16197c6dae556b19ba65217e515af51f" }
 dependencies = [
     { name = "pydb" },
     { name = "pymq" },
@@ -846,13 +838,13 @@ requires-dist = [
     { name = "pynet", git = "https://github.com/robcox2910/pynet?tag=v0.1.1" },
     { name = "pyos-learn", git = "https://github.com/robcox2910/py-os?tag=v0.2.2" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pyscheduler", git = "https://github.com/robcox2910/pyscheduler?tag=v0.3.0" },
+    { name = "pyscheduler", git = "https://github.com/robcox2910/pyscheduler?tag=v0.3.1" },
     { name = "pysearch", git = "https://github.com/robcox2910/pysearch?tag=v0.2.2" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
     { name = "pytsdb", git = "https://github.com/robcox2910/pytsdb?tag=v0.3.1" },
     { name = "pyvecdb", git = "https://github.com/robcox2910/pyvecdb?tag=v0.2.1" },
-    { name = "pyweb", git = "https://github.com/robcox2910/pyweb?tag=v0.2.2" },
+    { name = "pyweb", git = "https://github.com/robcox2910/pyweb?tag=v0.3.1" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
 ]
 provides-extras = ["dev", "web"]
@@ -912,7 +904,7 @@ source = { git = "https://github.com/robcox2910/pyvecdb?tag=v0.2.1#9431fb75c611c
 [[package]]
 name = "pyweb"
 version = "0.2.2"
-source = { git = "https://github.com/robcox2910/pyweb?tag=v0.2.2#015d2e473383bfd09f177d0d383307efa239742f" }
+source = { git = "https://github.com/robcox2910/pyweb?tag=v0.3.1#015d2e473383bfd09f177d0d383307efa239742f" }
 dependencies = [
     { name = "pycrypt" },
     { name = "pynet" },
