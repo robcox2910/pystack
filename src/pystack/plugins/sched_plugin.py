@@ -20,6 +20,10 @@ Shell command ``schedalerts`` (in ``_schedalerts.py``) runs a job that
 always fails and follows its alert: written down first, routed to a
 ``log`` notifier, and delivered.
 
+Shell command ``schedweb`` (in ``_schedweb.py``) stocks a demo folder with
+a dozen jobs and three days of runs and serves PyScheduler's web UI over
+it until Ctrl-C (or ``--seconds N``).
+
 This plugin has no Pebble module.
 """
 
@@ -176,8 +180,15 @@ def _schedalerts_cmd(args: list[str]) -> str:
     return schedalerts_cmd(args)
 
 
+def _schedweb_cmd(args: list[str]) -> str:
+    """Serve PyScheduler's web UI over seeded demo runs (imported lazily, like ``schedalerts``)."""
+    from pystack.plugins._schedweb import schedweb_cmd  # noqa: PLC0415
+
+    return schedweb_cmd(args)
+
+
 class PySchedulerPlugin(Plugin):
-    """Add PyScheduler's shell demo to PyStack (currently ``sched``)."""
+    """Add PyScheduler's shell demos to PyStack (``sched``, ``schedalerts``, ``schedweb``)."""
 
     def info(self) -> PluginInfo:
         """Return plugin metadata."""
@@ -188,7 +199,7 @@ class PySchedulerPlugin(Plugin):
         )
 
     def shell_commands(self) -> list[ShellCommand]:
-        """Return the sched shell command."""
+        """Return the scheduler shell commands."""
         return [
             ShellCommand(
                 name="sched",
@@ -199,5 +210,10 @@ class PySchedulerPlugin(Plugin):
                 name="schedalerts",
                 handler=_schedalerts_cmd,
                 help_text="Fail a PyScheduler job and follow its alert to a log notifier",
+            ),
+            ShellCommand(
+                name="schedweb",
+                handler=_schedweb_cmd,
+                help_text="Serve PyScheduler's web UI over a few days of demo runs",
             ),
         ]
