@@ -347,7 +347,11 @@ Its twin found the same kind of bug in `graphdb`: a saved edge called `e²`
 crashed start-up, because Python's `isdigit()` says `"²"` is a digit but
 `int("²")` can't read it. (Then a reviewer asked about very long ids:
 `int()` refuses more than 4,300 digits, so an edge called `e111...1` with
-5,000 ones crashed too. Now the strategy makes those as well.) And the model check found that deleting a key
+5,000 ones crashed too. Now the strategy makes those as well. One digit
+short is still a trap: after `e` plus 4,300 nines the next id has 4,301
+digits, which Python can't write down, so ids that long don't count
+towards the next number, and the counter skips any id the graph already
+has.) And the model check found that deleting a key
 that was never set answered `"ok"`: PyKV's `delete` returns `False` for a
 missing key, but the plugin was waiting for an error that never came.
 

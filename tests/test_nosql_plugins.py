@@ -426,6 +426,18 @@ class TestGraphDBShellCommands:
         assert "a" in result
         assert "b" in result
 
+    def test_graph_add_edge_skips_ids_already_in_the_graph(self) -> None:
+        """The counter never hands out an id the graph already has."""
+        plugin = GraphDBPlugin()
+        plugin.graph_add_node(["a", "Node"])
+        plugin.graph_add_node(["b", "Node"])
+        plugin._get_graph().add_edge("e1", "a", "b")  # not counted by the plugin
+        assert plugin.graph_add_edge(["a", "b", "LINK"]) == "e2"
+        cmds = {c.name: c.handler for c in plugin.shell_commands()}
+        plugin._get_graph().add_edge("e3", "a", "b")
+        assert "Added edge" in cmds["graph"](["add-edge", "a", "b"])
+        assert plugin._get_graph().has_edge("e4")
+
     def test_graph_shell_usage(self) -> None:
         """Shell command with no args should show usage."""
         plugin = GraphDBPlugin()

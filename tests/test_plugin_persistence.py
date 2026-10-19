@@ -333,3 +333,29 @@ class TestOddNamesInSaveFiles:
             assert _run(env, "graphdb", 'print(graph_add_edge("a", "a", "LOOP"))') == "e1\n"
         finally:
             env.shutdown()
+
+    def test_edge_ids_stay_fresh_after_the_counter_outgrows_int(self, tmp_path: Path) -> None:
+        """Regression: ``e`` + 4,300 nines made the next id 4,301 digits long.
+
+        That id can't be read back after a restart, so the counter handed it
+        out a second time and ``graph_add_edge`` answered "error: ...".
+        """
+        graph = Graph()
+        graph.add_node("a")
+        graph.add_edge("e" + "9" * 4300, "a", "a")
+        (tmp_path / "graphdb").mkdir()
+        save_graph(graph, tmp_path / "graphdb" / "graph.json")
+        add = 'print(graph_add_edge("a", "a", "LOOP"))'
+        first = PyStackEnvironment(db_path=tmp_path)
+        try:
+            first_id = _run(first, "graphdb", add)
+        finally:
+            first.shutdown()
+        second = PyStackEnvironment(db_path=tmp_path)
+        try:
+            second_id = _run(second, "graphdb", add)
+        finally:
+            second.shutdown()
+        assert not first_id.startswith("error")
+        assert not second_id.startswith("error"), second_id[:80]
+        assert second_id != first_id

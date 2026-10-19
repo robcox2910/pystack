@@ -18,6 +18,7 @@ Example Pebble usage::
     print(path)
 """
 
+import sys
 from pathlib import Path
 from typing import cast
 
@@ -46,10 +47,13 @@ def _counter_number(edge_id: str) -> int | None:
     # and this plugin only ever writes 0-9.
     if not (edge_id.startswith("e") and number.isascii() and number.isdigit()):
         return None
-    try:
-        return int(number)
-    except ValueError:  # over 4,300 digits: too long for ``int`` to read
+    # Python reads and writes ints of at most 4,300 digits. An id that long
+    # (``e`` + 4,300 nines) has a next id nobody can write down, so it can't
+    # be one this plugin numbered: don't count from it.
+    limit = sys.get_int_max_str_digits()
+    if limit and len(number) >= limit:
         return None
+    return int(number)
 
 
 class GraphDBPlugin(Plugin):
@@ -70,6 +74,15 @@ class GraphDBPlugin(Plugin):
             self._graph = Graph()
         return self._graph
 
+    def _next_edge_id(self) -> str:
+        """Return the next ``e<n>`` id, skipping any the graph already has."""
+        graph = self._get_graph()
+        while True:
+            self._edge_counter += 1
+            edge_id = f"e{self._edge_counter}"
+            if not graph.has_edge(edge_id):
+                return edge_id
+
     @pebble_method
     def graph_add_node(self, args: list[PebbleValue]) -> PebbleValue:
         """Add a node to the graph with an id and label."""
@@ -86,8 +99,7 @@ class GraphDBPlugin(Plugin):
         to_id = str(args[1])
         rel_type = str(args[2]) if len(args) > 2 else "CONNECTED"  # noqa: PLR2004
         g = self._get_graph()
-        self._edge_counter += 1
-        edge_id = f"e{self._edge_counter}"
+        edge_id = self._next_edge_id()
         g.add_edge(edge_id, from_id, to_id, rel_type=rel_type)
         return edge_id
 
@@ -175,8 +187,7 @@ class GraphDBPlugin(Plugin):
                 from_id = args[1]
                 to_id = args[2]
                 rel_type = args[3] if len(args) >= min_add_edge_args else "CONNECTED"
-                self._edge_counter += 1
-                edge_id = f"e{self._edge_counter}"
+                edge_id = self._next_edge_id()
                 self._get_graph().add_edge(edge_id, from_id, to_id, rel_type=rel_type)
                 return f"Added edge {from_id} -[{rel_type}]-> {to_id}"
 
