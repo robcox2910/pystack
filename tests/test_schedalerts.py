@@ -40,7 +40,7 @@ class TestSchedalertsCommand:
     def test_listed_with_sched(self) -> None:
         """The plugin offers both scheduler demos."""
         names = [c.name for c in PySchedulerPlugin().shell_commands()]
-        assert names == ["sched", "schedalerts", "schedweb"]
+        assert names == ["sched", "schedagents", "schedalerts", "schedweb"]
 
 
 class TestSchedalertsFailures:

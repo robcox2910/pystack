@@ -16,6 +16,10 @@ scheduler and start a brand-new one on the same state folder: the runs
 are still there, because every change was written to its journalled
 PyDB store first.
 
+Shell command ``schedagents`` (in ``_schedagents.py``) runs a scheduler
+with two remote agents, one pinned job and one job that needs the ``gpu``
+tag, and prints which agent ran each.
+
 Shell command ``schedalerts`` (in ``_schedalerts.py``) runs a job that
 always fails and follows its alert: written down first, routed to a
 ``log`` notifier, and delivered.
@@ -173,6 +177,13 @@ def _sched_cmd(_args: list[str]) -> str:
     return "\n".join(lines)
 
 
+def _schedagents_cmd(args: list[str]) -> str:
+    """Run the remote-agents demo (imported lazily, like ``schedalerts``)."""
+    from pystack.plugins._schedagents import schedagents_cmd  # noqa: PLC0415
+
+    return schedagents_cmd(args)
+
+
 def _schedalerts_cmd(args: list[str]) -> str:
     """Run the alert demo (imported lazily: it reuses this module's helpers)."""
     from pystack.plugins._schedalerts import schedalerts_cmd  # noqa: PLC0415
@@ -188,7 +199,7 @@ def _schedweb_cmd(args: list[str]) -> str:
 
 
 class PySchedulerPlugin(Plugin):
-    """Add PyScheduler's shell demos to PyStack (``sched``, ``schedalerts``, ``schedweb``)."""
+    """Add PyScheduler's shell demos to PyStack (``sched``, ``schedagents``, ``schedalerts``, ``schedweb``)."""
 
     def info(self) -> PluginInfo:
         """Return plugin metadata."""
@@ -205,6 +216,11 @@ class PySchedulerPlugin(Plugin):
                 name="sched",
                 handler=_sched_cmd,
                 help_text="Run a small job chain on PyScheduler and restart it",
+            ),
+            ShellCommand(
+                name="schedagents",
+                handler=_schedagents_cmd,
+                help_text="Run PyScheduler jobs on remote agents and see which agent ran each",
             ),
             ShellCommand(
                 name="schedalerts",
