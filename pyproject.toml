@@ -19,23 +19,23 @@ classifiers = [
 ]
 keywords = ["education", "full-stack", "operating-system", "compiler", "database"]
 dependencies = [
-    "pyos-learn",
-    "pebble-lang",
-    "pydb",
-    "pyweb",
-    "pygit",
-    "pycrypt",
-    "pynet",
-    "pysearch",
-    "pymq",
-    "pykv",
-    "pydocdb",
-    "pygraphdb",
-    "pytsdb",
-    "pyvecdb",
-    "pycoldb",
-    "pyllm",
-    "pyscheduler",
+    "fromscratch-pyos>=0.3.0",
+    "fromscratch-pebble>=0.3.0",
+    "fromscratch-pydb>=0.5.0",
+    "fromscratch-pyweb>=0.4.0",
+    "fromscratch-pygit>=0.3.0",
+    "fromscratch-pycrypt>=0.2.0",
+    "fromscratch-pynet>=0.2.0",
+    "fromscratch-pysearch>=0.3.0",
+    "fromscratch-pymq>=0.5.0",
+    "fromscratch-pykv>=0.4.0",
+    "fromscratch-pydocdb>=0.3.0",
+    "fromscratch-pygraphdb>=0.4.0",
+    "fromscratch-pytsdb>=0.4.0",
+    "fromscratch-pyvecdb>=0.3.0",
+    "fromscratch-pycoldb>=0.4.0",
+    "fromscratch-pyllm>=0.5.0",
+    "fromscratch-pyscheduler>=0.5.0",
 ]
 
 [project.urls]
@@ -74,25 +74,6 @@ version-file = "src/pystack/_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pystack"]
-
-[tool.uv.sources]
-pyos-learn = { git = "https://github.com/robcox2910/py-os", tag = "v0.2.2" }
-pebble-lang = { git = "https://github.com/robcox2910/pebble-lang", tag = "v0.2.3" }
-pydb = { git = "https://github.com/robcox2910/pydb", tag = "v0.4.1" }
-pyweb = { git = "https://github.com/robcox2910/pyweb", tag = "v0.3.1" }
-pygit = { git = "https://github.com/robcox2910/pygit", tag = "v0.2.0" }
-pycrypt = { git = "https://github.com/robcox2910/pycrypt", tag = "v0.1.1" }
-pynet = { git = "https://github.com/robcox2910/pynet", tag = "v0.1.1" }
-pysearch = { git = "https://github.com/robcox2910/pysearch", tag = "v0.2.2" }
-pymq = { git = "https://github.com/robcox2910/pymq", tag = "v0.4.1" }
-pyscheduler = { git = "https://github.com/robcox2910/pyscheduler", tag = "v0.4.0" }
-pykv = { git = "https://github.com/robcox2910/pykv", tag = "v0.3.0" }
-pydocdb = { git = "https://github.com/robcox2910/pydoc-db", tag = "v0.2.2" }
-pygraphdb = { git = "https://github.com/robcox2910/pygraphdb", tag = "v0.3.0" }
-pytsdb = { git = "https://github.com/robcox2910/pytsdb", tag = "v0.3.1" }
-pyvecdb = { git = "https://github.com/robcox2910/pyvecdb", tag = "v0.2.1" }
-pycoldb = { git = "https://github.com/robcox2910/pycoldb", tag = "v0.3.0" }
-pyllm = { git = "https://github.com/robcox2910/pyllm", tag = "v0.4.3" }
 
 # Ruff configuration
 [tool.ruff]

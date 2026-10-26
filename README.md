@@ -306,7 +306,7 @@ When you run `pystack os`, these commands are available at the
 ## Quick Start
 
 ```bash
-# Install dependencies (pinned releases of all 16 sibling projects)
+# Install dependencies (released versions of all 17 sibling projects)
 uv sync --all-extras
 
 # Run an example program
@@ -327,9 +327,10 @@ uv run pytest
 
 ## Developing alongside a sibling
 
-Every sibling project is pinned to a release tag in `pyproject.toml`
-(`[tool.uv.sources]`), and `uv.lock` records the exact commit. A change merged
-into a sibling can't affect PyStack until PyStack chooses to upgrade.
+Every sibling project comes from its PyPI release (`fromscratch-*` in
+`pyproject.toml`), and `uv.lock` records the exact version. A change merged
+into a sibling can't affect PyStack until the sibling publishes a release and
+PyStack chooses to upgrade.
 
 To try an unreleased change from a sibling checkout next to this one, install
 it over the pinned release:
@@ -342,9 +343,9 @@ uv run --no-sync pytest
 Use `uv run --no-sync` while you do this: a plain `uv run` (like `uv sync`)
 puts the pinned release back, which is how you undo the override.
 
-To upgrade a sibling, edit its tag in `[tool.uv.sources]`, run
-`uv lock --upgrade-package <name>`, and open a pull request so CI checks the
-pair together.
+To upgrade a sibling, raise its minimum version in `pyproject.toml`, run
+`uv lock --upgrade-package fromscratch-<name>`, and open a pull request so CI
+checks the pair together.
 
 ## Releasing
 

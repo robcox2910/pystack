@@ -270,26 +270,164 @@ wheels = [
 ]
 
 [[package]]
+name = "fromscratch-pebble"
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3c/47/252c7ac1f6fc612be7b801a946674a15af8a6a5e54c7a30e597d735a66fc/fromscratch_pebble-0.3.0.tar.gz", hash = "sha256:544cb23ecfe239933407415fe9059ec78c69a24e6a8da7d430e977867934a362", size = 408595, upload-time = "2026-10-26T11:45:07.526Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b3/56/159c6250b4c28fe7fa22fea254b2635c83a8d64099ec87d042ed59c85c37/fromscratch_pebble-0.3.0-py3-none-any.whl", hash = "sha256:d7725f2b538dbe0bceee5204ea2dcc9576de98a4c4c32da4e489adf6c04d93c1", size = 110491, upload-time = "2026-10-26T11:45:06.175Z" },
+]
+
+[[package]]
+name = "fromscratch-pycoldb"
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/03/36/cf098b7c6ddf17f23da15836e65544f59e1c0098f7c8da2b45d1b82a9416/fromscratch_pycoldb-0.4.0.tar.gz", hash = "sha256:e2d36b6388e3449d22f0fb72d297d660ee34c0d96362edf19819caa79d8c840d", size = 95212, upload-time = "2026-10-26T11:51:59.242Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/89/2f/d1b8ab57318bbef2345e96ae94327ee5f9694593b529c4255934bca572b2/fromscratch_pycoldb-0.4.0-py3-none-any.whl", hash = "sha256:5238d244292af320f93f05f0f0f7ebc4d37610b37b2c2f891cdbfe47021c317f", size = 26468, upload-time = "2026-10-26T11:51:57.87Z" },
+]
+
+[[package]]
+name = "fromscratch-pycrypt"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/52/34/996a121630ae21aee86381c945bb8ac59a90e5f75b860b29cdcb7e605565/fromscratch_pycrypt-0.2.0.tar.gz", hash = "sha256:4497a39b5e6d380e24d3681ee340038bee0ffa507a00b1c70371bcda2d4825fb", size = 70786, upload-time = "2026-10-26T11:54:46.737Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1c/c6/7b9929f6d6a3ce4d68b17196d2e15d7c6689ad708d37ac1a59f14b505445/fromscratch_pycrypt-0.2.0-py3-none-any.whl", hash = "sha256:a81117449b551abd0cefa3a996ce332607429fdedd4f2580c19b8e42c8cdf70a", size = 13343, upload-time = "2026-10-26T11:54:45.472Z" },
+]
+
+[[package]]
+name = "fromscratch-pydb"
+version = "0.5.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1e/3b/4a4c6bdc3b435ea904efd64379c9f601c248e2bd65b7fcc04b5317d2188b/fromscratch_pydb-0.5.0.tar.gz", hash = "sha256:0d6394312cea576e2b97288cfc3b7ce085eee353c1cd7e47e7f8b03cce0012bd", size = 298143, upload-time = "2026-10-26T11:45:09.53Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/00/af/b36b3335e5e82a5aa236a4712de42f7cc8b80257d8d0fc20cb08c687ecf0/fromscratch_pydb-0.5.0-py3-none-any.whl", hash = "sha256:01a3b6529380bb620d0ad387393f3ac784fc9c85dc5dede7033624b027e10059", size = 100336, upload-time = "2026-10-26T11:45:07.982Z" },
+]
+
+[[package]]
+name = "fromscratch-pydocdb"
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fb/f0/3fbf555f8ae0dc9bfe38c10cd5b84a3f0ad4a55232c98be67e94c5525f94/fromscratch_pydocdb-0.3.0.tar.gz", hash = "sha256:3e1abeda7caff9a2e7e18deedb0687c1fd6c45f5a81738bf0d8b6709aab597c0", size = 93872, upload-time = "2026-10-26T11:48:46.761Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/73/2b/a716cc871f4916170534707af792572a03d3700526651322bdf72e718616/fromscratch_pydocdb-0.3.0-py3-none-any.whl", hash = "sha256:27c7c349b8989b629c48e75dd6b229e02c22b36329f705067a6353f8234ff794", size = 25382, upload-time = "2026-10-26T11:48:45.335Z" },
+]
+
+[[package]]
+name = "fromscratch-pygit"
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/50/7a/bea6c05bbdc4b32ad9859e056be6da4bba20cd2ce2333b1cd7d59dffdf61/fromscratch_pygit-0.3.0.tar.gz", hash = "sha256:be9542d6f063220a82493b01b90df67744925353cdf28365c894856245357555", size = 87754, upload-time = "2026-10-26T11:54:50.979Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ba/e0/f40f4b22bb6d61dd30c74c943a754b4c7de3b6668256bab00810588d141c/fromscratch_pygit-0.3.0-py3-none-any.whl", hash = "sha256:6b3d2593b95b414de57f788c17bfe8894c8c9cff88f9490ef1ef879b5c57eabd", size = 17267, upload-time = "2026-10-26T11:54:49.627Z" },
+]
+
+[[package]]
+name = "fromscratch-pygraphdb"
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/6a/d0/ddebba1f02b48f7ddd9bf1112ced52af59a54c6d7a4aa0c42e6605db1ddd/fromscratch_pygraphdb-0.4.0.tar.gz", hash = "sha256:ada5b17f72a8cc7ec3674e8ed933cc31c5fd5f855cba483029c99e44e66ba894", size = 92368, upload-time = "2026-10-26T11:48:39.205Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9c/98/63471e227b2271591f39de0a0338f34a1ebe8ee037dd56fe09b17f1fad8e/fromscratch_pygraphdb-0.4.0-py3-none-any.whl", hash = "sha256:a0df8aeb79cb36bf041c203580079eac0e67de43bf0c01f9f6fbd5e2b4b24ed2", size = 24651, upload-time = "2026-10-26T11:48:37.788Z" },
+]
+
+[[package]]
+name = "fromscratch-pykv"
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ab/ad/aee5ee5fc676a4a6a02ce9efadf049a191fafd325cb0073cf9a946c9af12/fromscratch_pykv-0.4.0.tar.gz", hash = "sha256:f772e6e44af7dd49d34b452e5360fd1bc660dcba9aef59c026dc0c77f86aac1b", size = 89697, upload-time = "2026-10-26T11:48:40.76Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/89/09/937e86c25d65917cdeac3344a50effe4339dbcd115db939f16e7ff6ea214/fromscratch_pykv-0.4.0-py3-none-any.whl", hash = "sha256:ea510a018f94f904fb580edf1e38136e0ba8763be2105e39e42de7b8c7ded28a", size = 21696, upload-time = "2026-10-26T11:48:39.409Z" },
+]
+
+[[package]]
+name = "fromscratch-pyllm"
+version = "0.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/68/e4/68ee696fcc165452dc9b229e2b70187c2b849c00b7b56cca81fde6d2ffa9/fromscratch_pyllm-0.5.0.tar.gz", hash = "sha256:2141a77f7cf31f7e76704c67a5322edb4d12f9b197bd98c39895f7ecec7848ef", size = 1656108, upload-time = "2026-10-26T12:09:58.429Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8d/f5/cdb2c9061e6f59ea188b6766b7e3c5fe30fa896fd7f99a2b4937830d9ed6/fromscratch_pyllm-0.5.0-py3-none-any.whl", hash = "sha256:da12b9fe9bb14cf65caa56d6f280e58f4629458d73bc974faa7cf42e8f781874", size = 1483095, upload-time = "2026-10-26T12:09:56.326Z" },
+]
+
+[[package]]
+name = "fromscratch-pymq"
+version = "0.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "fromscratch-pynet" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4a/f1/160ab189fc16098eca3964e5032661a21ab56b941a6b7cad8f567864197c/fromscratch_pymq-0.5.0.tar.gz", hash = "sha256:027390fddf25e7772420d1bdc4744bc716d249f66f8e861ac423b7b92d23c8fb", size = 184867, upload-time = "2026-10-26T12:04:39.963Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c6/9a/2dc9b9927e5a47f1dba5e8c5c0a16890031e5533c3e055f757af24f187d1/fromscratch_pymq-0.5.0-py3-none-any.whl", hash = "sha256:d7949c7579e20694861ac4117c895a662c6ec4d6267ecd0943fa56279b68f887", size = 61906, upload-time = "2026-10-26T12:04:38.453Z" },
+]
+
+[[package]]
+name = "fromscratch-pynet"
+version = "0.2.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/70/ee/ae041491adb4ce50d19fbc3d572417151a4ddced76332030a306a7b99cc1/fromscratch_pynet-0.2.0.tar.gz", hash = "sha256:01a040ede10b56b7860e4034a4ee22942a8539ddb60512a77bbb1c99afc6888e", size = 281429, upload-time = "2026-10-26T11:54:50.064Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/78/2d/53b36eab586a75f972d4e277d91bc64802a0647c803d646ad1302c554e3c/fromscratch_pynet-0.2.0-py3-none-any.whl", hash = "sha256:6cf61a2c756ea17598c091dfc52a7c432a20cbb62a896f08909b1adff8812caa", size = 95331, upload-time = "2026-10-26T11:54:48.526Z" },
+]
+
+[[package]]
+name = "fromscratch-pyos"
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e9/7a/6b5fac8dd640484d32e59519e6e5a177bee7a7027f7e4894c27cd50d6b77/fromscratch_pyos-0.3.0.tar.gz", hash = "sha256:dc230b19467457f9c69256441f462f3f36a0154928e6e29e2488b22357cb4089", size = 521573, upload-time = "2026-10-26T11:45:08.867Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3e/28/161e683a3341374bf21f40d872d06f68b991f4ee66f95ce0f3824201243c/fromscratch_pyos-0.3.0-py3-none-any.whl", hash = "sha256:14839a06e436437ddda47fb6333355692143cd70046bd8c64173a46c4afd3c55", size = 217340, upload-time = "2026-10-26T11:45:07.495Z" },
+]
+
+[[package]]
+name = "fromscratch-pyscheduler"
+version = "0.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "fromscratch-pydb" },
+    { name = "fromscratch-pymq" },
+    { name = "fromscratch-pynet" },
+    { name = "fromscratch-pyweb" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ad/81/e9210ef7aa4cd5fb1ed9f048d4e456aeb995587b581c215b0394a310ef87/fromscratch_pyscheduler-0.5.0.tar.gz", hash = "sha256:d8291e15a78f18f0eb643d8bd4aea1283be34b0f9c43fa088469b69c874b617f", size = 783740, upload-time = "2026-10-26T12:17:54.009Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f4/9c/2ee37a167a4c98b8a6cd1d0fbe7ab77331334b7cc46070cc1c527365d09c/fromscratch_pyscheduler-0.5.0-py3-none-any.whl", hash = "sha256:b5df4b76c6be7e83d866b4d63777cd38021c93f819b4111fa72406e47a5ba6f5", size = 398255, upload-time = "2026-10-26T12:17:52.261Z" },
+]
+
+[[package]]
+name = "fromscratch-pysearch"
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/15/d3/d9801335a2e6fe33252d8eee524c409f9b01a6909c9abc4895c9bfbaa346/fromscratch_pysearch-0.3.0.tar.gz", hash = "sha256:42aa61e970c6f2944187c7439cbeb5ea19fdfbde77b5d92373ce253f55d91c86", size = 81978, upload-time = "2026-10-26T12:04:32.389Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/be/47/d9544c0061f26a4d486e1412ca4513529dd206312a88284fdd4b57f534c9/fromscratch_pysearch-0.3.0-py3-none-any.whl", hash = "sha256:55d7c13d14c9cb73278147cb41d747263440b3087e5b3d7724b934d1ebd75d60", size = 16177, upload-time = "2026-10-26T12:04:30.917Z" },
+]
+
+[[package]]
 name = "fromscratch-pystack"
 source = { editable = "." }
 dependencies = [
-    { name = "pebble-lang" },
-    { name = "pycoldb" },
-    { name = "pycrypt" },
-    { name = "pydb" },
-    { name = "pydocdb" },
-    { name = "pygit" },
-    { name = "pygraphdb" },
-    { name = "pykv" },
-    { name = "pyllm" },
-    { name = "pymq" },
-    { name = "pynet" },
-    { name = "pyos-learn" },
-    { name = "pyscheduler" },
-    { name = "pysearch" },
-    { name = "pytsdb" },
-    { name = "pyvecdb" },
-    { name = "pyweb" },
+    { name = "fromscratch-pebble" },
+    { name = "fromscratch-pycoldb" },
+    { name = "fromscratch-pycrypt" },
+    { name = "fromscratch-pydb" },
+    { name = "fromscratch-pydocdb" },
+    { name = "fromscratch-pygit" },
+    { name = "fromscratch-pygraphdb" },
+    { name = "fromscratch-pykv" },
+    { name = "fromscratch-pyllm" },
+    { name = "fromscratch-pymq" },
+    { name = "fromscratch-pynet" },
+    { name = "fromscratch-pyos" },
+    { name = "fromscratch-pyscheduler" },
+    { name = "fromscratch-pysearch" },
+    { name = "fromscratch-pytsdb" },
+    { name = "fromscratch-pyvecdb" },
+    { name = "fromscratch-pyweb" },
 ]
 
 [package.optional-dependencies]
@@ -313,32 +451,63 @@ requires-dist = [
     { name = "commitizen", marker = "extra == 'dev'", specifier = ">=4.4.0" },
     { name = "flask", marker = "extra == 'dev'", specifier = ">=3.0" },
     { name = "flask", marker = "extra == 'web'", specifier = ">=3.0" },
+    { name = "fromscratch-pebble", specifier = ">=0.3.0" },
+    { name = "fromscratch-pycoldb", specifier = ">=0.4.0" },
+    { name = "fromscratch-pycrypt", specifier = ">=0.2.0" },
+    { name = "fromscratch-pydb", specifier = ">=0.5.0" },
+    { name = "fromscratch-pydocdb", specifier = ">=0.3.0" },
+    { name = "fromscratch-pygit", specifier = ">=0.3.0" },
+    { name = "fromscratch-pygraphdb", specifier = ">=0.4.0" },
+    { name = "fromscratch-pykv", specifier = ">=0.4.0" },
+    { name = "fromscratch-pyllm", specifier = ">=0.5.0" },
+    { name = "fromscratch-pymq", specifier = ">=0.5.0" },
+    { name = "fromscratch-pynet", specifier = ">=0.2.0" },
+    { name = "fromscratch-pyos", specifier = ">=0.3.0" },
+    { name = "fromscratch-pyscheduler", specifier = ">=0.5.0" },
+    { name = "fromscratch-pysearch", specifier = ">=0.3.0" },
+    { name = "fromscratch-pytsdb", specifier = ">=0.4.0" },
+    { name = "fromscratch-pyvecdb", specifier = ">=0.3.0" },
+    { name = "fromscratch-pyweb", specifier = ">=0.4.0" },
     { name = "hypothesis", marker = "extra == 'dev'", specifier = ">=6.170" },
-    { name = "pebble-lang", git = "https://github.com/robcox2910/pebble-lang?tag=v0.2.3" },
     { name = "pip-audit", marker = "extra == 'dev'", specifier = ">=2.10.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
-    { name = "pycoldb", git = "https://github.com/robcox2910/pycoldb?tag=v0.3.0" },
-    { name = "pycrypt", git = "https://github.com/robcox2910/pycrypt?tag=v0.1.1" },
-    { name = "pydb", git = "https://github.com/robcox2910/pydb?tag=v0.4.1" },
-    { name = "pydocdb", git = "https://github.com/robcox2910/pydoc-db?tag=v0.2.2" },
-    { name = "pygit", git = "https://github.com/robcox2910/pygit?tag=v0.2.0" },
-    { name = "pygraphdb", git = "https://github.com/robcox2910/pygraphdb?tag=v0.3.0" },
-    { name = "pykv", git = "https://github.com/robcox2910/pykv?tag=v0.3.0" },
-    { name = "pyllm", git = "https://github.com/robcox2910/pyllm?tag=v0.4.3" },
-    { name = "pymq", git = "https://github.com/robcox2910/pymq?tag=v0.4.1" },
-    { name = "pynet", git = "https://github.com/robcox2910/pynet?tag=v0.1.1" },
-    { name = "pyos-learn", git = "https://github.com/robcox2910/py-os?tag=v0.2.2" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.400" },
-    { name = "pyscheduler", git = "https://github.com/robcox2910/pyscheduler?tag=v0.4.0" },
-    { name = "pysearch", git = "https://github.com/robcox2910/pysearch?tag=v0.2.2" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.4" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.0.0" },
-    { name = "pytsdb", git = "https://github.com/robcox2910/pytsdb?tag=v0.3.1" },
-    { name = "pyvecdb", git = "https://github.com/robcox2910/pyvecdb?tag=v0.2.1" },
-    { name = "pyweb", git = "https://github.com/robcox2910/pyweb?tag=v0.3.1" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.3" },
 ]
 provides-extras = ["dev", "web"]
+
+[[package]]
+name = "fromscratch-pytsdb"
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/6b/864315ce2a87c2231d146c6ad2d0fdeb4ff22bb5c87765f5ef88325c0040/fromscratch_pytsdb-0.4.0.tar.gz", hash = "sha256:c04f6fe1bbdedc1d07261769048b9f6970e3cd309eb4b2c2940dbad3ea250caf", size = 89805, upload-time = "2026-10-26T11:51:51.566Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b8/1e/664b0a1c906f97472574f0a1edef576dae588d10f7f347ddf800b293f832/fromscratch_pytsdb-0.4.0-py3-none-any.whl", hash = "sha256:ae16e56ceaee1a5d473c04473e72b131b99216a3aefb3106a5944980ff5354cc", size = 22327, upload-time = "2026-10-26T11:51:50.2Z" },
+]
+
+[[package]]
+name = "fromscratch-pyvecdb"
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3b/5a/3670baeebf00e2a4bd10e67201e071d4569d958815798c2cece58e546851/fromscratch_pyvecdb-0.3.0.tar.gz", hash = "sha256:5bcf7e086dac694e74fd7313f8cd14fa2d94525da430c3a6f7b87891740d6eb2", size = 90653, upload-time = "2026-10-26T11:52:01.262Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/4a/ed/8f91d6901c0107a56ad214b408affa379c703b1d38d12d1b64607d9c1e27/fromscratch_pyvecdb-0.3.0-py3-none-any.whl", hash = "sha256:6a05249df714b644df04d9729d780299632f7c0729863994b7def8a6e026cf2a", size = 20559, upload-time = "2026-10-26T11:51:59.672Z" },
+]
+
+[[package]]
+name = "fromscratch-pyweb"
+version = "0.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "fromscratch-pycrypt" },
+    { name = "fromscratch-pynet" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/26/ff/f2b0c7e33ae6c5cb8f00e8dea2d0786ed2ca9aa4ddc8e3b637318972d830/fromscratch_pyweb-0.4.0.tar.gz", hash = "sha256:8f03bf08884a5c004442d7c01264b44c82b4f4e9253b0d6b65702388984ee461", size = 223815, upload-time = "2026-10-26T12:04:39.701Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c3/20/df06cc31f6ad5df1fa69ce833fbaefea7c57b2c8945ed7f6f319a43fe8c2/fromscratch_pyweb-0.4.0-py3-none-any.whl", hash = "sha256:16f3b4a61978fe8d5bc778a8a08c7be629e052af803599b7cecc246b9e9e3cc1", size = 68175, upload-time = "2026-10-26T12:04:38.311Z" },
+]
 
 [[package]]
 name = "hypothesis"
@@ -624,11 +793,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pebble-lang"
-version = "0.2.3"
-source = { git = "https://github.com/robcox2910/pebble-lang?tag=v0.2.3#3372237c5a45fd7613e1e2aab1a1525130d431d6" }
-
-[[package]]
 name = "pip"
 version = "26.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -742,31 +906,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pycoldb"
-version = "0.3.0"
-source = { git = "https://github.com/robcox2910/pycoldb?tag=v0.3.0#3e4d3ea5507725008ead05492da092acdf35dc63" }
-
-[[package]]
-name = "pycrypt"
-version = "0.1.1"
-source = { git = "https://github.com/robcox2910/pycrypt?tag=v0.1.1#a67e801e3d123a3e359935077c783b95e1a642d4" }
-
-[[package]]
-name = "pydb"
-version = "0.4.1"
-source = { git = "https://github.com/robcox2910/pydb?tag=v0.4.1#4256469224eb0981df2f7a43411471628259cb6c" }
-
-[[package]]
-name = "pydocdb"
-version = "0.2.2"
-source = { git = "https://github.com/robcox2910/pydoc-db?tag=v0.2.2#4b174cf739413ef00d01362ad5610cb7f4a2cacc" }
-
-[[package]]
-name = "pygit"
-version = "0.2.0"
-source = { git = "https://github.com/robcox2910/pygit?tag=v0.2.0#88dc26ec6617af423af606d53cfef4e8b803fd3b" }
-
-[[package]]
 name = "pygments"
 version = "2.21.0"
 source = { registry = "https://pypi.org/simple" }
@@ -774,42 +913,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/49/2e/ced460408999b33da
 wheels = [
     { url = "https://files.pythonhosted.org/packages/71/46/17f022dd3e953bf20a04a028a21ec746d942f8d2af30fa0f124fa0e6a684/pygments-2.21.0-py3-none-any.whl", hash = "sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9", size = 1250147, upload-time = "2026-08-17T08:02:44.912Z" },
 ]
-
-[[package]]
-name = "pygraphdb"
-version = "0.3.0"
-source = { git = "https://github.com/robcox2910/pygraphdb?tag=v0.3.0#444fe1bb35de9e6732842c6a01a24a60bdcfcf53" }
-
-[[package]]
-name = "pykv"
-version = "0.3.0"
-source = { git = "https://github.com/robcox2910/pykv?tag=v0.3.0#fc8d6fdfc3d7343480b74fc7ebb0cac00c399d6d" }
-
-[[package]]
-name = "pyllm"
-version = "0.4.3"
-source = { git = "https://github.com/robcox2910/pyllm?tag=v0.4.3#b1a4b6cb5e99c9a4fdf3cd49ab3077132d93c3c9" }
-dependencies = [
-    { name = "numpy" },
-]
-
-[[package]]
-name = "pymq"
-version = "0.4.1"
-source = { git = "https://github.com/robcox2910/pymq?tag=v0.4.1#651ee7e44e28a288311d1519085b55888e69c0da" }
-dependencies = [
-    { name = "pynet" },
-]
-
-[[package]]
-name = "pynet"
-version = "0.1.1"
-source = { git = "https://github.com/robcox2910/pynet?tag=v0.1.1#824795ac00dddddad64621ab869a0a7b1f85befb" }
-
-[[package]]
-name = "pyos-learn"
-version = "0.2.2"
-source = { git = "https://github.com/robcox2910/py-os?tag=v0.2.2#9759c4914286f5b13f86020fe3fc2e800cfe9ad6" }
 
 [[package]]
 name = "pyparsing"
@@ -832,22 +935,6 @@ sdist = { url = "https://files.pythonhosted.org/packages/74/b2/5db700e52554b8f02
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0c/82/a2c93e32800940d9573fb28c346772a14778b84ba7524e691b324620ab89/pyright-1.1.408-py3-none-any.whl", hash = "sha256:090b32865f4fdb1e0e6cd82bf5618480d48eecd2eb2e70f960982a3d9a4c17c1", size = 6399144, upload-time = "2026-01-08T08:07:37.082Z" },
 ]
-
-[[package]]
-name = "pyscheduler"
-version = "0.4.0"
-source = { git = "https://github.com/robcox2910/pyscheduler?tag=v0.4.0#292b8f77f213be769344dc13175b8cc123d57618" }
-dependencies = [
-    { name = "pydb" },
-    { name = "pymq" },
-    { name = "pynet" },
-    { name = "pyweb" },
-]
-
-[[package]]
-name = "pysearch"
-version = "0.2.2"
-source = { git = "https://github.com/robcox2910/pysearch?tag=v0.2.2#a1b8d46624f0c58fedfeedb10a35135209cb1a5d" }
 
 [[package]]
 name = "pytest"
@@ -889,25 +976,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/fc/54/fad125f5c48f7821644ee6f223ebfcedc4e23597c1a16eeb13d33aa4a91a/python_discovery-1.6.3.tar.gz", hash = "sha256:a62b301d96cf5489cb96ab023b32e068421867fdd5df2e42eece877869047fa2", size = 88998, upload-time = "2026-10-16T03:54:29.507Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/de/ec/643826e4d69b7bdce4213f221e8f5ed06d0a9dd69fa9b33342578d2cc8c8/python_discovery-1.6.3-py3-none-any.whl", hash = "sha256:cb7654125e3dcb594269a6feb56ac693f1f13b7c654493a93eba72dc22d18034", size = 39386, upload-time = "2026-10-16T03:54:28.237Z" },
-]
-
-[[package]]
-name = "pytsdb"
-version = "0.3.1"
-source = { git = "https://github.com/robcox2910/pytsdb?tag=v0.3.1#9b79d7efc0acbf1b2e964d5943b0a880eff967b0" }
-
-[[package]]
-name = "pyvecdb"
-version = "0.2.1"
-source = { git = "https://github.com/robcox2910/pyvecdb?tag=v0.2.1#9431fb75c611cfa5f427802224c84e76276bf4af" }
-
-[[package]]
-name = "pyweb"
-version = "0.3.1"
-source = { git = "https://github.com/robcox2910/pyweb?tag=v0.3.1#015d2e473383bfd09f177d0d383307efa239742f" }
-dependencies = [
-    { name = "pycrypt" },
-    { name = "pynet" },
 ]
 
 [[package]]
