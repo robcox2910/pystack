@@ -1,5 +1,5 @@
 [project]
-name = "pystack"
+name = "fromscratch-pystack"
 dynamic = ["version"]
 description = "Every project in the from-scratch-in-Python series joined into one working platform"
 readme = "README.md"
