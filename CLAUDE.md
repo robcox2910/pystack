@@ -55,7 +55,7 @@
 - All violations must be fixed, not ignored (except D203/D213 incompatible pair)
 - Use conventional commits (enforced by commitizen): `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `ci:`, `chore:`
 - All changes go via PR from a feature branch (main is protected)
-- Sibling projects are pinned release tags in `[tool.uv.sources]` (git + tag); `uv.lock` records the commit
-- Upgrade a sibling: edit its tag, run `uv lock --upgrade-package <name>`, open a PR
+- Sibling projects are their PyPI releases (`fromscratch-<name>>=X.Y.Z`); `uv.lock` records the version
+- Upgrade a sibling: raise its floor, run `uv lock --upgrade-package fromscratch-<name>`, open a PR
 - Try an unreleased sibling change: `uv pip install -e ../<folder>`, then run with `uv run --no-sync ...`; a plain `uv run` or `uv sync` restores the pin
-- Never use `path` sources -- `tests/test_dependency_pins.py` enforces this
+- Never use `path` or git sources -- `tests/test_dependency_pins.py` enforces this
