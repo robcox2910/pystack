@@ -209,14 +209,22 @@ Plugins can also be discovered automatically via Python entry points
 (the `pystack.plugins` group), so other packages can extend PyStack
 without modifying its code.
 
-## Installation
+## Install
+
+```bash
+pip install fromscratch-pystack
+```
+
+That pulls in all 17 other projects too. To read the code or run the tests, clone it from [GitHub](https://github.com/robcox2910/pystack).
+
+## Develop from source
 
 ```bash
 # Clone the repository
 git clone https://github.com/robcox2910/pystack.git
 cd pystack
 
-# Install all dependencies (all 10 projects wired together)
+# Install all dependencies (all 18 projects wired together)
 uv sync --all-extras
 
 # Run an example
