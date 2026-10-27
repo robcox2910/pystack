@@ -1,4 +1,8 @@
-# PyStack
+---
+title: "Build your own full software stack in Python"
+---
+
+# PyStack: Build your own full software stack in Python
 
 ## The Full Stack, From Scratch
 
